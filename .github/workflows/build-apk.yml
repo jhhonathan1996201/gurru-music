@@ -1,0 +1,44 @@
+# Gurru Music — compila el APK en la nube con GitHub Actions
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Sincronizar la app web con Android
+        run: npx cap sync
+
+      - name: Compilar el APK (debug)
+        run: |
+          chmod +x android/gradlew
+          cd android && ./gradlew assembleDebug
+
+      - name: Subir el APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: gurru-music-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
