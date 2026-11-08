@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
-    <link rel="icon" href="data:," />
+    <link rel="icon" href="logo.png" />
     <title>Gurru Music</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -43,11 +43,6 @@
         .app{ height:min(920px, calc(100dvh - 44px)); border-radius:26px; box-shadow:var(--shadow), 0 0 0 1px rgba(125,211,252,.25); }
       }
       .cyan{ color:var(--accent); text-shadow:0 0 6px var(--glow), 0 0 18px var(--glow); }
-
-      /* Barra superior de la foto: señal, batería, hora */
-      .statusbar{ flex:0 0 auto; display:flex; align-items:flex-start; justify-content:space-between; padding:10px 14px 0; }
-      .statusbar svg{ display:block; filter:drop-shadow(0 0 4px rgba(255,255,255,.6)); }
-      .clock{ font-family:"Archivo",sans-serif; font-weight:800; font-size:24px; line-height:1; color:var(--accent); text-shadow:0 0 8px var(--glow), 0 0 22px var(--glow); }
 
       /* Título + contador, como en la foto */
       .titlebar{ flex:0 0 auto; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:6px 14px 0; }
@@ -123,7 +118,7 @@
       .q-toggle{ border:1px solid rgba(125,211,252,.55); background:rgba(255,255,255,.08); color:#fff; border-radius:999px; padding:4px 10px; font-size:11.5px; font-weight:800; }
       .queue-body{ display:flex; flex-direction:column; min-height:0; overflow:hidden; }
       .queue.collapsed .queue-body{ display:none; }
-      .queue-list{ list-style:none; margin:0; padding:0; max-height:min(168px,26dvh); min-height:0; overflow:auto; }
+      .queue-list{ list-style:none; margin:0; padding:0; max-height:min(320px,46dvh); min-height:0; overflow:auto; overscroll-behavior:contain; }
       .queue-list li{ display:grid; grid-template-columns:64px 1fr auto; align-items:center; gap:8px; padding:6px 6px; border-radius:8px; cursor:pointer; }
       .queue-list li:hover{ background:rgba(255,255,255,.07); }
       .queue-list li.is-prev{ opacity:.62; }
@@ -281,6 +276,18 @@
       .dls-foot .dls-btn{ border:1.5px solid rgba(125,211,252,.55); background:transparent; color:#fff; border-radius:10px; padding:8px 14px; font-size:13px; font-weight:800; font-family:inherit; }
       .dls-foot .dls-msg{ font-size:12px; color:var(--soft); margin-top:6px; min-height:15px; }
 
+      /* Pantalla de carga animada con el logo (se muestra al abrir la app) */
+      #bootSplash{ position:fixed; inset:0; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; background:radial-gradient(120% 90% at 50% 28%, #0a2247 0%, #04163c 45%, #020a1e 100%); transition:opacity .55s ease; }
+      #bootSplash.boot-hide{ opacity:0; pointer-events:none; }
+      .boot-logo{ width:min(58vw,240px); height:auto; border-radius:28px; animation:bootIn .8s cubic-bezier(.2,.9,.3,1.15) both, bootGlow 1.6s ease-in-out .8s infinite; }
+      @keyframes bootIn{ from{ opacity:0; transform:scale(.72) translateY(16px); filter:drop-shadow(0 0 0 rgba(0,229,255,0)); } to{ opacity:1; transform:scale(1) translateY(0); filter:drop-shadow(0 0 22px rgba(0,229,255,.75)); } }
+      @keyframes bootGlow{ 0%,100%{ filter:drop-shadow(0 0 14px rgba(0,229,255,.45)); } 50%{ filter:drop-shadow(0 0 32px rgba(0,229,255,.9)); } }
+      .boot-name{ color:#7df3ff; font-size:30px; font-weight:800; letter-spacing:2px; text-shadow:0 0 18px rgba(0,229,255,.8); animation:bootName .7s ease .35s both; }
+      @keyframes bootName{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+      .boot-bar{ width:min(52vw,200px); height:4px; border-radius:99px; background:rgba(125,243,255,.18); overflow:hidden; }
+      .boot-bar i{ display:block; height:100%; width:0; border-radius:99px; background:#00e5ff; box-shadow:0 0 12px #00e5ff; animation:bootLoad 1.5s ease .15s forwards; }
+      @keyframes bootLoad{ to{ width:100%; } }
+
       /* Barra inferior con dos destinos: Descargas (izquierda) y Biblioteca (derecha) */
       .softbar button.sk-left{ grid-column:1; justify-self:start; }
       #dropOverlay{ position:fixed; inset:0; z-index:50; display:none; place-items:center; background:rgba(1,10,36,.8); backdrop-filter:blur(2px); }
@@ -290,14 +297,17 @@
     </style>
   </head>
   <body>
+    <div id="bootSplash">
+      <img class="boot-logo" src="logo.png" alt="Gurru Music" />
+      <div class="boot-name">Gurru Music</div>
+      <div class="boot-bar"><i></i></div>
+    </div>
+    <script>
+      (function(){ var b=document.getElementById('bootSplash'); if(!b) return;
+        function hide(){ b.classList.add('boot-hide'); setTimeout(function(){ b.remove(); }, 650); }
+        setTimeout(hide, 1700); })();
+    </script>
     <div class="app" id="app">
-
-      <!-- Como la foto: señal y batería arriba, hora en cian -->
-      <div class="statusbar">
-        <span aria-hidden="true"><svg width="22" height="18" viewBox="0 0 22 18"><rect x="1" y="11" width="3.4" height="6" fill="#fff"/><rect x="6" y="8" width="3.4" height="9" fill="#fff"/><rect x="11" y="4.5" width="3.4" height="12.5" fill="#fff"/><rect x="16" y="1" width="3.4" height="16" fill="#fff" opacity=".35"/></svg></span>
-        <span aria-hidden="true"><svg width="34" height="18" viewBox="0 0 34 18"><rect x="1" y="1.5" width="28" height="15" rx="3.5" fill="rgba(255,255,255,.25)" stroke="#fff" stroke-width="1.6"/><rect id="battFill" x="3.6" y="4.1" width="17" height="9.8" rx="1.6" fill="#fff"/><rect x="30.6" y="6" width="2.6" height="6" rx="1" fill="#fff"/></svg></span>
-        <span class="clock" id="clock">--:--</span>
-      </div>
 
       <div class="titlebar">
         <span class="app-name">Gurru Music</span>
@@ -567,13 +577,38 @@
         if (v === "player"){
           requestAnimationFrame(function(){ setMarquee($("mTitle")); setMarquee($("mArtist")); });
         }
-        if (v === "downloads") renderDownloads();
+        if (v === "downloads"){
+          renderDownloads();
+          /* Al abrir Descargas se comprueba el plugin y se muestra su
+             estado real (versión de yt-dlp o el motivo del fallo). */
+          try { nativeDlAvailable(); } catch(e){}
+        }
       }
       window.addEventListener("popstate", function(){
         if (suppressNextPop){ suppressNextPop = false; return; }
         libraryInHistory = false;
         if (view !== "player") showView("player", true);
       });
+      /* Gesto atrás EN EL APK: en el WebView de Capacitor el botón/gesto
+         atrás del sistema NO dispara popstate, así que sin esto la app se
+         cerraba desde cualquier vista. Con el plugin App de Capacitor se
+         intercepta: si hay una ventana encima se cierra, si no estás en el
+         reproductor se vuelve a él, y solo en el reproductor se sale. */
+      (function(){
+        var capApp = null;
+        try {
+          if (window.Capacitor && window.Capacitor.registerPlugin) capApp = window.Capacitor.registerPlugin("App");
+        } catch(e){ capApp = null; }
+        if (!capApp || !capApp.addListener) return;
+        try {
+          capApp.addListener("backButton", function(){
+            var overlay = $("choiceOverlay");
+            if (overlay && overlay.classList.contains("show")){ closeChoice(); return; }
+            if (view !== "player"){ showView("player", true); return; }
+            try { capApp.exitApp(); } catch(e){}
+          });
+        } catch(e){}
+      })();
       $("skRight").addEventListener("click", function(){ if (view !== "library") showView("library"); });
       $("skLeft").addEventListener("click", function(){ if (view !== "downloads") showView("downloads"); });
 
@@ -586,20 +621,6 @@
         $("queueToggleBtn").setAttribute("aria-expanded", queueCollapsed ? "false" : "true");
       }
       $("queueToggleBtn").addEventListener("click", function(){ setQueueCollapsed(!queueCollapsed); });
-
-      /* ---------- Reloj y batería ---------- */
-      function tickClock(){
-        var d = new Date();
-        var hh = d.getHours(), mm = d.getMinutes();
-        $("clock").textContent = (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm;
-      }
-      tickClock(); setInterval(tickClock, 15000);
-      if (navigator.getBattery){
-        navigator.getBattery().then(function(b){
-          function upd(){ $("battFill").setAttribute("width", Math.max(2, Math.round(22.8 * b.level))); }
-          upd(); b.addEventListener("levelchange", upd);
-        }).catch(function(){});
-      }
 
       /* ---------- Etiquetas ID3 ---------- */
       function decodeText(enc, bytes){
@@ -800,30 +821,17 @@
           return;
         }
         empty.style.display = "none";
+        /* Toda la lista, en orden: se puede deslizar por todas las
+           canciones, no solo por las 7 cercanas a la actual. */
         var items = [];
-        /* Anteriores: hasta 2 antes, en orden */
-        for (var p = 2; p >= 1; p--){
-          var pi = current - p;
-          if (pi >= 0) items.push({ i: pi, kind: "prev", label: p === 1 ? "Anterior" : "Antes" });
+        for (var i = 0; i < tracks.length; i++){
+          var label, kind;
+          if (i < current){ kind = "prev"; label = (i === current - 1) ? "Anterior" : "Antes"; }
+          else if (i === current){ kind = "current"; label = "Sonando"; }
+          else { kind = "next"; label = (i === current + 1) ? "Siguiente" : "Después"; }
+          items.push({ i: i, kind: kind, label: label });
         }
-        items.push({ i: current, kind: "current", label: "Sonando" });
-        if (repeatMode === 2){
-          items.push({ i: current, kind: "next", label: "Sigue · repite" });
-        } else {
-          for (var n = 1; n <= 4; n++){
-            var ni;
-            if (shuffle){
-              ni = (current + n) % tracks.length;
-              if (ni === current) continue;
-            } else {
-              ni = current + n;
-              if (ni >= tracks.length) break;
-            }
-            items.push({ i: ni, kind: "next", label: n === 1 ? "Siguiente" : "Después" });
-            if (items.length >= 7) break;
-          }
-        }
-        var nextCount = items.filter(function(x){ return x.kind === "next"; }).length;
+        var nextCount = tracks.length - current - 1;
         $("queueCount").textContent = (current + 1) + "/" + tracks.length + (shuffle ? " · aleatorio" : "") + (nextCount ? " · " + nextCount + " sigue" + (nextCount === 1 ? "" : "n") : "");
         items.forEach(function(item){
           var t = tracks[item.i];
@@ -1021,6 +1029,7 @@
       var dlFormat = "mp3";
       try { var _df = localStorage.getItem("gurru-dl-format"); if (_df === "mp3" || _df === "m4a") dlFormat = _df; } catch(e){}
       var nativeDl = null, nativeDlChecked = false, nativeDlListenerOn = false, nativeDlOk = null;
+      var nativeDlLastError = "";
       var dlNativeRunningId = null;
       function getNativeDl(){
         if (nativeDlChecked) return nativeDl;
@@ -1029,18 +1038,38 @@
           if (window.Capacitor && window.Capacitor.registerPlugin
               && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()){
             nativeDl = window.Capacitor.registerPlugin("YtDlpDownloader");
+          } else {
+            nativeDlLastError = "No es la app nativa (Capacitor no está presente).";
           }
-        } catch(e){ nativeDl = null; }
+        } catch(e){ nativeDl = null; nativeDlLastError = "No se pudo cargar el plugin: " + (e && e.message ? e.message : e); }
         return nativeDl;
       }
       function nativeDlAvailable(){
-        if (nativeDlOk !== null) return Promise.resolve(nativeDlOk);
+        /* Solo se guarda el éxito: si la primera comprobación falla
+           (yt-dlp tarda en arrancar la primera vez), no se queda
+           bloqueado para siempre; el siguiente intento vuelve a probar.
+           El motivo real del fallo se guarda en nativeDlLastError y se
+           muestra en Descargas, en vez del mensaje genérico de antes. */
+        if (nativeDlOk === true) return Promise.resolve(true);
         var p = getNativeDl();
-        if (!p || !p.isAvailable) return Promise.resolve(false);
+        if (!p || !p.isAvailable){
+          if (!nativeDlLastError) nativeDlLastError = "El plugin YtDlpDownloader no está disponible en esta app.";
+          return Promise.resolve(false);
+        }
         return p.isAvailable().then(function(r){
           nativeDlOk = !!(r && r.available);
+          if (nativeDlOk){
+            var msg = $("dlUpdateMsg");
+            if (msg) msg.textContent = "yt-dlp " + (r.version || "?") + " listo dentro del APK. Si una descarga falla, prueba actualizarlo aquí.";
+          }
           return nativeDlOk;
-        }).catch(function(){ nativeDlOk = false; return false; });
+        }).catch(function(err){
+          nativeDlOk = false;
+          nativeDlLastError = (err && err.message) ? String(err.message) : String(err || "error desconocido del plugin");
+          var msg2 = $("dlUpdateMsg");
+          if (msg2) msg2.textContent = "Plugin nativo no disponible: " + nativeDlLastError;
+          return false;
+        });
       }
       function nativeDlOnProgress(){
         var p = getNativeDl();
@@ -1218,7 +1247,7 @@
           return nativeDlAvailable().then(function(ok){
             if (ok) return downloadTrackNative(track, entry);
             entry.status = "error";
-            entry.error = "La descarga completa solo funciona en el APK de Gurru Music (yt-dlp dentro de la app). En la versión web esta canción queda en solo-audio por internet.";
+            entry.error = "El plugin nativo no respondió" + (nativeDlLastError ? ": " + nativeDlLastError.slice(0, 200) : ". La descarga completa solo funciona en el APK de Gurru Music (yt-dlp dentro de la app).");
             track.dlState = "error"; track.dlProgress = null;
             renderPlaylist(); renderDownloads();
             return Promise.reject(new Error("apk-only"));
@@ -1226,8 +1255,10 @@
         });
       }
       /* Una canción con el plugin nativo: yt-dlp descarga el mejor audio y
-         lo convierte a MP3 o M4A (según el formato elegido) dentro del APK. */
-      function downloadTrackNative(track, entry){
+         lo convierte a MP3 o M4A (según el formato elegido) dentro del APK.
+         Si falla la primera vez, se actualiza yt-dlp (YouTube cambia sus
+         bloqueos seguido) y se reintenta UNA vez antes de dar el error. */
+      function downloadTrackNative(track, entry, retried){
         nativeDlOnProgress();
         var p = getNativeDl();
         var watch = "https://www.youtube.com/watch?v=" + encodeURIComponent(track.videoId);
@@ -1260,6 +1291,14 @@
           return true;
         }).catch(function(err){
           dlNativeRunningId = null;
+          if (!retried){
+            dlSetStatus("La primera descarga falló; actualizando yt-dlp y reintentando: " + track.title + "…", false);
+            var up = getNativeDl();
+            if (up && up.updateYtDlp){
+              return up.updateYtDlp({ channel: "stable" }).catch(function(){})
+                .then(function(){ return downloadTrackNative(track, entry, true); });
+            }
+          }
           throw err;
         });
       }
@@ -1319,7 +1358,7 @@
             var e2 = dlEntryFor(t);
             e2.status = dlCancelFlag ? "cancelled" : "error";
             if (dlCancelFlag){ e2.error = ""; }
-            else if (!e2.error){ e2.error = (err && err.message && err.message !== "apk-only") ? String(err.message).slice(0, 140) : "yt-dlp no pudo descargar esta canción"; }
+            else if (!e2.error){ e2.error = (err && err.message && err.message !== "apk-only") ? String(err.message).slice(0, 280) : "yt-dlp no pudo descargar esta canción"; }
             renderPlaylist(); renderDownloads();
           }).then(function(){ return dlSleep(500); }).then(step);
         })();

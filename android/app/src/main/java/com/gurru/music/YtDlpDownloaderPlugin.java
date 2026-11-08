@@ -224,15 +224,24 @@ public class YtDlpDownloaderPlugin extends Plugin {
             public void run() {
                 try {
                     ensureInitialized();
-                    final String version = YoutubeDL.getInstance().version(getContext());
-                    final String versionName = YoutubeDL.getInstance().versionName(getContext());
+                    // La versión se intenta leer, pero si falla NO se marca
+                    // como no disponible: lo que importa es que Python +
+                    // yt-dlp arrancaron. Antes, un fallo de version() aquí
+                    // bloqueaba todas las descargas con el mensaje genérico
+                    // de "solo funciona en el APK" sin decir el motivo real.
+                    String version = "";
+                    try { version = YoutubeDL.getInstance().version(getContext()); } catch (Exception ignored) {}
+                    String versionName = "";
+                    try { versionName = YoutubeDL.getInstance().versionName(getContext()); } catch (Exception ignored) {}
+                    final String v = version;
+                    final String vn = versionName;
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             JSObject ret = new JSObject();
                             ret.put("available", true);
-                            ret.put("version", version);
-                            ret.put("versionName", versionName);
+                            ret.put("version", v);
+                            ret.put("versionName", vn);
                             call.resolve(ret);
                         }
                     });
@@ -363,6 +372,10 @@ public class YtDlpDownloaderPlugin extends Plugin {
                     request.addOption("--audio-quality", "0");
                     request.addOption("--no-playlist");
                     request.addOption("--no-warnings");
+                    // YouTube bloquea cada vez más al cliente web con
+                    // "Sign in to confirm you're not a bot" (403). Pedir el
+                    // audio como cliente Android suele pasar ese bloqueo.
+                    request.addOption("--extractor-args", "youtube:player_client=android");
                     request.addOption("-o", tmpTemplate);
 
                     lastProgressId = null;
