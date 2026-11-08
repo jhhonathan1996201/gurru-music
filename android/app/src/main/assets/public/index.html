@@ -1,0 +1,1762 @@
+<!doctype html>
+<html lang="es" data-accent="azul">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="data:," />
+    <title>Gurru Music</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+    <style>
+      :root{ --page-bg:#02061a; --shadow:0 30px 60px -18px rgba(0,0,0,.8); }
+      html[data-accent="azul"]{ --accent:#22d3ee; --accent2:#0284c7; --glow:rgba(34,211,238,.85); --soft:#bae6fd; }
+      html[data-accent="rojo"]{ --accent:#fb4d6d; --accent2:#be123c; --glow:rgba(251,77,109,.85); --soft:#fecdd3; }
+      html[data-accent="naranja"]{ --accent:#fb923c; --accent2:#ea580c; --glow:rgba(251,146,60,.85); --soft:#fed7aa; }
+      *{ box-sizing:border-box; }
+      html,body{ margin:0; padding:0; }
+      body{
+        font-family:"Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+        background:radial-gradient(900px 500px at 80% -10%, rgba(2,132,199,.35), transparent 60%), var(--page-bg);
+        min-height:100dvh; display:flex; align-items:stretch; justify-content:center; color:#fff;
+      }
+      button{ font-family:inherit; cursor:pointer; }
+      button:focus-visible, input:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+      /* ===== LA APP: como la foto, fondo azul oscuro con burbujas ===== */
+      .app{
+        position:relative; width:min(480px,100%); height:100dvh; display:flex; flex-direction:column; overflow:hidden;
+        background:
+          radial-gradient(120px 120px at 88% 62%, rgba(125,211,252,.5), transparent 70%),
+          radial-gradient(70px 70px at 78% 52%, rgba(56,189,248,.55), transparent 70%),
+          radial-gradient(46px 46px at 66% 72%, rgba(125,211,252,.45), transparent 70%),
+          radial-gradient(200px 200px at 6% 22%, rgba(37,99,235,.55), transparent 70%),
+          radial-gradient(90px 90px at 22% 40%, rgba(14,165,233,.4), transparent 70%),
+          radial-gradient(34px 34px at 30% 30%, rgba(125,211,252,.5), transparent 70%),
+          radial-gradient(26px 26px at 52% 46%, rgba(186,230,253,.45), transparent 70%),
+          radial-gradient(60px 60px at 92% 36%, rgba(125,211,252,.28), transparent 70%),
+          linear-gradient(180deg,#041238 0%, #02102e 45%, #010a24 100%);
+      }
+      @media (min-width:540px){
+        body{ align-items:center; padding:22px 0; }
+        .app{ height:min(920px, calc(100dvh - 44px)); border-radius:26px; box-shadow:var(--shadow), 0 0 0 1px rgba(125,211,252,.25); }
+      }
+      .cyan{ color:var(--accent); text-shadow:0 0 6px var(--glow), 0 0 18px var(--glow); }
+
+      /* Barra superior de la foto: señal, batería, hora */
+      .statusbar{ flex:0 0 auto; display:flex; align-items:flex-start; justify-content:space-between; padding:10px 14px 0; }
+      .statusbar svg{ display:block; filter:drop-shadow(0 0 4px rgba(255,255,255,.6)); }
+      .clock{ font-family:"Archivo",sans-serif; font-weight:800; font-size:24px; line-height:1; color:var(--accent); text-shadow:0 0 8px var(--glow), 0 0 22px var(--glow); }
+
+      /* Título + contador, como en la foto */
+      .titlebar{ flex:0 0 auto; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:6px 14px 0; }
+      .titlebar .app-name{ font-size:clamp(22px,6vw,30px); font-weight:800; line-height:1.1; color:var(--accent); text-shadow:0 0 8px var(--glow), 0 0 24px var(--glow); }
+      .titlebar .counter{ font-size:clamp(22px,6vw,30px); font-weight:800; color:var(--accent); text-shadow:0 0 8px var(--glow), 0 0 24px var(--glow); white-space:nowrap; }
+
+      main{ flex:1; min-height:0; display:flex; flex-direction:column; position:relative; z-index:1; }
+      .view{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+      .view[hidden]{ display:none; }
+
+      /* ===== Reproduciendo ===== */
+      .np{ flex:1; min-height:0; display:flex; flex-direction:column; padding:6px 16px 4px; overflow:hidden; }
+      .art-wrap{ flex:1 1 auto; min-height:64px; display:flex; position:relative; }
+      .art{ flex:1; position:relative; overflow:hidden; display:grid; place-items:center; border-radius:6px; }
+      .art img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; }
+      .art.has-art img{ display:block; }
+      .art.has-art .xpress{ display:none; }
+      .xpress{ font-size:clamp(32px,9vw,44px); font-weight:800; letter-spacing:-.01em; color:var(--accent); text-shadow:0 0 10px var(--glow), 0 0 30px var(--glow); text-align:center; padding:0 10px; }
+      .xpress small{ display:block; font-size:11px; letter-spacing:.34em; font-weight:700; color:rgba(255,255,255,.75); text-shadow:none; margin-top:8px; }
+
+      .track-meta{ flex:0 0 auto; text-align:center; margin-top:6px; }
+      .marquee{ overflow:hidden; white-space:nowrap; }
+      .marquee > span{ display:inline-block; will-change:transform; }
+      .marquee.scrolling > span{ animation:mq 7s ease-in-out infinite alternate; }
+      @keyframes mq{ from{ transform:translateX(0); } to{ transform:translateX(var(--sx,-40px)); } }
+      @media (prefers-reduced-motion: reduce){ .marquee.scrolling > span{ animation:none; } *{ transition:none !important; } }
+      .t-artist{ font-size:clamp(20px,5.4vw,27px); font-weight:800; color:#fff; text-shadow:0 0 8px rgba(255,255,255,.45); line-height:1.2; }
+      .t-title{ font-size:clamp(26px,7vw,36px); font-weight:900; color:#fff; text-shadow:0 0 10px rgba(255,255,255,.5); line-height:1.15; margin-top:2px; }
+      .t-album{ font-size:clamp(16px,4.6vw,22px); font-weight:700; color:#fff; text-shadow:0 0 8px rgba(255,255,255,.4); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+
+      .times{ display:flex; justify-content:space-between; font-family:"Share Tech Mono",monospace; font-size:clamp(19px,5vw,25px); color:#fff; text-shadow:0 0 8px rgba(255,255,255,.5); margin-top:8px; }
+      input[type="range"].seek{ -webkit-appearance:none; appearance:none; width:100%; height:24px; background:transparent; margin:0; cursor:pointer; }
+      input[type="range"].seek::-webkit-slider-runnable-track{ height:6px; border-radius:3px; background:linear-gradient(90deg, var(--accent) var(--fill,0%), rgba(255,255,255,.28) var(--fill,0%)); box-shadow:0 0 8px var(--glow); }
+      input[type="range"].seek::-webkit-slider-thumb{ -webkit-appearance:none; width:18px; height:18px; border-radius:50%; margin-top:-6px; background:#fff; border:1px solid var(--accent); box-shadow:0 0 10px var(--glow); }
+      input[type="range"].seek::-moz-range-track{ height:6px; border-radius:3px; background:rgba(255,255,255,.28); }
+      input[type="range"].seek::-moz-range-progress{ height:6px; border-radius:3px; background:var(--accent); }
+      input[type="range"].seek::-moz-range-thumb{ width:16px; height:16px; border-radius:50%; background:#fff; border:1px solid var(--accent); }
+      input[type="range"].seek:disabled{ opacity:.4; cursor:default; }
+
+      /* Fila de controles como la foto: volumen | anterior play siguiente | aleatorio repetir */
+      .transport{ flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; padding:2px 0 0; }
+      .t-group{ display:flex; align-items:center; gap:2px; }
+      .t-group.center{ gap:6px; }
+      .tbtn{ border:0; background:transparent; color:#fff; width:46px; height:52px; display:grid; place-items:center; position:relative; }
+      .tbtn svg{ width:30px; height:30px; fill:#fff; filter:drop-shadow(0 0 6px rgba(255,255,255,.65)); display:block; }
+      .tbtn.small svg{ width:25px; height:25px; }
+      .tbtn:active{ transform:scale(.92); }
+      .tbtn.on svg{ fill:var(--accent); filter:drop-shadow(0 0 8px var(--glow)); }
+      .tbtn .rep-badge{ position:absolute; top:2px; right:0; font-size:9px; font-weight:800; color:#02102e; background:var(--accent); border-radius:8px; padding:0 5px; line-height:14px; display:none; }
+      .tbtn.on .rep-badge{ display:block; }
+      .tbtn.play{ width:64px; height:60px; }
+      .tbtn.play svg{ width:46px; height:46px; }
+
+      #viz{ width:100%; height:30px; display:block; flex:0 0 30px; }
+      .vol-row{ flex:0 0 auto; display:flex; align-items:center; gap:10px; padding:2px 2px 4px; }
+      .vol-row svg{ width:19px; height:19px; fill:var(--soft); flex:0 0 19px; }
+      .vol-row .vol-pct{ font-family:"Share Tech Mono",monospace; font-size:12px; color:var(--soft); width:36px; text-align:right; }
+      input[type="range"].vol{ -webkit-appearance:none; appearance:none; flex:1; height:6px; border-radius:3px; background:linear-gradient(90deg, var(--accent) var(--fill,80%), rgba(255,255,255,.25) var(--fill,80%)); cursor:pointer; }
+      input[type="range"].vol::-webkit-slider-thumb{ -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:#fff; border:1px solid var(--accent); }
+      input[type="range"].vol::-moz-range-track{ height:6px; border-radius:3px; background:rgba(255,255,255,.25); }
+      input[type="range"].vol::-moz-range-progress{ height:6px; border-radius:3px; background:var(--accent); }
+      input[type="range"].vol::-moz-range-thumb{ width:14px; height:14px; border-radius:50%; background:#fff; border:1px solid var(--accent); }
+
+      /* ===== Cola: anterior, actual y siguientes =====
+         La cola NUNCA tapa la barra inferior: es flexible, se encoge si
+         falta espacio y su lista rueda por dentro. La barra inferior
+         (Biblioteca) va en su propia capa, siempre visible. */
+      .queue{ flex:0 1 auto; min-height:0; display:flex; flex-direction:column; margin-top:2px; border-top:1px solid rgba(125,211,252,.28); padding-top:5px; }
+      .queue-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 2px 4px; }
+      .queue-head .q-title{ font-size:11.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); text-shadow:0 0 6px var(--glow); }
+      .queue-head .q-right{ display:flex; align-items:center; gap:8px; }
+      .queue-head .q-count{ font-family:"Share Tech Mono",monospace; font-size:11.5px; color:var(--soft); white-space:nowrap; }
+      .q-toggle{ border:1px solid rgba(125,211,252,.55); background:rgba(255,255,255,.08); color:#fff; border-radius:999px; padding:4px 10px; font-size:11.5px; font-weight:800; }
+      .queue-body{ display:flex; flex-direction:column; min-height:0; overflow:hidden; }
+      .queue.collapsed .queue-body{ display:none; }
+      .queue-list{ list-style:none; margin:0; padding:0; max-height:min(168px,26dvh); min-height:0; overflow:auto; }
+      .queue-list li{ display:grid; grid-template-columns:64px 1fr auto; align-items:center; gap:8px; padding:6px 6px; border-radius:8px; cursor:pointer; }
+      .queue-list li:hover{ background:rgba(255,255,255,.07); }
+      .queue-list li.is-prev{ opacity:.62; }
+      .queue-list li.is-current{ background:rgba(2,132,199,.38); box-shadow:inset 0 0 0 1px rgba(125,211,252,.55); opacity:1; cursor:default; }
+      .queue-list li.is-current .q-t{ color:#fff; }
+      .queue-list .q-tag{ font-size:9.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); text-align:left; white-space:nowrap; }
+      .queue-list li.is-prev .q-tag{ color:var(--soft); }
+      .queue-list li.is-next .q-tag{ color:#7dd3fc; }
+      .queue-list .q-t{ font-size:13px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; display:block; }
+      .queue-list .q-a{ font-weight:400; color:var(--soft); }
+      .queue-list .q-dur{ font-family:"Share Tech Mono",monospace; font-size:11.5px; color:var(--soft); }
+      .queue-empty{ font-size:12.5px; color:var(--soft); padding:2px 2px 4px; }
+      /* YouTube en la vista Reproduciendo */
+      /* YouTube nunca se muestra: el reproductor queda oculto (4px, casi invisible)
+         y solo se escucha el audio. La portada que se ve es la miniatura de la canción. */
+      .yt-wrap{ position:absolute; left:6px; bottom:6px; width:4px; height:4px; opacity:.02; overflow:hidden; pointer-events:none; display:none; z-index:2; }
+      .yt-wrap.show{ display:block; }
+      .yt-wrap iframe, .yt-wrap #ytPlayer{ width:4px; height:4px; border:0; display:block; }
+      /* YouTube en Biblioteca */
+      .yt-box{ flex:0 0 auto; margin-top:12px; border:1.5px solid rgba(255,80,80,.55); background:rgba(127,29,29,.22); border-radius:12px; padding:12px; }
+      .yt-box .yt-h{ display:flex; align-items:center; gap:8px; font-weight:900; font-size:15px; }
+      .yt-box .yt-h .yt-badge{ background:#ff0033; color:#fff; font-size:11px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:.04em; }
+      .yt-box p{ margin:6px 0 10px; font-size:12.5px; color:var(--soft); line-height:1.45; }
+      .yt-row{ display:flex; gap:8px; }
+      .yt-row input{ flex:1; min-width:0; padding:10px 11px; border-radius:9px; border:1px solid rgba(255,255,255,.28); background:rgba(255,255,255,.09); color:#fff; font:inherit; font-size:13.5px; }
+      .yt-row input::placeholder{ color:rgba(186,230,253,.6); }
+      .yt-add{ border:0; background:#ff0033; color:#fff; border-radius:9px; padding:10px 14px; font-weight:800; font-size:13.5px; white-space:nowrap; }
+      .yt-msg{ font-size:12.5px; margin-top:8px; min-height:16px; color:#fecdd3; line-height:1.4; }
+      .yt-msg.ok{ color:#a7f3d0; }
+      .src-badge{ font-size:9.5px; font-weight:900; letter-spacing:.06em; padding:2px 6px; border-radius:999px; background:#ff0033; color:#fff; vertical-align:2px; margin-left:6px; }
+
+      /* ===== Biblioteca ===== */
+      .lib{ flex:1; min-height:0; display:flex; flex-direction:column; padding:12px 16px 8px; }
+      .pick-grid{ flex:0 0 auto; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+      .pick-btn{ border:2px dashed rgba(125,211,252,.65); border-radius:12px; padding:15px 10px; text-align:center; cursor:pointer; background:rgba(2,132,199,.16); color:#fff; }
+      .pick-btn:hover{ background:rgba(2,132,199,.3); }
+      .pick-btn svg{ width:28px; height:28px; fill:var(--accent); margin-bottom:5px; filter:drop-shadow(0 0 6px var(--glow)); }
+      .pick-btn .pz-t{ font-weight:800; font-size:14.5px; }
+      .pick-btn .pz-s{ font-size:11.5px; color:var(--soft); margin-top:2px; line-height:1.35; }
+      .lib-note{ flex:0 0 auto; font-size:11.5px; color:var(--soft); text-align:center; margin:9px 2px 0; line-height:1.4; }
+      .lib-tools{ flex:0 0 auto; display:flex; gap:8px; margin:12px 0 6px; }
+      .search-wrap{ flex:1; position:relative; }
+      .search-wrap svg{ position:absolute; left:10px; top:50%; transform:translateY(-50%); width:15px; height:15px; fill:#7dd3fc; }
+      .search-wrap input{ width:100%; padding:10px 12px 10px 32px; border-radius:9px; font:inherit; font-size:14px; border:1px solid rgba(125,211,252,.5); background:rgba(255,255,255,.08); color:#fff; }
+      .search-wrap input::placeholder{ color:rgba(186,230,253,.65); }
+      .ghost-btn{ border:1px solid rgba(125,211,252,.5); background:rgba(255,255,255,.07); color:#fff; border-radius:9px; padding:8px 14px; font-size:13px; font-weight:700; }
+      .ghost-btn:disabled{ opacity:.4; cursor:default; }
+      .playlist{ list-style:none; margin:4px 0 0; padding:0; flex:1; min-height:0; overflow:auto; }
+      .playlist li{ display:grid; grid-template-columns:28px 1fr auto auto; align-items:center; gap:10px; padding:10px 8px; border-radius:10px; cursor:pointer; }
+      .playlist li:hover{ background:rgba(255,255,255,.07); }
+      .playlist li.active{ background:rgba(2,132,199,.35); box-shadow:inset 0 0 0 1px rgba(125,211,252,.4); }
+      .playlist .idx{ font-family:"Share Tech Mono",monospace; font-size:12.5px; color:#7dd3fc; text-align:center; }
+      .eq{ display:none; align-items:flex-end; gap:2px; height:14px; justify-content:center; }
+      .eq i{ width:3px; background:var(--accent); border-radius:1px; animation:eq .9s ease-in-out infinite; }
+      .eq i:nth-child(2){ animation-delay:.25s; } .eq i:nth-child(3){ animation-delay:.5s; }
+      @keyframes eq{ 0%,100%{ height:5px; } 50%{ height:14px; } }
+      .playlist li.playing .eq{ display:flex; }
+      .playlist li.playing .idx-num{ display:none; }
+      @media (prefers-reduced-motion: reduce){ .eq i{ animation:none; height:10px; } }
+      .playlist .meta{ min-width:0; }
+      .playlist .pt{ font-size:14.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff; display:block; }
+      .playlist .pa{ font-size:12px; color:var(--soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
+      .playlist .dur{ font-family:"Share Tech Mono",monospace; font-size:12px; color:var(--soft); }
+      .playlist .rm{ border:0; background:transparent; color:#7dd3fc; font-size:18px; line-height:1; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; }
+      .empty-state{ text-align:center; padding:26px 12px 14px; color:var(--soft); }
+      .empty-state svg{ width:44px; height:44px; fill:rgba(125,211,252,.6); margin-bottom:8px; }
+      .empty-state .es-t{ font-weight:800; color:#fff; font-size:15px; }
+      .empty-state p{ font-size:13px; margin:5px 0 0; line-height:1.5; }
+      .no-results{ padding:16px; text-align:center; font-size:13px; color:var(--soft); display:none; }
+
+      /* Barra inferior: solo Biblioteca (en el reproductor) y el contador centrado.
+         Sin botón de cola ni de Atrás: no se sobreponen con nada y el regreso es con el gesto del teléfono. */
+      .softbar{ flex:0 0 auto; position:relative; z-index:6; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; padding-bottom:env(safe-area-inset-bottom); background:linear-gradient(180deg, rgba(1,10,36,.25), rgba(1,10,36,.92) 30%); border-top:1px solid rgba(125,211,252,.22); }
+      .softbar .sk-mid{ grid-column:2; justify-self:center; }
+      .softbar button{ grid-column:3; justify-self:end; }
+      .softbar button{ border:0; background:transparent; font-size:clamp(19px,5vw,24px); font-weight:800; padding:10px 14px 12px; color:var(--accent); text-shadow:0 0 8px var(--glow), 0 0 22px var(--glow); }
+      .softbar button:active{ opacity:.7; }
+      .softbar .sk-mid{ display:flex; align-items:center; gap:7px; color:rgba(186,230,253,.75); font-size:11px; font-weight:700; font-family:"Share Tech Mono",monospace; }
+      .softbar .sk-mid .dot{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.25); }
+      .softbar .sk-mid .dot.on{ background:var(--accent); box-shadow:0 0 7px var(--glow); }
+
+      /* Estado de las descargas MP3 de YouTube (visible en el reproductor) */
+      .dl-status{ flex:0 0 auto; display:none; align-items:center; gap:8px; margin-top:4px; padding:6px 9px; border:1px solid rgba(167,243,208,.45); background:rgba(6,78,59,.35); border-radius:9px; font-size:12px; font-weight:700; color:#d1fae5; line-height:1.35; }
+      .dl-status.show{ display:flex; }
+      .dl-status .dl-txt{ flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .dl-status .dl-cancel{ flex:0 0 auto; border:1px solid rgba(167,243,208,.6); background:transparent; color:#fff; border-radius:999px; padding:3px 9px; font-size:11px; font-weight:800; }
+      .dl-status.err{ border-color:rgba(254,205,211,.5); background:rgba(127,29,29,.35); color:#ffe4e6; }
+      .src-badge.saved{ background:#059669; }
+      .playlist .dl{ border:0; background:transparent; color:#a7f3d0; font-size:15px; line-height:1; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; }
+      .playlist .dl:disabled{ opacity:.55; }
+      .playlist li{ grid-template-columns:28px 1fr auto auto auto; }
+      /* Pantallas bajas: se reparte el espacio sin sobreponer nada */
+      @media (max-height:720px){
+        .art-wrap{ min-height:44px; }
+        #viz{ height:18px; flex-basis:18px; }
+        .queue-list{ max-height:min(120px,20dvh); }
+        .t-title{ font-size:clamp(22px,6vw,30px); }
+        .t-artist{ font-size:clamp(17px,4.8vw,23px); }
+      }
+      /* ===== Apartado DESCARGAS ===== */
+      .dls{ flex:1; min-height:0; display:flex; flex-direction:column; padding:12px 16px 8px; }
+      .dls-head{ flex:0 0 auto; }
+      .dls-head .dls-title{ font-size:21px; font-weight:900; color:var(--accent); text-shadow:0 0 8px var(--glow); }
+      .dls-head p{ margin:5px 0 0; font-size:12.5px; color:var(--soft); line-height:1.45; }
+      .dls-list{ flex:1; min-height:0; overflow:auto; margin-top:10px; padding-bottom:6px; }
+      .dl-group{ border:1px solid rgba(125,211,252,.35); background:rgba(2,132,199,.14); border-radius:12px; padding:11px 12px; margin-bottom:12px; }
+      .dl-group-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+      .dl-group-head .g-t{ font-size:14.5px; font-weight:900; color:#fff; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .dl-group-head .g-pct{ font-family:"Share Tech Mono",monospace; font-size:17px; font-weight:700; color:var(--accent); white-space:nowrap; }
+      .dl-group .g-sub{ font-size:11.5px; color:var(--soft); margin-top:2px; }
+      .dl-bar{ height:9px; border-radius:5px; background:rgba(255,255,255,.16); overflow:hidden; margin-top:8px; }
+      .dl-bar i{ display:block; height:100%; width:0%; border-radius:5px; background:linear-gradient(90deg, var(--accent2), var(--accent)); box-shadow:0 0 8px var(--glow); transition:width .25s ease; }
+      .dl-bar.indet i{ width:35% !important; animation:dlindet 1.1s ease-in-out infinite alternate; }
+      @keyframes dlindet{ from{ margin-left:0; } to{ margin-left:65%; } }
+      @media (prefers-reduced-motion: reduce){ .dl-bar.indet i{ animation:none; } .dl-bar i{ transition:none; } }
+      .dl-items{ list-style:none; margin:10px 0 0; padding:0; }
+      .dl-item{ padding:9px 2px; border-top:1px solid rgba(125,211,252,.18); }
+      .dl-item:first-child{ border-top:0; }
+      .dl-item-top{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+      .dl-item .di-t{ font-size:13.5px; font-weight:800; color:#fff; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .dl-item .di-pct{ font-family:"Share Tech Mono",monospace; font-size:16px; color:var(--accent); white-space:nowrap; }
+      .dl-item .di-sub{ font-size:11.5px; color:var(--soft); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .dl-item .di-status{ font-size:11.5px; font-weight:700; margin-top:3px; color:#bae6fd; }
+      .dl-item .di-status.done{ color:#a7f3d0; }
+      .dl-item .di-status.err{ color:#fecdd3; }
+      .dl-item .di-actions{ display:flex; gap:8px; margin-top:7px; }
+      .di-btn{ border:1px solid rgba(125,211,252,.55); background:rgba(255,255,255,.08); color:#fff; border-radius:999px; padding:5px 12px; font-size:12px; font-weight:800; }
+      .di-btn.go{ background:var(--accent2); border-color:var(--accent); }
+      .dls-empty{ text-align:center; padding:30px 12px; color:var(--soft); }
+      .dls-empty .es-t{ font-weight:800; color:#fff; font-size:15px; }
+      .dls-empty p{ font-size:13px; margin:5px 0 0; line-height:1.5; }
+
+      /* ===== Al pegar un link: Escuchar o Descargar ===== */
+      .choice-overlay{ position:absolute; inset:0; z-index:30; display:none; place-items:center; background:rgba(1,8,28,.78); padding:20px; }
+      .choice-overlay.show{ display:grid; }
+      .choice-card{ width:100%; max-width:400px; border:1.5px solid rgba(125,211,252,.55); background:linear-gradient(180deg,#06245c,#03122f); border-radius:16px; padding:20px 18px; box-shadow:0 24px 50px rgba(0,0,0,.6); }
+      .choice-card .c-badge{ display:inline-block; background:#ff0033; color:#fff; font-size:11px; font-weight:900; padding:3px 8px; border-radius:6px; letter-spacing:.04em; }
+      .choice-card h2{ margin:10px 0 4px; font-size:20px; font-weight:900; color:#fff; line-height:1.25; }
+      .choice-card .c-sub{ font-size:13px; color:var(--soft); line-height:1.5; margin:0 0 16px; }
+      .choice-btn{ display:flex; align-items:center; gap:12px; width:100%; border:0; border-radius:12px; padding:14px 15px; margin-bottom:10px; text-align:left; color:#fff; }
+      .choice-btn svg{ width:26px; height:26px; fill:#fff; flex:0 0 26px; }
+      .choice-btn .cb-t{ font-size:16px; font-weight:900; display:block; }
+      .choice-btn .cb-s{ font-size:12px; opacity:.85; display:block; margin-top:1px; line-height:1.35; }
+      .choice-btn.listen{ background:var(--accent2); }
+      .choice-btn.download{ background:#047857; }
+      .choice-btn:disabled{ opacity:.45; cursor:default; }
+      .choice-only{ display:block; margin:4px auto 0; border:0; background:transparent; color:var(--soft); font-size:13px; font-weight:700; padding:6px 10px; text-decoration:underline; }
+      .fmt-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:2px 0 12px; }
+      .fmt-row .fmt-label{ font-size:12.5px; font-weight:800; color:var(--soft); }
+      .fmt-row .fmt-btn{ border:1.5px solid rgba(125,211,252,.5); background:transparent; color:#fff; border-radius:8px; padding:6px 12px; font-size:13px; font-weight:900; font-family:inherit; }
+      .fmt-row .fmt-btn.on{ background:#7dd3fc; color:#03122f; border-color:#7dd3fc; }
+      .fmt-row .fmt-note{ font-size:11.5px; color:var(--soft); }
+      .dls-foot{ margin-top:14px; padding-top:12px; border-top:1px solid rgba(125,211,252,.25); text-align:center; }
+      .dls-foot .dls-fmt{ font-size:12.5px; color:var(--soft); margin-bottom:8px; }
+      .dls-foot .dls-btn{ border:1.5px solid rgba(125,211,252,.55); background:transparent; color:#fff; border-radius:10px; padding:8px 14px; font-size:13px; font-weight:800; font-family:inherit; }
+      .dls-foot .dls-msg{ font-size:12px; color:var(--soft); margin-top:6px; min-height:15px; }
+
+      /* Barra inferior con dos destinos: Descargas (izquierda) y Biblioteca (derecha) */
+      .softbar button.sk-left{ grid-column:1; justify-self:start; }
+      #dropOverlay{ position:fixed; inset:0; z-index:50; display:none; place-items:center; background:rgba(1,10,36,.8); backdrop-filter:blur(2px); }
+      #dropOverlay.show{ display:grid; }
+      #dropOverlay .do-box{ border:3px dashed #7dd3fc; border-radius:18px; padding:38px 48px; color:#fff; text-align:center; font-size:19px; font-weight:800; }
+      #dropOverlay svg{ width:44px; height:44px; fill:#7dd3fc; margin-bottom:10px; }
+    </style>
+  </head>
+  <body>
+    <div class="app" id="app">
+
+      <!-- Como la foto: señal y batería arriba, hora en cian -->
+      <div class="statusbar">
+        <span aria-hidden="true"><svg width="22" height="18" viewBox="0 0 22 18"><rect x="1" y="11" width="3.4" height="6" fill="#fff"/><rect x="6" y="8" width="3.4" height="9" fill="#fff"/><rect x="11" y="4.5" width="3.4" height="12.5" fill="#fff"/><rect x="16" y="1" width="3.4" height="16" fill="#fff" opacity=".35"/></svg></span>
+        <span aria-hidden="true"><svg width="34" height="18" viewBox="0 0 34 18"><rect x="1" y="1.5" width="28" height="15" rx="3.5" fill="rgba(255,255,255,.25)" stroke="#fff" stroke-width="1.6"/><rect id="battFill" x="3.6" y="4.1" width="17" height="9.8" rx="1.6" fill="#fff"/><rect x="30.6" y="6" width="2.6" height="6" rx="1" fill="#fff"/></svg></span>
+        <span class="clock" id="clock">--:--</span>
+      </div>
+
+      <div class="titlebar">
+        <span class="app-name">Gurru Music</span>
+        <span class="counter" id="tPos">0/0</span>
+      </div>
+
+      <main>
+        <!-- ============ REPRODUCIENDO ============ -->
+        <section class="view" id="viewPlayer" aria-label="Canción actual">
+          <div class="np">
+            <div class="art-wrap" id="artWrap">
+              <div class="art" id="artBox">
+                <img id="artImg" alt="Portada del álbum" />
+                <div class="xpress">Gurru Music<small>REPRODUCTOR DE MÚSICA</small></div>
+              </div>
+              <div class="yt-wrap" id="ytWrap" aria-label="Reproductor de audio de YouTube (oculto)"><div id="ytPlayer"></div></div>
+            </div>
+
+            <div class="track-meta">
+              <div class="marquee t-artist" id="mArtist"><span id="tArtist">Sin música todavía</span></div>
+              <div class="marquee t-title" id="mTitle"><span id="tTitle">Elige una carpeta</span></div>
+              <div class="t-album" id="tAlbum">&nbsp;</div>
+            </div>
+
+            <div class="times"><span id="tCur">00:00:00</span><span id="tTot">00:00:00</span></div>
+            <input type="range" class="seek" id="seek" min="0" max="1000" value="0" disabled aria-label="Progreso de la canción" />
+
+            <div class="transport">
+              <div class="t-group">
+                <button class="tbtn small" id="btnMute" title="Volumen" aria-label="Silenciar o activar sonido">
+                  <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>
+                </button>
+              </div>
+              <div class="t-group center">
+                <button class="tbtn" id="btnPrev" title="Anterior" aria-label="Canción anterior">
+                  <svg viewBox="0 0 24 24"><path d="M6 5h2.4v14H6zM19 5v14L9.5 12z"/></svg>
+                </button>
+                <button class="tbtn play" id="btnPlay" title="Reproducir / Pausar" aria-label="Reproducir o pausar">
+                  <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <button class="tbtn" id="btnNext" title="Siguiente" aria-label="Canción siguiente">
+                  <svg viewBox="0 0 24 24"><path d="M15.6 5H18v14h-2.4zM5 5v14l9.5-7z"/></svg>
+                </button>
+              </div>
+              <div class="t-group">
+                <button class="tbtn small" id="btnShuffle" title="Aleatorio" aria-label="Modo aleatorio" aria-pressed="false">
+                  <svg viewBox="0 0 24 24"><path d="M10.59 9.17 5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.14-3.13z"/></svg>
+                </button>
+                <button class="tbtn small" id="btnRepeat" title="Repetir" aria-label="Modo de repetición" aria-pressed="false">
+                  <svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+                  <span class="rep-badge" id="repBadge">1</span>
+                </button>
+              </div>
+            </div>
+
+            <canvas id="viz" width="560" height="30" aria-hidden="true"></canvas>
+
+            <div class="vol-row">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
+              <input type="range" class="vol" id="volSlider" min="0" max="100" value="80" aria-label="Volumen" />
+              <span class="vol-pct" id="volPct">80%</span>
+            </div>
+
+            <div class="dl-status" id="dlStatus" role="status">
+              <span class="dl-txt" id="dlStatusTxt"></span>
+              <button class="dl-cancel" id="dlCancelBtn">Detener</button>
+            </div>
+
+            <div class="queue" id="queuePanel" aria-label="Cola de reproducción">
+              <div class="queue-head">
+                <span class="q-title">A continuación</span>
+                <span class="q-right"><span class="q-count" id="queueCount"></span><button class="q-toggle" id="queueToggleBtn" aria-expanded="true">Ocultar ▴</button></span>
+              </div>
+              <div class="queue-body" id="queueBody">
+                <ul class="queue-list" id="queueList"></ul>
+                <div class="queue-empty" id="queueEmpty">Carga música para ver qué suena ahora, qué sonó antes y qué sigue.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ BIBLIOTECA ============ -->
+        <section class="view" id="viewLibrary" aria-label="Biblioteca de música" hidden>
+          <div class="lib">
+            <div class="pick-grid">
+              <button class="pick-btn" id="folderBtn" aria-label="Elegir una carpeta de música">
+                <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm0 12H4V6h5.17l2 2H20v10z"/></svg>
+                <div class="pz-t">Elegir carpeta</div>
+                <div class="pz-s">Carga TODAS las canciones de la carpeta de una vez</div>
+              </button>
+              <button class="pick-btn" id="dropzone" aria-label="Elegir archivos de música">
+                <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+                <div class="pz-t">Elegir archivos</div>
+                <div class="pz-s">Selecciona canciones una por una o varias a la vez</div>
+              </button>
+            </div>
+            <div class="yt-box">
+              <div class="yt-h"><span class="yt-badge">YouTube</span><span>Agregar por link</span></div>
+              <p>Pega el link de una <b>playlist</b> de YouTube o YouTube Music (o de un video) y toca <b>Agregar</b>. Nada suena ni se descarga solo: la app te pregunta si quieres <b>Escuchar</b> (suena en el reproductor principal, solo audio, sin video) o <b>Descargar</b>. La playlist se carga <b>completa, canción por canción</b>. Al descargar, cada canción se guarda <b>en la memoria del teléfono con yt-dlp, dentro del APK</b>, en el formato que elijas (MP3 o M4A) y en la máxima calidad, en la carpeta <b>Música/Gurru Music</b>, y el avance se ve en el apartado <b>Descargas</b>. Cada canción guardada se vuelve una pista local más, igual que tus MP3. Si una canción no se puede descargar, se queda en modo solo-audio por internet y puedes reintentar desde Descargas. En la versión web (sin APK) la descarga no está disponible: solo se puede escuchar.</p>
+              <div class="yt-row">
+                <input type="url" id="ytInput" placeholder="https://www.youtube.com/playlist?list=…" aria-label="Link de YouTube" />
+                <button class="yt-add" id="ytAddBtn">Agregar</button>
+              </div>
+              <div class="yt-msg" id="ytMsg" role="status"></div>
+              <p style="margin-top:8px">Ejemplo de link válido: abre tu playlist en YouTube → Compartir → Copiar, y pégalo aquí.</p>
+            </div>
+            <p class="lib-note">Al elegir carpeta se agregan también las subcarpetas, en orden. Formatos: MP3 · M4A · OGG · WAV · FLAC. En computadora también puedes arrastrar la carpeta a la ventana.</p>
+            <input type="file" id="fileInput" accept="audio/*,.mp3,.m4a,.aac,.ogg,.opus,.wav,.flac" multiple hidden />
+            <input type="file" id="folderInput" webkitdirectory directory multiple hidden />
+
+            <div class="lib-tools">
+              <div class="search-wrap">
+                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+                <input type="search" id="searchInput" placeholder="Buscar en tu música…" aria-label="Buscar en tu música" />
+              </div>
+              <button class="ghost-btn" id="clearBtn" disabled>Vaciar</button>
+            </div>
+
+            <ul class="playlist" id="playlist"></ul>
+            <div class="empty-state" id="emptyState">
+              <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+              <div class="es-t">Todavía no hay canciones</div>
+              <p>Toca <b>«Elegir carpeta»</b> y selecciona la carpeta donde guardas tu música: se cargan todas de una vez.<br />Toca una canción de la lista para escucharla.</p>
+            </div>
+            <div class="no-results" id="noResults">Ninguna canción coincide con tu búsqueda.</div>
+          </div>
+        </section>
+
+        <!-- ============ DESCARGAS ============ -->
+        <section class="view" id="viewDownloads" aria-label="Descargas" hidden>
+          <div class="dls">
+            <div class="dls-head">
+              <div class="dls-title">Descargas</div>
+              <p>Aquí se ve el avance de cada descarga: <b>canción por canción</b> y, cuando es una playlist, también el <b>total de la lista completa</b>. En el APK, los archivos se guardan con yt-dlp (dentro de la app) en la carpeta <b>Música/Gurru Music</b> del teléfono, en el formato elegido (MP3 o M4A) y en la máxima calidad disponible.</p>
+            </div>
+            <div class="dls-list" id="dlList"></div>
+            <div class="dls-empty" id="dlEmpty">
+              <div class="es-t">Todavía no hay descargas</div>
+              <p>En Biblioteca pega un link de YouTube y elige <b>«Descargar»</b>: aquí verás el porcentaje de cada canción mientras se guarda en tu teléfono.</p>
+            </div>
+            <div class="dls-foot">
+              <div class="dls-fmt">Formato de descarga: <b id="dlFmtCur">MP3</b> · Carpeta: <b>Música/Gurru Music</b></div>
+              <button class="dls-btn" id="dlUpdateBtn" type="button">Actualizar yt-dlp</button>
+              <div class="dls-msg" id="dlUpdateMsg">YouTube cambia sus bloqueos cada cierto tiempo; si una descarga falla, prueba actualizar yt-dlp aquí (solo en el APK).</div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Barra inferior sin botones de cola ni de Atrás: solo Biblioteca en el reproductor.
+           En Biblioteca no hay botón de regreso: se vuelve con el gesto atrás del teléfono. -->
+      <div class="softbar">
+        <button class="sk-left" id="skLeft">Descargas</button>
+        <span class="sk-mid">
+          <span class="dot" id="dotShuffle" title="Aleatorio"></span>
+          <span id="tPosSoft">0 / 0</span>
+          <span class="dot" id="dotRepeat" title="Repetir"></span>
+        </span>
+        <button id="skRight">Biblioteca</button>
+      </div>
+
+      <!-- Al pegar un link de YouTube NO suena ni se descarga solo:
+           el usuario elige Escuchar o Descargar. -->
+      <div class="choice-overlay" id="choiceOverlay" role="dialog" aria-modal="true" aria-labelledby="choiceTitle">
+        <div class="choice-card">
+          <span class="c-badge">YouTube</span>
+          <h2 id="choiceTitle">¿Qué quieres hacer?</h2>
+          <p class="c-sub" id="choiceSub"></p>
+          <button class="choice-btn listen" id="choiceListenBtn">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <span><span class="cb-t">Escuchar</span><span class="cb-s" id="choiceListenSub">Suena en el reproductor principal, solo audio, sin video.</span></span>
+          </button>
+          <button class="choice-btn download" id="choiceDownloadBtn">
+            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <span><span class="cb-t">Descargar</span><span class="cb-s">Se guarda en el teléfono con yt-dlp (dentro del APK), en el formato elegido y en la máxima calidad. El avance se ve en Descargas, canción por canción.</span></span>
+          </button>
+          <div class="fmt-row" id="fmtRow" role="group" aria-label="Formato de descarga">
+            <span class="fmt-label">Formato:</span>
+            <button class="fmt-btn on" data-fmt="mp3" type="button">MP3</button>
+            <button class="fmt-btn" data-fmt="m4a" type="button">M4A</button>
+            <span class="fmt-note">MP3: compatible con todo · M4A: mejor calidad/tamaño</span>
+          </div>
+          <button class="choice-only" id="choiceOnlyBtn">Solo agregarlo a la Biblioteca</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="dropOverlay" aria-hidden="true">
+      <div class="do-box">
+        <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+        <div>Suelta tu música aquí</div>
+      </div>
+    </div>
+
+    <audio id="audio" preload="metadata"></audio>
+    <audio id="audioYt" preload="metadata"></audio>
+
+    <script>
+      "use strict";
+      var $ = function(id){ return document.getElementById(id); };
+      var audio = $("audio");
+      var tracks = [];
+      var current = -1;
+      var shuffle = false;
+      var repeatMode = 0;
+      var seeking = false;
+      var uid = 0;
+      var view = "player";
+      var lastVol = 0.8;
+
+      var ICON_PLAY  = '<path d="M8 5v14l11-7z"/>';
+      var ICON_PAUSE = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
+
+      /* Como la foto: 00:00:02 */
+      function fmt(sec){
+        if (!isFinite(sec) || sec == null || sec < 0) sec = 0;
+        sec = Math.floor(sec);
+        var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+        function p(n){ return (n < 10 ? "0" : "") + n; }
+        return p(h) + ":" + p(m) + ":" + p(s);
+      }
+      function fmtShort(sec){
+        if (!isFinite(sec) || sec == null || sec < 0) sec = 0;
+        sec = Math.floor(sec);
+        var m = Math.floor(sec / 60), s = sec % 60;
+        return m + ":" + (s < 10 ? "0" : "") + s;
+      }
+      function esc(s){
+        return String(s).replace(/[&<>"']/g, function(c){
+          return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+        });
+      }
+
+      /* ---------- Vistas ---------- */
+      /* Sin botón Atrás: entrar a Biblioteca deja una entrada en el historial,
+         así el gesto atrás del teléfono (popstate) regresa al reproductor. */
+      var libraryInHistory = false;
+      var suppressNextPop = false;
+      function showView(v, skipHistory){
+        view = v;
+        $("viewPlayer").hidden = v !== "player";
+        $("viewLibrary").hidden = v !== "library";
+        $("viewDownloads").hidden = v !== "downloads";
+        /* Sin botón de regreso: se vuelve al reproductor con el gesto atrás
+           del teléfono. La barra inferior ofrece el apartado que NO estás
+           viendo: Biblioteca a la derecha y Descargas a la izquierda. */
+        var showLib = v !== "library";
+        $("skRight").style.visibility = showLib ? "visible" : "hidden";
+        $("skRight").setAttribute("aria-hidden", showLib ? "false" : "true");
+        $("skRight").tabIndex = showLib ? 0 : -1;
+        var showDl = v !== "downloads";
+        $("skLeft").style.visibility = showDl ? "visible" : "hidden";
+        $("skLeft").setAttribute("aria-hidden", showDl ? "false" : "true");
+        $("skLeft").tabIndex = showDl ? 0 : -1;
+        if (!skipHistory){
+          if (v !== "player" && !libraryInHistory){
+            libraryInHistory = true;
+            try{ history.pushState({ gurruView: v }, ""); }catch(e){}
+          } else if (v === "player" && libraryInHistory){
+            libraryInHistory = false;
+            suppressNextPop = true;
+            try{ history.back(); }catch(e){ suppressNextPop = false; }
+          }
+        } else if (v === "player"){
+          libraryInHistory = false;
+        }
+        if (v === "player"){
+          requestAnimationFrame(function(){ setMarquee($("mTitle")); setMarquee($("mArtist")); });
+        }
+        if (v === "downloads") renderDownloads();
+      }
+      window.addEventListener("popstate", function(){
+        if (suppressNextPop){ suppressNextPop = false; return; }
+        libraryInHistory = false;
+        if (view !== "player") showView("player", true);
+      });
+      $("skRight").addEventListener("click", function(){ if (view !== "library") showView("library"); });
+      $("skLeft").addEventListener("click", function(){ if (view !== "downloads") showView("downloads"); });
+
+      /* ---------- Cola: mostrar / ocultar ---------- */
+      var queueCollapsed = false;
+      function setQueueCollapsed(collapsed){
+        queueCollapsed = !!collapsed;
+        $("queuePanel").classList.toggle("collapsed", queueCollapsed);
+        $("queueToggleBtn").textContent = queueCollapsed ? "Mostrar ▾" : "Ocultar ▴";
+        $("queueToggleBtn").setAttribute("aria-expanded", queueCollapsed ? "false" : "true");
+      }
+      $("queueToggleBtn").addEventListener("click", function(){ setQueueCollapsed(!queueCollapsed); });
+
+      /* ---------- Reloj y batería ---------- */
+      function tickClock(){
+        var d = new Date();
+        var hh = d.getHours(), mm = d.getMinutes();
+        $("clock").textContent = (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm;
+      }
+      tickClock(); setInterval(tickClock, 15000);
+      if (navigator.getBattery){
+        navigator.getBattery().then(function(b){
+          function upd(){ $("battFill").setAttribute("width", Math.max(2, Math.round(22.8 * b.level))); }
+          upd(); b.addEventListener("levelchange", upd);
+        }).catch(function(){});
+      }
+
+      /* ---------- Etiquetas ID3 ---------- */
+      function decodeText(enc, bytes){
+        try{
+          if (enc === 0) return new TextDecoder("iso-8859-1").decode(bytes).replace(/\0+$/,"");
+          if (enc === 1) return new TextDecoder("utf-16").decode(bytes).replace(/\0+$/,"");
+          if (enc === 2) return new TextDecoder("utf-16be").decode(bytes).replace(/\0+$/,"");
+          return new TextDecoder("utf-8").decode(bytes).replace(/\0+$/,"");
+        }catch(e){ return ""; }
+      }
+      function parseID3v2(buf){
+        var dv = new DataView(buf);
+        if (buf.byteLength < 10) return null;
+        if (dv.getUint8(0) !== 0x49 || dv.getUint8(1) !== 0x44 || dv.getUint8(2) !== 0x33) return null;
+        var ver = dv.getUint8(3);
+        var size = ((dv.getUint8(6) & 0x7f) << 21) | ((dv.getUint8(7) & 0x7f) << 14) | ((dv.getUint8(8) & 0x7f) << 7) | (dv.getUint8(9) & 0x7f);
+        var end = Math.min(10 + size, buf.byteLength);
+        var out = {};
+        var pos = 10;
+        while (pos + 10 <= end){
+          var id = "";
+          for (var i = 0; i < 4; i++) id += String.fromCharCode(dv.getUint8(pos + i));
+          if (!/^[A-Z0-9]{4}$/.test(id)) break;
+          var fsize;
+          if (ver === 4){
+            fsize = ((dv.getUint8(pos+4) & 0x7f) << 21) | ((dv.getUint8(pos+5) & 0x7f) << 14) | ((dv.getUint8(pos+6) & 0x7f) << 7) | (dv.getUint8(pos+7) & 0x7f);
+          } else { fsize = dv.getUint32(pos + 4); }
+          if (fsize <= 0 || pos + 10 + fsize > buf.byteLength + 10) break;
+          var data = new Uint8Array(buf, pos + 10, Math.min(fsize, buf.byteLength - (pos + 10)));
+          if (data.length > 0){
+            if (id === "TIT2" || id === "TPE1" || id === "TALB"){
+              var txt = decodeText(data[0], data.subarray(1)).trim();
+              if (txt) out[id] = txt;
+            } else if (id === "APIC" && !out.artUrl){
+              try{
+                var enc = data[0];
+                var p = 1, mime = "";
+                while (p < data.length && data[p] !== 0){ mime += String.fromCharCode(data[p]); p++; }
+                p++; p++;
+                if (enc === 1 || enc === 2){
+                  while (p + 1 < data.length && !(data[p] === 0 && data[p+1] === 0)) p += 2;
+                  p += 2;
+                } else { while (p < data.length && data[p] !== 0) p++; p++; }
+                if (p < data.length){
+                  var imgBytes = data.subarray(p);
+                  if (imgBytes.length > 100){
+                    var blob = new Blob([imgBytes], { type: mime || "image/jpeg" });
+                    out.artUrl = URL.createObjectURL(blob);
+                  }
+                }
+              }catch(e){}
+            }
+          }
+          pos += 10 + fsize;
+        }
+        return (out.TIT2 || out.TPE1 || out.TALB || out.artUrl) ? out : null;
+      }
+      function parseID3v1(buf){
+        if (buf.byteLength < 128) return null;
+        var dv = new DataView(buf);
+        if (dv.getUint8(0) !== 0x54 || dv.getUint8(1) !== 0x41 || dv.getUint8(2) !== 0x47) return null;
+        function field(off, len){
+          var bytes = new Uint8Array(buf, off, len);
+          return new TextDecoder("iso-8859-1").decode(bytes).replace(/[\0 ]+$/,"").trim();
+        }
+        var out = { TIT2: field(3,30), TPE1: field(33,30), TALB: field(63,30) };
+        return (out.TIT2 || out.TPE1) ? out : null;
+      }
+      function readMeta(file){
+        var headSlice = file.slice(0, Math.min(file.size, 3 * 1024 * 1024));
+        return headSlice.arrayBuffer().then(function(buf){
+          var v2 = parseID3v2(buf);
+          if (v2) return v2;
+          if (file.size > 128){
+            return file.slice(file.size - 128).arrayBuffer().then(function(tail){ return parseID3v1(tail) || {}; }).catch(function(){ return {}; });
+          }
+          return {};
+        }).catch(function(){ return {}; });
+      }
+      function loadDuration(url){
+        return new Promise(function(res){
+          var a = new Audio();
+          a.preload = "metadata";
+          a.onloadedmetadata = function(){ res(a.duration); };
+          a.onerror = function(){ res(0); };
+          a.src = url;
+        });
+      }
+
+      /* ---------- Agregar archivos y CARPETAS ---------- */
+      function isAudioFile(f){
+        if (f.type && f.type.indexOf("audio") === 0) return true;
+        return /\.(mp3|m4a|aac|ogg|opus|wav|flac)$/i.test(f.name);
+      }
+      function addFiles(fileList){
+        var files = Array.prototype.filter.call(fileList, isAudioFile);
+        if (!files.length) return;
+        /* Orden de carpeta: por ruta (subcarpetas incluidas) y luego por nombre */
+        files.sort(function(a, b){
+          var pa = (a.webkitRelativePath || a.name).toLowerCase();
+          var pb = (b.webkitRelativePath || b.name).toLowerCase();
+          return pa < pb ? -1 : (pa > pb ? 1 : 0);
+        });
+        var wasEmpty = tracks.length === 0;
+        var pending = files.map(function(file){
+          var url = URL.createObjectURL(file);
+          return Promise.all([readMeta(file), loadDuration(url)]).then(function(r){
+            var meta = r[0], dur = r[1];
+            var base = file.name.replace(/\.[^.]+$/, "");
+            var title = meta.TIT2 || "", artist = meta.TPE1 || "";
+            if (!title){
+              var parts = base.split(" - ");
+              if (parts.length > 1 && !artist){ artist = parts[0].trim(); title = parts.slice(1).join(" - ").trim(); }
+              else title = base;
+            }
+            return { id: ++uid, type: "local", url: url, title: title || base, artist: artist || "Artista desconocido", album: meta.TALB || "", artUrl: meta.artUrl || null, duration: dur || 0 };
+          }).catch(function(){
+            return { id: ++uid, type: "local", url: url, title: file.name.replace(/\.[^.]+$/, ""), artist: "Artista desconocido", album: "", artUrl: null, duration: 0 };
+          });
+        });
+        Promise.all(pending).then(function(newTracks){
+          tracks = tracks.concat(newTracks);
+          renderPlaylist();
+          if (wasEmpty && tracks.length) loadTrack(0, false);
+        });
+      }
+
+      /* ---------- Lista ---------- */
+      function renderPlaylist(){
+        var q = $("searchInput").value.trim().toLowerCase();
+        var ul = $("playlist");
+        ul.innerHTML = "";
+        var visible = 0;
+        tracks.forEach(function(t, i){
+          if (q && (t.title + " " + t.artist + " " + t.album).toLowerCase().indexOf(q) === -1) return;
+          visible++;
+          var li = document.createElement("li");
+          if (i === current) li.className = "active" + (activeIsPlaying() ? " playing" : "");
+          var isYt = t.type === "youtube" || t.type === "ytaudio";
+          var badge = "";
+          if (t.downloaded) badge = '<span class="src-badge saved">MP3 guardado</span>';
+          else if (isYt) badge = '<span class="src-badge">YouTube</span>';
+          var dlBtn = "";
+          if (isYt && !t.downloaded){
+            if (t.dlState === "downloading") dlBtn = '<button class="dl" disabled style="width:auto;font-size:11.5px;font-family:\'Share Tech Mono\',monospace" title="Descargando… el avance completo está en Descargas">' + (typeof t.dlProgress === "number" ? Math.floor(t.dlProgress) + "%" : "…") + '</button>';
+            else dlBtn = '<button class="dl" title="Descargar al teléfono (MP3/M4A, máxima calidad) — el avance se ve en Descargas" aria-label="Descargar ' + esc(t.title) + ' como MP3">⬇</button>';
+          } else { dlBtn = '<span style="width:28px"></span>'; }
+          li.innerHTML =
+            '<span class="idx"><span class="idx-num">' + (i + 1) + '</span><span class="eq"><i></i><i></i><i></i></span></span>' +
+            '<span class="meta"><span class="pt">' + esc(t.title) + badge + '</span><span class="pa">' + esc(t.artist) + '</span></span>' +
+            '<span class="dur">' + (t.duration ? fmtShort(t.duration) : (t.type === "youtube" ? (t.kind === "playlist" ? "Lista" : "Audio") : "--:--")) + '</span>' + dlBtn +
+            '<button class="rm" title="Quitar de la lista" aria-label="Quitar ' + esc(t.title) + '">&times;</button>';
+          li.addEventListener("click", function(){ playTrack(i); showView("player"); });
+          var dlEl = li.querySelector(".dl");
+          if (dlEl) dlEl.addEventListener("click", function(ev){ ev.stopPropagation(); queueDownload(t, true); });
+          li.querySelector(".rm").addEventListener("click", function(ev){ ev.stopPropagation(); removeTrack(i); });
+          ul.appendChild(li);
+        });
+        $("emptyState").style.display = tracks.length ? "none" : "block";
+        $("noResults").style.display = (tracks.length && !visible) ? "block" : "none";
+        $("clearBtn").disabled = tracks.length === 0;
+        updateScreenMeta();
+        renderQueue();
+      }
+      function removeTrack(i){
+        var t = tracks[i];
+        tracks.splice(i, 1);
+        if (t.artUrl) URL.revokeObjectURL(t.artUrl);
+        if (i === current){
+          stopYouTube();
+          pauseAllAudio(); audio.removeAttribute("src"); audio.load();
+          try{ ytAudioEl.removeAttribute("src"); ytAudioEl.load(); }catch(e){}
+          if (t.url) URL.revokeObjectURL(t.url);
+          current = -1;
+          if (tracks.length) loadTrack(Math.min(i, tracks.length - 1), false);
+          else resetScreen();
+        } else if (i < current) current--;
+        renderPlaylist();
+      }
+      function clearAll(){
+        stopYouTube();
+        pauseAllAudio(); audio.removeAttribute("src"); audio.load();
+        try{ ytAudioEl.removeAttribute("src"); ytAudioEl.load(); }catch(e){}
+        tracks.forEach(function(t){ if (t.url) URL.revokeObjectURL(t.url); if (t.artUrl) URL.revokeObjectURL(t.artUrl); });
+        tracks = []; current = -1;
+        resetScreen(); renderPlaylist();
+      }
+
+      /* ---------- Cola: anterior, actual y siguientes ---------- */
+      function renderQueue(){
+        var list = $("queueList");
+        var empty = $("queueEmpty");
+        list.innerHTML = "";
+        if (!tracks.length || current < 0){
+          $("queueCount").textContent = tracks.length ? tracks.length + " en la lista" : "";
+          empty.style.display = "block";
+          empty.textContent = tracks.length ? "Toca una canción para ver qué suena, qué sonó antes y qué sigue." : "Carga música para ver qué suena ahora, qué sonó antes y qué sigue.";
+          return;
+        }
+        empty.style.display = "none";
+        var items = [];
+        /* Anteriores: hasta 2 antes, en orden */
+        for (var p = 2; p >= 1; p--){
+          var pi = current - p;
+          if (pi >= 0) items.push({ i: pi, kind: "prev", label: p === 1 ? "Anterior" : "Antes" });
+        }
+        items.push({ i: current, kind: "current", label: "Sonando" });
+        if (repeatMode === 2){
+          items.push({ i: current, kind: "next", label: "Sigue · repite" });
+        } else {
+          for (var n = 1; n <= 4; n++){
+            var ni;
+            if (shuffle){
+              ni = (current + n) % tracks.length;
+              if (ni === current) continue;
+            } else {
+              ni = current + n;
+              if (ni >= tracks.length) break;
+            }
+            items.push({ i: ni, kind: "next", label: n === 1 ? "Siguiente" : "Después" });
+            if (items.length >= 7) break;
+          }
+        }
+        var nextCount = items.filter(function(x){ return x.kind === "next"; }).length;
+        $("queueCount").textContent = (current + 1) + "/" + tracks.length + (shuffle ? " · aleatorio" : "") + (nextCount ? " · " + nextCount + " sigue" + (nextCount === 1 ? "" : "n") : "");
+        items.forEach(function(item){
+          var t = tracks[item.i];
+          var li = document.createElement("li");
+          li.className = item.kind === "current" ? "is-current" : (item.kind === "prev" ? "is-prev" : "is-next");
+          var badge = (t.type === "youtube" || t.type === "ytaudio") ? '<span class="src-badge">YouTube</span>' : (t.downloaded ? '<span class="src-badge saved">MP3</span>' : "");
+          li.innerHTML =
+            '<span class="q-tag">' + esc(item.label) + '</span>' +
+            '<span class="q-t">' + esc(t.title) + badge + ' <span class="q-a">&middot; ' + esc(t.artist) + '</span></span>' +
+            '<span class="q-dur">' + (t.duration ? fmtShort(t.duration) : (t.type === "youtube" ? (t.kind === "playlist" ? "Lista" : "Audio") : "--:--")) + '</span>';
+          if (item.kind !== "current"){
+            (function(idx){ li.addEventListener("click", function(){ playTrack(idx); }); })(item.i);
+          }
+          list.appendChild(li);
+        });
+        var curEl = list.querySelector(".is-current");
+        if (curEl && curEl.scrollIntoView) { try{ curEl.scrollIntoView({ block: "nearest" }); }catch(e){} }
+      }
+
+      /* ---------- Pantalla ---------- */
+      function setMarquee(el){
+        var span = el.firstElementChild;
+        el.classList.remove("scrolling");
+        if (!span) return;
+        var diff = span.scrollWidth - el.clientWidth;
+        if (diff > 4){ el.style.setProperty("--sx", -diff + "px"); el.classList.add("scrolling"); }
+      }
+      function updateScreenMeta(){
+        var label = tracks.length ? (current + 1) + "/" + tracks.length : "0/0";
+        $("tPos").textContent = label;
+        $("tPosSoft").textContent = tracks.length ? (current + 1) + " / " + tracks.length : "0 / 0";
+      }
+      function showTrackOnScreen(){
+        var t = tracks[current];
+        if (!t) return;
+        $("tTitle").textContent = t.title;
+        $("tArtist").textContent = t.artist;
+        $("tAlbum").textContent = t.album || "\u00a0";
+        var artBox = $("artBox");
+        /* El video nunca se muestra: en YouTube se ve la miniatura como portada
+           y solo suena el audio. El reproductor oculto lo maneja playHiddenYouTube. */
+        $("artWrap").classList.remove("yt-mode");
+        if (t.artUrl){ $("artImg").src = t.artUrl; artBox.classList.add("has-art"); }
+        else { $("artImg").removeAttribute("src"); artBox.classList.remove("has-art"); }
+        $("seek").disabled = t.type === "youtube";
+        updateScreenMeta();
+        requestAnimationFrame(function(){ setMarquee($("mTitle")); setMarquee($("mArtist")); });
+        if ("mediaSession" in navigator){
+          try{
+            var md = { title: t.title, artist: t.artist, album: t.album || "" };
+            if (t.artUrl) md.artwork = [{ src: t.artUrl, sizes: "512x512" }];
+            navigator.mediaSession.metadata = new MediaMetadata(md);
+          }catch(e){}
+        }
+      }
+      function resetScreen(){
+        $("tTitle").textContent = "Elige una carpeta";
+        $("tArtist").textContent = "Sin música todavía";
+        $("tAlbum").textContent = "\u00a0";
+        $("artWrap").classList.remove("yt-mode");
+        $("ytWrap").classList.remove("show");
+        $("artImg").removeAttribute("src");
+        $("artBox").classList.remove("has-art");
+        $("seek").disabled = true; $("seek").value = 0;
+        $("seek").style.setProperty("--fill", "0%");
+        $("tCur").textContent = "00:00:00"; $("tTot").textContent = "00:00:00";
+        updateScreenMeta();
+        setPlayIcons(false);
+      }
+
+      /* ---------- YouTube: SOLO AUDIO y playlist COMPLETA ---------- */
+      /* Todo se resuelve SOLO con YouTube (iframe_api, oEmbed y el
+         reproductor oficial): ningún link del usuario sale a servidores
+         de terceros. La playlist se expande a UNA pista por canción
+         leyendo la lista con la API oficial (getPlaylist), así la
+         Biblioteca y la cola "A continuación" muestran todo lo que trae.
+         El video nunca se muestra: el reproductor queda oculto y se le
+         pide su máxima calidad (highres); solo se escucha el audio. */
+      var ytAudioEl = $("audioYt");
+      var ytLoadSeq = 0;
+      var ytApiPlayer = null;
+      var ytApiPromise = null;
+      var ytHiddenActive = false;
+      var ytHiddenPlaying = false;
+      var ytHiddenTrack = null;
+
+      function parseYouTubeLink(raw){
+        if (!raw) return null;
+        var s = String(raw).trim();
+        try{
+          var u = new URL(s.indexOf("://") === -1 ? "https://" + s : s);
+          var host = u.hostname.replace(/^www\.|^m\.|^music\./, "");
+          var list = u.searchParams.get("list");
+          var v = u.searchParams.get("v");
+          if (host === "youtu.be"){ v = u.pathname.split("/").filter(Boolean)[0] || v; }
+          if (u.pathname.indexOf("/shorts/") === 0) v = u.pathname.split("/")[2];
+          if (u.pathname.indexOf("/embed/") === 0) v = u.pathname.split("/")[2];
+          if (list && /^[A-Za-z0-9_-]{8,}$/.test(list)) return { kind: "playlist", playlistId: list, videoId: v || null };
+          if (v && /^[A-Za-z0-9_-]{6,}$/.test(v)) return { kind: "video", videoId: v, playlistId: list || null };
+          return null;
+        }catch(e){ return null; }
+      }
+      function ensureYTApi(){
+        if (window.YT && window.YT.Player) return Promise.resolve();
+        if (ytApiPromise) return ytApiPromise;
+        ytApiPromise = new Promise(function(resolve, reject){
+          var prev = window.onYouTubeIframeAPIReady, done = false;
+          window.onYouTubeIframeAPIReady = function(){ if (typeof prev === "function"){ try{ prev(); }catch(e){} } done = true; resolve(); };
+          var s = document.createElement("script");
+          s.src = "https://www.youtube.com/iframe_api"; s.async = true;
+          s.onerror = function(){ if (!done){ ytApiPromise = null; reject(new Error("api")); } };
+          document.head.appendChild(s);
+          setTimeout(function(){ if (!done){ ytApiPromise = null; reject(new Error("api-timeout")); } }, 9000);
+        });
+        return ytApiPromise;
+      }
+      /* Expandir la playlist con la API oficial: cargamos la lista en el
+         reproductor oculto, en silencio y en pausa, solo para leer los IDs
+         de TODAS sus canciones con getPlaylist(). */
+      function expandPlaylist(listId){
+        return ensureYTApi().then(function(){
+          return new Promise(function(resolve, reject){
+            stopYouTube();
+            $("ytWrap").classList.add("show");
+            var settled = false;
+            function cleanup(){ var w = $("ytWrap"); if (w){ w.innerHTML = '<div id="ytPlayer"></div>'; w.classList.remove("show"); } }
+            try{
+              var player = new YT.Player("ytPlayer", { width: "4", height: "4", playerVars: { playsinline: 1, rel: 0 }, events: {
+                onReady: function(e){
+                  try{ e.target.mute(); e.target.loadPlaylist({ list: listId, listType: "playlist", index: 0 }); e.target.pauseVideo(); }catch(err){}
+                  var tries = 0;
+                  var iv = setInterval(function(){
+                    tries++;
+                    var ids = null;
+                    try{ ids = e.target.getPlaylist(); }catch(err){}
+                    if (ids && ids.length){
+                      clearInterval(iv); settled = true;
+                      try{ e.target.stopVideo(); e.target.destroy(); }catch(err){}
+                      cleanup();
+                      resolve({ title: "Playlist de YouTube", videos: ids.map(function(id){ return { videoId: id, title: "Canción de YouTube", artist: "YouTube", duration: 0, artUrl: "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg" }; }) });
+                    } else if (tries > 24){
+                      clearInterval(iv); settled = true;
+                      try{ e.target.destroy(); }catch(err){}
+                      cleanup(); reject(new Error("ytapi-timeout"));
+                    }
+                  }, 500);
+                },
+                onError: function(){ if (!settled){ settled = true; cleanup(); reject(new Error("ytapi-error")); } }
+              }});
+            }catch(err){ cleanup(); reject(err); }
+          });
+        });
+      }
+      /* Título, autor y miniatura reales, desde el oEmbed de YouTube */
+      function enrichYouTubeTrack(track){
+        if (!track.videoId) return Promise.resolve();
+        if (track.title !== "Canción de YouTube" && track.title !== "Video de YouTube") return Promise.resolve();
+        try{
+          var watchUrl = "https://www.youtube.com/watch?v=" + encodeURIComponent(track.videoId);
+          return fetch("https://www.youtube.com/oembed?url=" + encodeURIComponent(watchUrl) + "&format=json")
+            .then(function(r){ if (!r.ok) throw new Error("oembed"); return r.json(); })
+            .then(function(data){
+              if (!data) return;
+              if (data.title) track.title = data.title;
+              if (data.author_name) track.artist = data.author_name;
+              if (data.thumbnail_url) track.artUrl = data.thumbnail_url;
+              renderPlaylist();
+              if (tracks[current] === track) showTrackOnScreen();
+              /* Si la ventana de elección está abierta para esta canción, muestra ya su título real */
+              if (typeof choiceCtx !== "undefined" && choiceCtx && !choiceCtx.groupTitle && tracks[choiceCtx.indices[0]] === track){
+                $("choiceSub").textContent = "«" + track.title + "» ya está en tu Biblioteca. Nada está sonando ni descargándose todavía: tú eliges.";
+              }
+            })
+            .catch(function(){});
+        }catch(e){ return Promise.resolve(); }
+      }
+
+      /* ----- Guardar en el teléfono, máxima calidad -----
+         La idea del usuario: que lo de YouTube quede INTEGRADO como su
+         demás música, no como un reproductor aparte. SOLO cuando el
+         usuario elige «Descargar» (nunca automático al pegar el link),
+         cada canción se descarga con yt-dlp DENTRO del APK (plugin
+         nativo YtDlpDownloader, sin Termux ni servidor) y se GUARDA en
+         la memoria del teléfono (Música/Gurru Music) en el formato
+         elegido (MP3 o M4A), en la máxima calidad, y la pista pasa a ser
+         LOCAL: suena con el reproductor normal, entra a la cola y ya no
+         depende de YouTube. Si todo falla, la canción se queda en modo
+         solo-audio por internet y se puede reintentar. En la versión web
+         (sin APK) la descarga no está disponible. */
+      /* ----- Descargas NATIVAS con yt-dlp DENTRO del APK -----
+         Plugin Capacitor "YtDlpDownloader" (ver android/.../YtDlpDownloaderPlugin.java).
+         En el APK, Descargar usa yt-dlp empaquetado: sin Termux ni servidor.
+         En la versión web no hay plugin: la descarga no está disponible y
+         la canción queda en solo-audio por internet. */
+      var dlFormat = "mp3";
+      try { var _df = localStorage.getItem("gurru-dl-format"); if (_df === "mp3" || _df === "m4a") dlFormat = _df; } catch(e){}
+      var nativeDl = null, nativeDlChecked = false, nativeDlListenerOn = false, nativeDlOk = null;
+      var dlNativeRunningId = null;
+      function getNativeDl(){
+        if (nativeDlChecked) return nativeDl;
+        nativeDlChecked = true;
+        try {
+          if (window.Capacitor && window.Capacitor.registerPlugin
+              && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()){
+            nativeDl = window.Capacitor.registerPlugin("YtDlpDownloader");
+          }
+        } catch(e){ nativeDl = null; }
+        return nativeDl;
+      }
+      function nativeDlAvailable(){
+        if (nativeDlOk !== null) return Promise.resolve(nativeDlOk);
+        var p = getNativeDl();
+        if (!p || !p.isAvailable) return Promise.resolve(false);
+        return p.isAvailable().then(function(r){
+          nativeDlOk = !!(r && r.available);
+          return nativeDlOk;
+        }).catch(function(){ nativeDlOk = false; return false; });
+      }
+      function nativeDlOnProgress(){
+        var p = getNativeDl();
+        if (!p || !p.addListener || nativeDlListenerOn) return;
+        nativeDlListenerOn = true;
+        p.addListener("downloadProgress", function(ev){
+          if (!ev) return;
+          var e = null;
+          for (var i = 0; i < dlEntries.length; i++){
+            if (String(dlEntries[i].id) === String(ev.id)){ e = dlEntries[i]; break; }
+          }
+          if (!e) return;
+          if (ev.status === "downloading" || ev.status === "resolving"){
+            e.status = "downloading";
+            if (typeof ev.progress === "number"){
+              e.progress = ev.progress;
+              if (e.track) e.track.dlProgress = ev.progress;
+            }
+            renderDownloads();
+          }
+        });
+      }
+      function setDlFormat(f){
+        if (f !== "mp3" && f !== "m4a") return;
+        dlFormat = f;
+        try { localStorage.setItem("gurru-dl-format", f); } catch(e){}
+        var btns = document.querySelectorAll("#fmtRow .fmt-btn");
+        for (var i = 0; i < btns.length; i++){
+          btns[i].classList.toggle("on", btns[i].getAttribute("data-fmt") === f);
+        }
+        var cur = $("dlFmtCur"); if (cur) cur.textContent = f.toUpperCase();
+      }
+      (function(){
+        var btns = document.querySelectorAll("#fmtRow .fmt-btn");
+        for (var i = 0; i < btns.length; i++){
+          btns[i].addEventListener("click", function(){ setDlFormat(this.getAttribute("data-fmt")); });
+        }
+        setDlFormat(dlFormat);
+        var up = $("dlUpdateBtn");
+        if (up) up.addEventListener("click", function(){
+          var msg = $("dlUpdateMsg");
+          var p = getNativeDl();
+          if (!p){ if (msg) msg.textContent = "Actualizar yt-dlp solo funciona dentro del APK."; return; }
+          if (msg) msg.textContent = "Buscando actualización de yt-dlp…";
+          p.updateYtDlp({ channel: "stable" }).then(function(r){
+            if (msg) msg.textContent = (r && r.status === "ALREADY_UP_TO_DATE")
+              ? "yt-dlp ya está al día (" + (r.version || "") + ")."
+              : "yt-dlp actualizado (" + ((r && r.version) || "") + ").";
+          }).catch(function(err){
+            if (msg) msg.textContent = "No se pudo actualizar yt-dlp: " + (err && err.message ? err.message : "error de red");
+          });
+        });
+      })();
+
+      var dlPending = [], dlRunning = false, dlCancelFlag = false;
+      var dlDone = 0, dlFail = 0, dlTotal = 0;
+
+      /* ----- Apartado DESCARGAS: una entrada por canción, agrupadas por lista -----
+         Cada entrada guarda su porcentaje real (bytes recibidos / total cuando
+         el servidor lo informa) y su estado; las de una playlist comparten un
+         grupo para mostrar también el avance total de la lista. */
+      var dlEntries = [];   /* {id, track, groupId, status, progress, loaded, total, error} */
+      var dlGroups = [];    /* {id, title, total} */
+      var dlEntryUid = 0, dlGroupUid = 0;
+      function dlFmtBytes(n){
+        if (!n && n !== 0) return "";
+        if (n < 1024) return n + " B";
+        if (n < 1024 * 1024) return (n / 1024).toFixed(0) + " KB";
+        return (n / (1024 * 1024)).toFixed(1) + " MB";
+      }
+      function dlEntryFor(track, groupId){
+        for (var i = 0; i < dlEntries.length; i++) if (dlEntries[i].track === track) return dlEntries[i];
+        var e = { id: ++dlEntryUid, track: track, groupId: groupId || null, status: "queued", progress: null, loaded: 0, total: 0, error: "" };
+        dlEntries.push(e);
+        return e;
+      }
+      function dlGroupProgress(g){
+        var items = dlEntries.filter(function(e){ return e.groupId === g.id; });
+        if (!items.length) return { pct: 0, done: 0, fail: 0, total: 0 };
+        var sum = 0, done = 0, fail = 0;
+        items.forEach(function(e){
+          if (e.status === "done"){ sum += 100; done++; }
+          else if (e.status === "error"){ fail++; }
+          else if (typeof e.progress === "number") sum += e.progress;
+        });
+        return { pct: Math.floor(sum / items.length), done: done, fail: fail, total: items.length };
+      }
+      function dlStatusText(e){
+        var t = e.track;
+        if (e.status === "queued") return "En espera…";
+        if (e.status === "resolving") return "Buscando el audio en la máxima calidad…";
+        if (e.status === "downloading"){
+          if (typeof e.progress === "number") return "Descargando… " + dlFmtBytes(e.loaded) + (e.total ? " de " + dlFmtBytes(e.total) : "");
+          return "Descargando… " + dlFmtBytes(e.loaded) + " recibidos";
+        }
+        if (e.status === "done") return "✓ Guardada en Música/Gurru Music" + (t.savedName ? ": " + t.savedName : "");
+        if (e.status === "error") return "No se pudo descargar" + (e.error ? " (" + e.error + ")" : "") + ". La canción queda en solo-audio por internet.";
+        if (e.status === "cancelled") return "Descarga detenida.";
+        return "";
+      }
+      function dlItemHTML(e){
+        var t = e.track;
+        var pctTxt = e.status === "done" ? "100%" : (typeof e.progress === "number" ? Math.floor(e.progress) + "%" : (e.status === "downloading" || e.status === "resolving" ? "…" : "0%"));
+        var barCls = (e.status === "downloading" && typeof e.progress !== "number") || e.status === "resolving" ? "dl-bar indet" : "dl-bar";
+        var barW = e.status === "done" ? 100 : (typeof e.progress === "number" ? e.progress : 0);
+        var stCls = e.status === "done" ? "di-status done" : (e.status === "error" ? "di-status err" : "di-status");
+        var actions = "";
+        if (e.status === "error" || e.status === "cancelled") actions = '<div class="di-actions"><button class="di-btn go" data-retry="' + e.id + '">Reintentar descarga</button></div>';
+        else if (e.status === "done") actions = '<div class="di-actions"><button class="di-btn go" data-play="' + e.id + '">▶ Escuchar</button></div>';
+        return '<li class="dl-item">' +
+          '<div class="dl-item-top"><span class="di-t">' + esc(t.title) + '</span><span class="di-pct">' + pctTxt + '</span></div>' +
+          '<div class="di-sub">' + esc(t.artist) + ' · MP3 · Máxima calidad</div>' +
+          '<div class="' + barCls + '"><i style="width:' + barW + '%"></i></div>' +
+          '<div class="' + stCls + '">' + esc(dlStatusText(e)) + '</div>' + actions + '</li>';
+      }
+      function renderDownloads(){
+        var list = $("dlList");
+        if (!list) return;
+        $("dlEmpty").style.display = dlEntries.length ? "none" : "block";
+        var html = "";
+        /* Primero las listas (playlists) con su total, luego las sueltas */
+        dlGroups.forEach(function(g){
+          var items = dlEntries.filter(function(e){ return e.groupId === g.id; });
+          if (!items.length) return;
+          var gp = dlGroupProgress(g);
+          html += '<div class="dl-group"><div class="dl-group-head"><span class="g-t">' + esc(g.title) + '</span><span class="g-pct">' + gp.pct + '%</span></div>' +
+            '<div class="g-sub">' + gp.done + ' de ' + gp.total + ' canciones guardadas' + (gp.fail ? ' · ' + gp.fail + ' con error' : '') + '</div>' +
+            '<div class="dl-bar"><i style="width:' + gp.pct + '%"></i></div>' +
+            '<ul class="dl-items">' + items.map(dlItemHTML).join("") + '</ul></div>';
+        });
+        var singles = dlEntries.filter(function(e){ return !e.groupId; });
+        if (singles.length){
+          html += '<div class="dl-group"><div class="dl-group-head"><span class="g-t">Canciones sueltas</span></div>' +
+            '<ul class="dl-items">' + singles.map(dlItemHTML).join("") + '</ul></div>';
+        }
+        list.innerHTML = html;
+        list.querySelectorAll("[data-retry]").forEach(function(b){
+          b.addEventListener("click", function(){
+            var e = dlEntries.find(function(x){ return x.id === Number(b.getAttribute("data-retry")); });
+            if (e){ e.status = "queued"; e.progress = null; e.error = ""; queueDownload(e.track, false, e.groupId); }
+          });
+        });
+        list.querySelectorAll("[data-play]").forEach(function(b){
+          b.addEventListener("click", function(){
+            var e = dlEntries.find(function(x){ return x.id === Number(b.getAttribute("data-play")); });
+            if (e){ var idx = tracks.indexOf(e.track); if (idx >= 0){ showView("player"); loadTrack(idx, true); } }
+          });
+        });
+      }
+      function dlSetStatus(text, isErr){
+        var box = $("dlStatus");
+        if (!text){ box.classList.remove("show"); box.classList.remove("err"); return; }
+        $("dlStatusTxt").textContent = text;
+        box.classList.add("show");
+        box.classList.toggle("err", !!isErr);
+        $("dlCancelBtn").style.display = dlRunning ? "" : "none";
+      }
+      function dlSleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+      function dlSafeName(name){
+        var s = String(name || "cancion").replace(/[\\/:*?"<>|#%&{}$!'@+=`~]/g, " ").replace(/\s+/g, " ").trim();
+        if (s.length > 110) s = s.slice(0, 110).trim();
+        return s || "cancion";
+      }
+      function downloadTrackAsMp3(track){
+        track.dlState = "downloading";
+        track.dlProgress = null;
+        var entry = dlEntryFor(track);
+        entry.status = "resolving"; entry.progress = null; entry.loaded = 0; entry.total = 0; entry.error = "";
+        renderPlaylist(); renderDownloads();
+        var ready = Promise.resolve();
+        if (track.title === "Canción de YouTube" || track.title === "Video de YouTube"){
+          ready = Promise.race([enrichYouTubeTrack(track), dlSleep(4000)]);
+        }
+        return ready.then(function(){
+          return nativeDlAvailable().then(function(ok){
+            if (ok) return downloadTrackNative(track, entry);
+            entry.status = "error";
+            entry.error = "La descarga completa solo funciona en el APK de Gurru Music (yt-dlp dentro de la app). En la versión web esta canción queda en solo-audio por internet.";
+            track.dlState = "error"; track.dlProgress = null;
+            renderPlaylist(); renderDownloads();
+            return Promise.reject(new Error("apk-only"));
+          });
+        });
+      }
+      /* Una canción con el plugin nativo: yt-dlp descarga el mejor audio y
+         lo convierte a MP3 o M4A (según el formato elegido) dentro del APK. */
+      function downloadTrackNative(track, entry){
+        nativeDlOnProgress();
+        var p = getNativeDl();
+        var watch = "https://www.youtube.com/watch?v=" + encodeURIComponent(track.videoId);
+        var base = (track.artist && track.artist !== "YouTube" ? track.artist + " - " : "") + track.title;
+        var id = String(entry.id);
+        dlNativeRunningId = id;
+        dlSetStatus("⬇ Descargando con yt-dlp (" + dlFormat.toUpperCase() + "): " + track.title + " — el porcentaje va en Descargas…", false);
+        return p.downloadAudio({ id: id, url: watch, format: dlFormat, title: base }).then(function(res){
+          dlNativeRunningId = null;
+          var fmt = (res && res.format) || dlFormat;
+          var fileUrl = null;
+          try { fileUrl = (window.Capacitor && window.Capacitor.convertFileSrc) ? window.Capacitor.convertFileSrc("file://" + res.filePath) : "file://" + res.filePath; } catch(e){ fileUrl = "file://" + res.filePath; }
+          var wasCurrentYt = tracks[current] === track && isHiddenYouTube();
+          track.url = fileUrl;
+          track.nativePath = res.filePath;
+          track.downloaded = true;
+          track.dlState = "done";
+          track.dlProgress = 100;
+          entry.status = "done"; entry.progress = 100;
+          renderDownloads();
+          track.type = "local";
+          track.savedName = (res && res.fileName) || (dlSafeName(base) + "." + fmt);
+          track.album = "Guardada en el teléfono · " + fmt.toUpperCase() + " · yt-dlp (APK)";
+          loadDuration(fileUrl).then(function(d){
+            if (d){ track.duration = d; renderPlaylist(); if (tracks[current] === track) $("tTot").textContent = fmt(d); }
+          });
+          renderPlaylist();
+          if (tracks[current] === track) showTrackOnScreen();
+          if (wasCurrentYt) loadTrack(current, true);
+          return true;
+        }).catch(function(err){
+          dlNativeRunningId = null;
+          throw err;
+        });
+      }
+      function queueDownload(track, announce, groupId){
+        if (!track || track.downloaded || track.dlState === "downloading") return;
+        if (track.kind === "playlist" || !track.videoId){
+          if (announce) dlSetStatus("Esa es la lista completa: sus canciones se descargan una por una; el avance está en Descargas.", true);
+          return;
+        }
+        var entry = dlEntryFor(track, groupId);
+        if (entry.status !== "downloading" && entry.status !== "resolving"){ entry.status = "queued"; entry.progress = null; }
+        if (!dlRunning && !dlPending.length){ dlDone = 0; dlFail = 0; dlTotal = 0; }
+        if (dlPending.indexOf(track) === -1){ dlPending.push(track); dlTotal++; }
+        renderDownloads();
+        processDownloads();
+      }
+      /* Descarga de una playlist completa: crea su grupo en Descargas para
+         ver el total de la lista y el porcentaje de cada canción. */
+      function queueDownloadSet(list, groupTitle){
+        var valid = (list || []).filter(function(t){ return t && t.videoId && t.kind !== "playlist" && !t.downloaded; });
+        if (!valid.length) return null;
+        var group = null;
+        if (valid.length > 1 || groupTitle){
+          group = { id: ++dlGroupUid, title: groupTitle || "Playlist de YouTube", total: valid.length };
+          dlGroups.push(group);
+        }
+        valid.forEach(function(t){ queueDownload(t, false, group ? group.id : null); });
+        renderDownloads();
+        return group;
+      }
+      function processDownloads(){
+        if (dlRunning) return;
+        dlRunning = true; dlCancelFlag = false;
+        $("dlCancelBtn").style.display = "";
+        (function step(){
+          if (dlCancelFlag || !dlPending.length){
+            dlRunning = false;
+            if (dlCancelFlag){
+              dlEntries.forEach(function(e){ if (e.status === "queued"){ e.status = "cancelled"; } });
+              renderDownloads();
+              dlSetStatus("Descargas detenidas. Lo ya guardado se queda en tu teléfono; el detalle está en Descargas.", false);
+            } else if (dlTotal){
+              if (dlDone && !dlFail) dlSetStatus("✓ " + dlDone + (dlDone === 1 ? " canción guardada" : " canciones guardadas") + " en Música/Gurru Music, en la máxima calidad. Ya son pistas locales de tu biblioteca.", false);
+              else if (dlDone && dlFail) dlSetStatus("✓ " + dlDone + " guardadas · " + dlFail + " no se pudieron descargar y quedan en solo-audio (reintenta desde el apartado Descargas).", true);
+              else dlSetStatus("No se pudo descargar ninguna canción con yt-dlp. Quedan en solo-audio por internet; reintenta desde el apartado Descargas (o actualiza yt-dlp).", true);
+              var keepErr = dlFail > 0;
+              setTimeout(function(){ if (!dlRunning && !keepErr) dlSetStatus("", false); }, 9000);
+            }
+            renderPlaylist();
+            return;
+          }
+          var t = dlPending.shift();
+          var num = dlDone + dlFail + 1;
+          dlSetStatus("⬇ Descargando " + num + "/" + dlTotal + ": " + t.title + " — el porcentaje va en Descargas (" + dlFormat.toUpperCase() + ", máxima calidad)…", false);
+          downloadTrackAsMp3(t).then(function(){ dlDone++; }).catch(function(err){
+            t.dlState = "error"; t.dlProgress = null; dlFail++;
+            var e2 = dlEntryFor(t);
+            e2.status = dlCancelFlag ? "cancelled" : "error";
+            if (dlCancelFlag){ e2.error = ""; }
+            else if (!e2.error){ e2.error = (err && err.message && err.message !== "apk-only") ? String(err.message).slice(0, 140) : "yt-dlp no pudo descargar esta canción"; }
+            renderPlaylist(); renderDownloads();
+          }).then(function(){ return dlSleep(500); }).then(step);
+        })();
+      }
+      $("dlCancelBtn").addEventListener("click", function(){
+        dlCancelFlag = true;
+        dlPending.length = 0;
+        if (dlNativeRunningId){
+          var p = getNativeDl();
+          if (p && p.cancelDownload){ try { p.cancelDownload({ id: dlNativeRunningId }); } catch(e){} }
+        }
+      });
+
+      /* ----- Reproductor oficial OCULTO: solo audio, máxima calidad ----- */
+      function ytEmbedSrc(t, autoplay){
+        var base = "https://www.youtube-nocookie.com/embed/";
+        var extra = "rel=0&playsinline=1" + (autoplay ? "&autoplay=1" : "");
+        if (t.videoId){
+          var src = base + encodeURIComponent(t.videoId) + "?" + extra + "&enablejsapi=1";
+          if (t.playlistId) src += "&list=" + encodeURIComponent(t.playlistId);
+          return src;
+        }
+        return base + "videoseries?list=" + encodeURIComponent(t.playlistId) + "&" + extra;
+      }
+      function playHiddenYouTube(track, autoplay){
+        stopYouTube();
+        ytHiddenActive = true; ytHiddenTrack = track; ytHiddenPlaying = false;
+        $("ytWrap").classList.add("show");
+        ensureYTApi().then(function(){
+          if (!ytHiddenActive || ytHiddenTrack !== track) return;
+          var vars = { autoplay: autoplay ? 1 : 0, playsinline: 1, rel: 0 };
+          var vid = track.videoId || undefined;
+          if (track.kind === "playlist" && !vid){ vars.listType = "playlist"; vars.list = track.playlistId; }
+          ytApiPlayer = new YT.Player("ytPlayer", { width: "4", height: "4", videoId: vid, playerVars: vars, events: {
+            onReady: function(e){
+              try{
+                e.target.setPlaybackQuality("highres");
+                e.target.setVolume(Math.round(audio.volume * 100));
+                if (track.kind === "playlist" && track.videoId && track.playlistId) e.target.loadPlaylist({ list: track.playlistId, listType: "playlist" });
+                if (autoplay) e.target.playVideo();
+              }catch(err){}
+            },
+            onStateChange: function(e){
+              if (!window.YT) return;
+              if (e.data === YT.PlayerState.PLAYING){ ytHiddenPlaying = true; try{ e.target.setPlaybackQuality("highres"); }catch(err){} setPlayIcons(true); }
+              else if (e.data === YT.PlayerState.PAUSED){ ytHiddenPlaying = false; setPlayIcons(false); }
+              else if (e.data === YT.PlayerState.ENDED){ ytHiddenPlaying = false; if (track.kind === "video") nextTrack(true); else setPlayIcons(false); }
+            },
+            onError: function(){ ytHiddenPlaying = false; setPlayIcons(false); }
+          }});
+        }).catch(function(){
+          if (!ytHiddenActive || ytHiddenTrack !== track) return;
+          var wrap = $("ytPlayer");
+          if (!wrap) return;
+          wrap.innerHTML = "";
+          var ifr = document.createElement("iframe");
+          ifr.src = ytEmbedSrc(track, autoplay);
+          ifr.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture");
+          ifr.setAttribute("title", track.title);
+          wrap.appendChild(ifr);
+          ytHiddenPlaying = !!autoplay;
+          setPlayIcons(!!autoplay);
+        });
+        setPlayIcons(!!autoplay);
+      }
+      function stopYouTube(){
+        ytHiddenActive = false; ytHiddenPlaying = false; ytHiddenTrack = null;
+        if (ytApiPlayer){ try{ ytApiPlayer.stopVideo(); }catch(e){} try{ ytApiPlayer.destroy(); }catch(e){} ytApiPlayer = null; }
+        var wrap = $("ytWrap");
+        if (wrap){ wrap.innerHTML = '<div id="ytPlayer"></div>'; wrap.classList.remove("show"); }
+      }
+      function isCurrentYouTube(){ return current >= 0 && tracks[current] && tracks[current].type === "youtube"; }
+      function isHiddenYouTube(){ return ytHiddenActive && current >= 0 && ytHiddenTrack === tracks[current]; }
+      function curAudio(){ return audio; }
+      function activeIsPlaying(){
+        if (isHiddenYouTube()) return ytHiddenPlaying;
+        return !audio.paused;
+      }
+      function pauseAllAudio(){ try{ audio.pause(); }catch(e){} try{ ytAudioEl.pause(); }catch(e){} }
+      function makeYtTrack(v){
+        return { id: ++uid, type: "youtube", kind: "video", videoId: v.videoId, playlistId: null, url: null, title: v.title || "Canción de YouTube", artist: v.artist || "YouTube", album: "YouTube · Solo audio · Máxima calidad", artUrl: v.artUrl || ("https://i.ytimg.com/vi/" + v.videoId + "/hqdefault.jpg"), duration: v.duration || 0, downloaded: false, dlState: null };
+      }
+      /* ----- Al agregar un link: el usuario ELIGE, nada empieza solo -----
+         Antes el link reproducía todo y además intentaba descargarlo todo
+         sin preguntar. Ahora se abre esta ventana: Escuchar (suena en el
+         reproductor principal) o Descargar (se guarda como MP3 y el avance
+         se ve en el apartado Descargas). */
+      var choiceCtx = null; /* {indices:[...], groupTitle, canDownload} */
+      function openChoice(ctx){
+        choiceCtx = ctx;
+        var n = ctx.indices.length;
+        var first = tracks[ctx.indices[0]];
+        if (ctx.groupTitle){
+          $("choiceTitle").textContent = "Playlist agregada: " + n + (n === 1 ? " canción" : " canciones");
+          $("choiceSub").textContent = "Se cargó la lista completa, canción por canción, en tu Biblioteca. Nada está sonando ni descargándose todavía: tú eliges.";
+          $("choiceListenSub").textContent = "Suena la playlist desde la primera canción, solo audio, sin video.";
+        } else {
+          $("choiceTitle").textContent = "Canción agregada";
+          $("choiceSub").textContent = (first ? "«" + first.title + "»" : "La canción") + " ya está en tu Biblioteca. Nada está sonando ni descargándose todavía: tú eliges.";
+          $("choiceListenSub").textContent = "Suena en el reproductor principal, solo audio, sin video.";
+        }
+        $("choiceDownloadBtn").disabled = !ctx.canDownload;
+        $("choiceOverlay").classList.add("show");
+      }
+      function closeChoice(){ $("choiceOverlay").classList.remove("show"); choiceCtx = null; }
+      $("choiceListenBtn").addEventListener("click", function(){
+        if (!choiceCtx) return;
+        var firstIdx = choiceCtx.indices[0];
+        closeChoice();
+        if (typeof firstIdx === "number" && tracks[firstIdx]){ showView("player"); loadTrack(firstIdx, true); }
+      });
+      $("choiceDownloadBtn").addEventListener("click", function(){
+        if (!choiceCtx) return;
+        var ctx = choiceCtx;
+        var list = ctx.indices.map(function(i){ return tracks[i]; }).filter(Boolean);
+        closeChoice();
+        queueDownloadSet(list, ctx.groupTitle);
+        showView("downloads");
+      });
+      $("choiceOnlyBtn").addEventListener("click", function(){ closeChoice(); });
+      function addYouTubeFromInput(){
+        var input = $("ytInput"), msg = $("ytMsg"), btn = $("ytAddBtn");
+        var parsed = parseYouTubeLink(input.value);
+        if (!parsed){
+          msg.textContent = "Ese link no se reconoce. Pega el link completo de una playlist (con list=…) o de un video de YouTube.";
+          msg.className = "yt-msg";
+          return;
+        }
+        if (parsed.kind === "video"){
+          var track = makeYtTrack({ videoId: parsed.videoId, title: "Video de YouTube", artist: "YouTube" });
+          track.playlistId = parsed.playlistId;
+          tracks.push(track);
+          var idx = tracks.length - 1;
+          input.value = "";
+          msg.textContent = "✓ Canción agregada a tu Biblioteca. Elige si quieres escucharla o descargarla: no empieza nada solo.";
+          msg.className = "yt-msg ok";
+          renderPlaylist();
+          enrichYouTubeTrack(track);
+          openChoice({ indices: [idx], groupTitle: null, canDownload: true });
+          return;
+        }
+        /* Playlist: primero se lee la lista COMPLETA y se agrega canción por canción */
+        btn.disabled = true;
+        msg.textContent = "Cargando la playlist completa (todas las canciones, solo audio)…";
+        msg.className = "yt-msg";
+        expandPlaylist(parsed.playlistId).then(function(res){
+          btn.disabled = false;
+          if (!res || !res.videos.length) throw new Error("empty");
+          var firstIndex = tracks.length;
+          res.videos.forEach(function(v){ tracks.push(makeYtTrack(v)); });
+          var indices = tracks.slice(firstIndex).map(function(t, k){ return firstIndex + k; });
+          input.value = "";
+          msg.textContent = "✓ Playlist agregada: " + res.videos.length + " canciones, completa y canción por canción. Elige si quieres escucharla o descargarla: no empieza nada solo.";
+          msg.className = "yt-msg ok";
+          renderPlaylist();
+          tracks.slice(firstIndex).forEach(function(t){ enrichYouTubeTrack(t); });
+          openChoice({ indices: indices, groupTitle: "Playlist de YouTube · " + res.videos.length + " canciones", canDownload: true });
+        }).catch(function(){
+          btn.disabled = false;
+          var track = { id: ++uid, type: "youtube", kind: "playlist", playlistId: parsed.playlistId, videoId: parsed.videoId, url: null, title: "Lista de YouTube", artist: "YouTube · Playlist", album: "Solo audio · Máxima calidad", artUrl: null, duration: 0 };
+          tracks.push(track);
+          var idx2 = tracks.length - 1;
+          input.value = "";
+          msg.textContent = "No se pudo leer el contenido de la lista canción por canción; quedó agregada como una sola entrada que suena completa y en orden, solo audio. Como no se pudo separar en canciones, esta entrada solo se puede Escuchar, no Descargar.";
+          msg.className = "yt-msg ok";
+          renderPlaylist();
+          openChoice({ indices: [idx2], groupTitle: null, canDownload: false });
+        });
+      }
+      $("ytAddBtn").addEventListener("click", addYouTubeFromInput);
+      $("ytInput").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); addYouTubeFromInput(); } });
+
+      /* ---------- Reproducción ---------- */
+      function loadTrack(i, autoplay){
+        current = i;
+        var t = tracks[i];
+        ytLoadSeq++;
+        if (t.type === "youtube"){
+          pauseAllAudio();
+          showTrackOnScreen();
+          renderPlaylist();
+          playHiddenYouTube(t, autoplay);
+          $("tCur").textContent = "00:00:00"; $("tTot").textContent = "YouTube · Audio";
+          return;
+        }
+        stopYouTube();
+        try{ ytAudioEl.pause(); ytAudioEl.removeAttribute("src"); ytAudioEl.load(); }catch(e){}
+        audio.src = t.url;
+        showTrackOnScreen();
+        renderPlaylist();
+        if (autoplay) startPlayback(); else setPlayIcons(false);
+      }
+      function playTrack(i){
+        if (i === current && tracks.length){ togglePlay(); return; }
+        loadTrack(i, true);
+      }
+      function startPlayback(){
+        if (current < 0) return;
+        var t = tracks[current];
+        if (t.type === "youtube" || t.type === "ytaudio" || isHiddenYouTube()){
+          if (ytApiPlayer && ytApiPlayer.playVideo){ try{ ytApiPlayer.setPlaybackQuality("highres"); ytApiPlayer.setVolume(Math.round(audio.volume * 100)); ytApiPlayer.playVideo(); }catch(e){} }
+          else playHiddenYouTube(t, true);
+          return;
+        }
+        ensureViz();
+        if (vizCtx && vizCtx.state === "suspended") vizCtx.resume();
+        var p = audio.play();
+        if (p && p.catch) p.catch(function(){});
+      }
+      function togglePlay(){
+        if (current < 0){ if (tracks.length) loadTrack(0, true); else showView("library"); return; }
+        if (isHiddenYouTube()){
+          if (ytApiPlayer && ytApiPlayer.pauseVideo && ytApiPlayer.playVideo){
+            try{ if (ytHiddenPlaying) ytApiPlayer.pauseVideo(); else { ytApiPlayer.setPlaybackQuality("highres"); ytApiPlayer.playVideo(); } }catch(e){}
+          } else if (!$("ytPlayer").querySelector("iframe")){ playHiddenYouTube(tracks[current], true); }
+          return;
+        }
+        var el = curAudio();
+        if (el.paused) startPlayback(); else el.pause();
+      }
+      function stopPlayback(){ stopYouTube(); pauseAllAudio(); try{ audio.currentTime = 0; }catch(e){} try{ ytAudioEl.currentTime = 0; }catch(e){} }
+      function nextTrack(auto){
+        if (!tracks.length) return;
+        if (auto && repeatMode === 2){ if (isHiddenYouTube()){ playHiddenYouTube(tracks[current], true); return; } try{ curAudio().currentTime = 0; }catch(e){} startPlayback(); return; }
+        var n;
+        if (shuffle && tracks.length > 1){ do { n = Math.floor(Math.random() * tracks.length); } while (n === current); }
+        else {
+          n = current + 1;
+          if (n >= tracks.length){
+            if (auto && repeatMode === 0){ pauseAllAudio(); if (ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } return; }
+            n = 0;
+          }
+        }
+        loadTrack(n, true);
+      }
+      function prevTrack(){
+        if (!tracks.length) return;
+        if (!isHiddenYouTube() && curAudio().currentTime > 3){ curAudio().currentTime = 0; return; }
+        var n = current - 1;
+        if (n < 0) n = tracks.length - 1;
+        loadTrack(n, true);
+      }
+      function setPlayIcons(playing){
+        $("playIcon").innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
+        renderPlayingState();
+      }
+      function renderPlayingState(){
+        var rows = $("playlist").querySelectorAll("li");
+        rows.forEach(function(li){ li.classList.remove("playing"); });
+        if (current >= 0 && activeIsPlaying()){
+          var active = $("playlist").querySelector("li.active");
+          if (active) active.classList.add("playing");
+        }
+      }
+      ytAudioEl.addEventListener("play", function(){ if (tracks[current] && tracks[current].type === "ytaudio") setPlayIcons(true); });
+      ytAudioEl.addEventListener("pause", function(){ if (tracks[current] && tracks[current].type === "ytaudio" && !isHiddenYouTube()) setPlayIcons(false); });
+      ytAudioEl.addEventListener("ended", function(){ if (tracks[current] && tracks[current].type === "ytaudio") nextTrack(true); });
+      ytAudioEl.addEventListener("loadedmetadata", function(){
+        if (!tracks[current] || tracks[current].type !== "ytaudio") return;
+        $("tTot").textContent = fmt(ytAudioEl.duration);
+        if (!tracks[current].duration){ tracks[current].duration = ytAudioEl.duration || 0; renderPlaylist(); }
+      });
+      ytAudioEl.addEventListener("timeupdate", function(){
+        if (seeking || !tracks[current] || tracks[current].type !== "ytaudio" || isHiddenYouTube()) return;
+        var d = ytAudioEl.duration || 0;
+        $("tCur").textContent = fmt(ytAudioEl.currentTime);
+        if (d > 0){
+          $("seek").value = Math.round((ytAudioEl.currentTime / d) * 1000);
+          $("seek").style.setProperty("--fill", ((ytAudioEl.currentTime / d) * 100) + "%");
+        }
+      });
+      audio.addEventListener("play", function(){ setPlayIcons(true); });
+      audio.addEventListener("pause", function(){ setPlayIcons(false); });
+      audio.addEventListener("ended", function(){ nextTrack(true); });
+      audio.addEventListener("loadedmetadata", function(){
+        $("tTot").textContent = fmt(audio.duration);
+        if (current >= 0 && !tracks[current].duration){ tracks[current].duration = audio.duration || 0; renderPlaylist(); }
+      });
+      audio.addEventListener("timeupdate", function(){
+        if (seeking) return;
+        var d = audio.duration || 0;
+        $("tCur").textContent = fmt(audio.currentTime);
+        if (d > 0){
+          $("seek").value = Math.round((audio.currentTime / d) * 1000);
+          $("seek").style.setProperty("--fill", ((audio.currentTime / d) * 100) + "%");
+        }
+      });
+      $("seek").addEventListener("input", function(){
+        seeking = true;
+        var d = curAudio().duration || 0;
+        var v = Number($("seek").value) / 1000;
+        $("seek").style.setProperty("--fill", (v * 100) + "%");
+        $("tCur").textContent = fmt(v * d);
+      });
+      $("seek").addEventListener("change", function(){
+        var el = curAudio();
+        var d = el.duration || 0;
+        try{ el.currentTime = (Number($("seek").value) / 1000) * d; }catch(e){}
+        seeking = false;
+      });
+
+      /* ---------- Volumen ---------- */
+      function setVolume(v){
+        v = Math.max(0, Math.min(1, v));
+        audio.volume = v;
+        try{ ytAudioEl.volume = v; }catch(e){}
+        if (ytApiPlayer && ytApiPlayer.setVolume){ try{ ytApiPlayer.setVolume(Math.round(v * 100)); }catch(e){} }
+        if (v > 0) lastVol = v;
+        var s = $("volSlider");
+        s.value = Math.round(v * 100);
+        s.style.setProperty("--fill", (v * 100) + "%");
+        $("volPct").textContent = Math.round(v * 100) + "%";
+      }
+      audio.volume = 0.8;
+      try{ ytAudioEl.volume = 0.8; }catch(e){}
+      $("volSlider").style.setProperty("--fill", "80%");
+      $("volSlider").addEventListener("input", function(){ setVolume(Number($("volSlider").value) / 100); });
+      $("btnMute").addEventListener("click", function(){ setVolume(audio.volume > 0 ? 0 : lastVol); });
+      /* El deslizador manda sobre el volumen real de salida del reproductor
+         y se mantiene sincronizado si el volumen del audio cambia. */
+      audio.addEventListener("volumechange", function(){
+        var v = audio.volume;
+        var s = $("volSlider");
+        if (Math.abs(Number(s.value) - Math.round(v * 100)) > 1){
+          s.value = Math.round(v * 100);
+          s.style.setProperty("--fill", (v * 100) + "%");
+          $("volPct").textContent = Math.round(v * 100) + "%";
+        }
+      });
+
+      /* ---------- Aleatorio / repetir ---------- */
+      function syncModes(){
+        var bs = $("btnShuffle");
+        bs.classList.toggle("on", shuffle);
+        bs.setAttribute("aria-pressed", shuffle ? "true" : "false");
+        var br = $("btnRepeat");
+        br.classList.toggle("on", repeatMode > 0);
+        br.setAttribute("aria-pressed", repeatMode > 0 ? "true" : "false");
+        $("repBadge").textContent = repeatMode === 2 ? "1" : "\u221e";
+        $("dotShuffle").classList.toggle("on", shuffle);
+        $("dotRepeat").classList.toggle("on", repeatMode > 0);
+        renderQueue();
+      }
+      $("btnShuffle").addEventListener("click", function(){ shuffle = !shuffle; syncModes(); });
+      $("btnRepeat").addEventListener("click", function(){ repeatMode = (repeatMode + 1) % 3; syncModes(); });
+      syncModes();
+
+      /* ---------- Visualizador ---------- */
+      var vizCtx = null, analyser = null, vizData = null;
+      function ensureViz(){
+        if (vizCtx) return;
+        try{
+          var AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return;
+          vizCtx = new AC();
+          var src = vizCtx.createMediaElementSource(audio);
+          analyser = vizCtx.createAnalyser();
+          analyser.fftSize = 64;
+          analyser.smoothingTimeConstant = 0.78;
+          vizData = new Uint8Array(analyser.frequencyBinCount);
+          src.connect(analyser);
+          analyser.connect(vizCtx.destination);
+          requestAnimationFrame(drawViz);
+        }catch(e){ vizCtx = null; }
+      }
+      function drawViz(){
+        var canvas = $("viz");
+        var ctx = canvas.getContext("2d");
+        var W = canvas.width, H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+        var accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#22d3ee";
+        if (analyser && !audio.paused){
+          analyser.getByteFrequencyData(vizData);
+          var bars = 36, bw = W / bars;
+          for (var i = 0; i < bars; i++){
+            var v = vizData[Math.floor(i * vizData.length / bars * 0.82)] / 255;
+            var h = Math.max(2, v * (H - 3));
+            ctx.fillStyle = accent;
+            ctx.globalAlpha = 0.35 + v * 0.65;
+            ctx.fillRect(i * bw + 2, H - h, bw - 4, h);
+          }
+          ctx.globalAlpha = 1;
+        } else {
+          ctx.fillStyle = "rgba(125,211,252,.3)";
+          for (var j = 0; j < 36; j++) ctx.fillRect(j * (W / 36) + 2, H - 3, W / 36 - 4, 3);
+        }
+        requestAnimationFrame(drawViz);
+      }
+
+      if ("mediaSession" in navigator){
+        try{
+          navigator.mediaSession.setActionHandler("play", function(){ startPlayback(); });
+          navigator.mediaSession.setActionHandler("pause", function(){ if (isHiddenYouTube() && ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } else pauseAllAudio(); });
+          navigator.mediaSession.setActionHandler("previoustrack", prevTrack);
+          navigator.mediaSession.setActionHandler("nexttrack", function(){ nextTrack(false); });
+        }catch(e){}
+      }
+
+      /* ---------- Controles ---------- */
+      $("btnPlay").addEventListener("click", togglePlay);
+      $("btnNext").addEventListener("click", function(){ nextTrack(false); });
+      $("btnPrev").addEventListener("click", prevTrack);
+      $("clearBtn").addEventListener("click", clearAll);
+      $("searchInput").addEventListener("input", renderPlaylist);
+
+      /* Elegir archivos y carpeta */
+      var fileInput = $("fileInput"), folderInput = $("folderInput");
+      $("dropzone").addEventListener("click", function(){ fileInput.click(); });
+      $("folderBtn").addEventListener("click", function(){ folderInput.click(); });
+      fileInput.addEventListener("change", function(){ addFiles(fileInput.files); fileInput.value = ""; showView("library"); });
+      folderInput.addEventListener("change", function(){ addFiles(folderInput.files); folderInput.value = ""; showView("library"); });
+
+      /* Arrastrar y soltar (archivos o carpetas en escritorio) */
+      var dragDepth = 0;
+      window.addEventListener("dragenter", function(ev){ ev.preventDefault(); dragDepth++; $("dropOverlay").classList.add("show"); });
+      window.addEventListener("dragleave", function(ev){ ev.preventDefault(); dragDepth--; if (dragDepth <= 0){ dragDepth = 0; $("dropOverlay").classList.remove("show"); } });
+      window.addEventListener("dragover", function(ev){ ev.preventDefault(); });
+      window.addEventListener("drop", function(ev){
+        ev.preventDefault(); dragDepth = 0;
+        $("dropOverlay").classList.remove("show");
+        if (ev.dataTransfer && ev.dataTransfer.files) addFiles(ev.dataTransfer.files);
+      });
+
+      document.addEventListener("keydown", function(ev){
+        var tag = (ev.target && ev.target.tagName) || "";
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        if (ev.key === "Escape"){ if (view !== "player") showView("player"); return; }
+        if (ev.code === "Space"){ ev.preventDefault(); togglePlay(); }
+        else if (ev.key === "ArrowRight"){ var ea = curAudio(); ea.currentTime = Math.min((ea.duration || 0), ea.currentTime + 5); }
+        else if (ev.key === "ArrowLeft"){ var eb = curAudio(); eb.currentTime = Math.max(0, eb.currentTime - 5); }
+        else if (ev.key === "ArrowUp"){ ev.preventDefault(); setVolume(audio.volume + 0.05); }
+        else if (ev.key === "ArrowDown"){ ev.preventDefault(); setVolume(audio.volume - 0.05); }
+      });
+
+      renderPlaylist();
+      resetScreen();
+      showView("player");
+    </script>
+  </body>
+</html>
