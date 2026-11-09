@@ -106,7 +106,8 @@ public class LocalMusicPlugin extends Plugin {
                         MediaStore.Audio.Media.ALBUM,
                         MediaStore.Audio.Media.ALBUM_ID,
                         MediaStore.Audio.Media.DURATION,
-                        MediaStore.Audio.Media.DISPLAY_NAME
+                        MediaStore.Audio.Media.DISPLAY_NAME,
+                        MediaStore.Audio.Media.DATA
                     };
                     /* Música marcada como tal, o audios largos aunque no
                        estén marcados (algunos MP3 no traen IS_MUSIC). Los
@@ -125,11 +126,21 @@ public class LocalMusicPlugin extends Plugin {
                         int iAlbumId = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
                         int iDur = cursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
                         int iName = cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
+                        int iPath = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
                         while (cursor.moveToNext()) {
                             long id = iId >= 0 ? cursor.getLong(iId) : -1;
                             if (id < 0) continue;
                             String title = iTitle >= 0 ? cursor.getString(iTitle) : null;
                             String name = iName >= 0 ? cursor.getString(iName) : null;
+                            /* Fuera los audios de WhatsApp: sus archivos
+                               empiezan con "aud" (AUD-...opus) o "ptt" y
+                               viven en la carpeta de WhatsApp. No son
+                               música aunque duren más de un minuto. */
+                            String path = iPath >= 0 ? cursor.getString(iPath) : null;
+                            String nameLow = name != null ? name.toLowerCase() : "";
+                            String pathLow = path != null ? path.toLowerCase() : "";
+                            if (nameLow.startsWith("aud") || nameLow.startsWith("ptt")
+                                    || pathLow.contains("whatsapp")) continue;
                             if (title == null || title.trim().isEmpty()) {
                                 title = name != null ? name.replaceAll("\\.[^.]+$", "") : "Canción";
                             }

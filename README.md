@@ -131,11 +131,19 @@ tu celular.
 
 - Al sonar una canción, el plugin nativo `BackgroundAudio` arranca un
   servicio en primer plano (`BackgroundAudioService`, tipo
-  `mediaPlayback`) con una notificación que muestra la canción actual
-  y botones de **Pausa / Siguiente / Detener**. El servicio sostiene
-  un wake lock parcial para que la CPU no se duerma con la pantalla
+  `mediaPlayback`) que publica una **MediaSession real** (título,
+  artista, álbum, portada, duración y posición) con notificación
+  **MediaStyle** y botones de **Anterior / Pausa / Siguiente /
+  Detener**. Así el sistema reconoce a Gurru Music como reproductor:
+  controles en la barra de notificaciones, en la pantalla de bloqueo
+  y en Bluetooth, con la barra de progreso. El servicio sostiene un
+  wake lock parcial para que la CPU no se duerma con la pantalla
   apagada. El audio en sí sigue sonando en el WebView (`<audio>` para
-  MP3 locales, reproductor de YouTube para online).
+  MP3 locales, reproductor de YouTube para online). La página
+  sincroniza la sesión con `updateSession` al cambiar de canción,
+  al pausar/reproducir, al buscar y cada 10 s mientras suena; las
+  acciones de la sesión vuelven a la página con `window.__gurru*`
+  (reproducir/pausar, siguiente, anterior, buscar, detener).
 - El servicio se detiene con el botón Detener de la notificación o con
   el botón de parar del reproductor. Si la música se pausa, la
   notificación queda con el botón de reproducir para retomarla.
@@ -143,6 +151,19 @@ tu celular.
   segundo plano aunque tenga el servicio. Si la música se corta al
   apagar la pantalla, ve a **Ajustes > Batería > Gurru Music** y
   permite la actividad en segundo plano / sin restricciones de batería.
+
+## La biblioteca se guarda al cerrar la app
+
+La biblioteca (canciones de YouTube y descargadas), la canción actual
+y su posición, y el historial de Descargas se guardan en
+`localStorage` y se restauran al abrir la app. Las canciones locales
+del escaneo se vuelven a buscar solas; las del selector de carpetas
+usan URLs `blob:` que no sobreviven al cierre y no se guardan (el
+escaneo las vuelve a encontrar). En Descargas hay un botón **Borrar
+historial** que borra solo el historial: las canciones guardadas
+siguen en el teléfono y en la Biblioteca. Si la app se cerró a media
+descarga, esa entrada queda como detenida al reabrir, no como
+"descargando" para siempre.
 
 ## Si cambias algo del reproductor
 
@@ -190,7 +211,9 @@ rechazaba como "sin permiso"; ahora el plugin revisa el permiso real
 `Context.checkSelfPermission`, y expone `checkPermission()` para que la
 página reintente el escaneo al abrir Biblioteca si el primero se atascó.
 El filtro de MediaStore acepta canciones marcadas como música o audios
-de 60 s o más aunque no estén marcados. Si el escaneo no encuentra nada,
+de 60 s o más aunque no estén marcados. Los audios de WhatsApp quedan
+fuera: se descartan los archivos cuyo nombre empieza con "aud" o "ptt"
+y los que viven en una ruta con "whatsapp". Si el escaneo no encuentra nada,
 queda el botón **Elegir carpeta** como respaldo. Las canciones de YouTube
 ya agregadas y las descargadas se conservan; las locales se reemplazan
 por el resultado nuevo (las descargadas no se duplican: se detectan por

@@ -260,15 +260,15 @@
       /* ===== Al tocar un resultado de la búsqueda: Escuchar o Descargar ===== */
       .choice-overlay{ position:absolute; inset:0; z-index:30; display:none; place-items:center; background:rgba(1,8,28,.78); padding:20px; }
       .tbtn.txt{ font-size:12px; font-weight:800; letter-spacing:.4px; color:#a5f3fc; }
-      .lyrics-overlay{ position:absolute; inset:0; z-index:32; display:none; place-items:center; background:rgba(1,8,28,.82); padding:20px; }
+      .lyrics-overlay{ position:fixed; inset:0; z-index:32; display:none; place-items:center; background:rgba(1,8,28,.82); padding:20px; }
       .lyrics-overlay.show{ display:grid; }
       .lyrics-box{ width:min(560px,94vw); max-height:80dvh; display:flex; flex-direction:column; background:linear-gradient(180deg,#0a2a5e,#04163c); border:2px solid rgba(125,249,255,.45); border-radius:18px; box-shadow:0 10px 40px rgba(0,0,0,.6); overflow:hidden; }
       .lyrics-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:14px 14px 8px; }
       .lyrics-titles{ min-width:0; }
       .lyrics-title{ font-size:17px; font-weight:800; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .lyrics-artist{ font-size:13px; color:#7dd3fc; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-      .lyrics-body{ overflow-y:auto; padding:4px 16px 16px; font-size:15px; line-height:1.65; color:#dbeafe; }
-      .lyrics-line{ padding:3px 0; opacity:.6; transition:opacity .2s; }
+      .lyrics-body{ overflow-y:auto; overflow-x:hidden; padding:4px 16px 16px; font-size:15px; line-height:1.65; color:#dbeafe; text-align:left; }
+      .lyrics-line{ padding:3px 0; opacity:.6; transition:opacity .2s; text-align:left; }
       .lyrics-line.active{ opacity:1; color:#7df9ff; font-weight:700; }
       .lyrics-plain{ white-space:pre-wrap; }
       .lyrics-loading,.lyrics-empty{ text-align:center; color:#93c5fd; padding:26px 10px; }
@@ -312,10 +312,9 @@
       .softbar button.sk-left{ grid-column:1; justify-self:start; }
       /* ===== Biblioteca: diseño con pestañas, buscador, filtro y orden ===== */
       .titlebar .app-name{ text-transform:uppercase; letter-spacing:.05em; }
-      .lib-tabs{ flex:0 0 auto; display:flex; align-items:baseline; gap:8px; padding:2px 2px 0; }
+      .lib-tabs{ flex:0 0 auto; display:flex; align-items:baseline; justify-content:space-between; gap:0; padding:2px 2px 0; }
       .lib-tabs button{ border:0; background:transparent; font:inherit; font-size:16px; font-weight:800; color:rgba(186,230,253,.55); padding:6px 2px 8px; cursor:pointer; white-space:nowrap; min-width:0; }
       .lib-tabs button.on{ color:var(--accent); text-shadow:0 0 10px var(--glow); border-bottom:3px solid var(--accent); }
-      .lib-tabs .lib-tabs-spacer{ flex:1; }
       .lib-tabs .ghost-btn{ padding:4px 8px; font-size:11px; }
       .add-toggle{ flex:0 0 auto; margin-top:10px; border:1.5px solid rgba(125,211,252,.55); background:rgba(2,132,199,.16); color:#fff; border-radius:10px; padding:10px; font:inherit; font-size:14px; font-weight:800; cursor:pointer; }
       .add-section{ flex:0 0 auto; }
@@ -449,7 +448,6 @@
             <button id="tabDownloads" class="lib-tab" data-view="downloads" type="button">Descargas</button>
             <button id="tabLibrary" class="lib-tab on" data-view="library" type="button">Biblioteca</button>
             <button id="tabYouTube" class="lib-tab" data-view="youtube" type="button">YouTube</button>
-            <span class="lib-tabs-spacer"></span>
             <button class="ghost-btn" id="clearBtn" disabled>Vaciar</button>
           </div>
           <button class="add-toggle" id="addToggle" type="button">− Agregar música</button>
@@ -520,6 +518,7 @@
             <div class="dls-foot">
               <div class="dls-fmt">Formato de descarga: <b id="dlFmtCur">MP3</b> · Carpeta: <b>Música/Gurru Music</b></div>
               <button class="dls-btn" id="dlUpdateBtn" type="button">Actualizar yt-dlp</button>
+              <button class="dls-btn" id="dlClearBtn" type="button">Borrar historial</button>
               <div class="dls-msg" id="dlUpdateMsg">YouTube cambia sus bloqueos cada cierto tiempo; si una descarga falla, prueba actualizar yt-dlp aquí (solo en el APK).</div>
             </div>
           </div>
@@ -622,6 +621,100 @@
       var uid = 0;
       var view = "player";
       var lastVol = 0.8;
+
+      /* ===== Guardar la biblioteca y el historial en el teléfono =====
+         Al cerrar y abrir la app, la biblioteca (canciones de YouTube y
+         descargadas) y el historial de Descargas se pierden si solo viven
+         en memoria. Se guardan en localStorage (que sí sobrevive en el
+         WebView del APK) y se restauran al abrir. Las canciones del
+         selector de carpetas usan URLs blob: que no sobreviven al cierre,
+         así que no se guardan (el escaneo automático las vuelve a
+         encontrar); las del escaneo, las de YouTube y las descargadas sí
+         tienen dirección estable y se guardan. */
+      var SAVE_KEY = "gurru-library-v1";
+      var DL_KEY = "gurru-dlhistory-v1";
+      var restoreSeekSec = null;
+      function serializeTrack(t){
+        if (!t || !t.url || (typeof t.url === "string" && t.url.indexOf("blob:") === 0)) return null;
+        return { id: t.id, type: t.type, kind: t.kind || null, videoId: t.videoId || null, playlistId: t.playlistId || null,
+          url: t.url, title: t.title, artist: t.artist, album: t.album || "", artUrl: t.artUrl || null, artRaw: t.artRaw || null,
+          duration: t.duration || 0, downloaded: !!t.downloaded, savedName: t.savedName || null, nativePath: t.nativePath || null,
+          scanned: !!t.scanned };
+      }
+      function saveState(){
+        try {
+          var list = [];
+          tracks.forEach(function(t){ var s = serializeTrack(t); if (s) list.push(s); });
+          var pos = 0;
+          try { pos = isHiddenYouTube() ? ytCurrentTime() : (curAudio() ? curAudio().currentTime : 0); } catch(e){}
+          localStorage.setItem(SAVE_KEY, JSON.stringify({ tracks: list, current: current, position: pos }));
+        } catch(e){}
+      }
+      function loadSavedState(){
+        var data = null;
+        try { data = JSON.parse(localStorage.getItem(SAVE_KEY) || "null"); } catch(e){}
+        if (!data || !Array.isArray(data.tracks) || !data.tracks.length) return false;
+        tracks = data.tracks.map(function(s){
+          return { id: s.id, type: s.type, kind: s.kind || null, videoId: s.videoId || null, playlistId: s.playlistId || null,
+            url: s.url, title: s.title, artist: s.artist, album: s.album || "", artUrl: s.artUrl || null, artRaw: s.artRaw || null,
+            duration: s.duration || 0, downloaded: !!s.downloaded, dlState: s.downloaded ? "done" : null, savedName: s.savedName || null,
+            nativePath: s.nativePath || null, scanned: !!s.scanned };
+        });
+        tracks.forEach(function(t){ if (typeof t.id === "number" && t.id >= uid) uid = t.id + 1; });
+        var idx = (typeof data.current === "number") ? data.current : -1;
+        if (idx >= 0 && idx < tracks.length){
+          current = idx;
+          if (typeof data.position === "number" && data.position > 1) restoreSeekSec = data.position;
+        }
+        return true;
+      }
+      function saveDlHistory(){
+        try {
+          var list = dlEntries.map(function(e){
+            var t = e.track || {};
+            return { id: e.id, groupId: e.groupId || null, status: e.status, progress: e.progress, error: e.error || "",
+              title: t.title || "", artist: t.artist || "", videoId: t.videoId || null, savedName: t.savedName || null, artUrl: t.artUrl || null };
+          });
+          localStorage.setItem(DL_KEY, JSON.stringify({ entries: list, groups: dlGroups, entryUid: dlEntryUid, groupUid: dlGroupUid }));
+        } catch(e){}
+      }
+      function loadDlHistory(){
+        var data = null;
+        try { data = JSON.parse(localStorage.getItem(DL_KEY) || "null"); } catch(e){}
+        if (!data || !Array.isArray(data.entries)) return;
+        dlGroups = (data.groups || []).map(function(g){ return { id: g.id, title: g.title, total: g.total }; });
+        dlEntryUid = data.entryUid || 0; dlGroupUid = data.groupUid || 0;
+        dlEntries = data.entries.map(function(s){
+          /* Si la app se cerró a media descarga, esa descarga ya no sigue:
+             queda como detenida, no como "descargando" para siempre. */
+          var st = (s.status === "downloading" || s.status === "resolving" || s.status === "queued") ? "cancelled" : s.status;
+          return { id: s.id, track: { title: s.title, artist: s.artist, videoId: s.videoId || null, savedName: s.savedName || null, artUrl: s.artUrl || null, downloaded: s.status === "done" },
+            groupId: s.groupId || null, status: st, progress: s.progress, loaded: 0, total: 0, error: s.error || "" };
+        });
+      }
+      /* Borra solo el historial de Descargas: las canciones guardadas
+         siguen en el teléfono y en la Biblioteca. */
+      function clearDlHistory(){
+        dlEntries = []; dlGroups = [];
+        saveDlHistory();
+        renderDownloads();
+        dlSetStatus("Historial de descargas borrado. Las canciones guardadas siguen en tu teléfono y en la Biblioteca.", false);
+      }
+      /* La entrada guardada trae solo un resumen del tema; para Escuchar o
+         Reintentar se busca el tema real en la biblioteca (o se reconstruye
+         el de YouTube con su videoId). */
+      function dlTrackFor(e){
+        if (!e) return null;
+        if (e.track && tracks.indexOf(e.track) >= 0) return e.track;
+        var snap = e.track || {};
+        for (var i = 0; i < tracks.length; i++){
+          var x = tracks[i];
+          if (snap.videoId && x.videoId === snap.videoId) return x;
+          if (x.title === snap.title && x.artist === snap.artist) return x;
+        }
+        if (snap.videoId) return makeYtTrack({ videoId: snap.videoId, title: snap.title, artist: snap.artist, artUrl: snap.artUrl });
+        return null;
+      }
 
       var ICON_PLAY  = '<path d="M8 5v14l11-7z"/>';
       var ICON_PAUSE = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
@@ -853,6 +946,7 @@
         Promise.all(pending).then(function(newTracks){
           tracks = tracks.concat(newTracks);
           renderPlaylist();
+          saveState();
           if (wasEmpty && tracks.length) loadTrack(0, false);
         });
       }
@@ -972,6 +1066,7 @@
           else resetScreen();
         } else if (i < current) current--;
         renderPlaylist();
+        saveState();
       }
       function clearAll(){
         stopYouTube();
@@ -980,6 +1075,7 @@
         tracks.forEach(function(t){ if (t.url) URL.revokeObjectURL(t.url); if (t.artUrl) URL.revokeObjectURL(t.artUrl); });
         tracks = []; current = -1;
         resetScreen(); renderPlaylist();
+        saveState();
       }
 
       /* ---------- Cola: anterior, actual y siguientes ---------- */
@@ -1255,14 +1351,34 @@
         } catch(e){ bgAudio = null; }
         return bgAudio;
       }
+      /* Sincroniza la sesión de audio del sistema (MediaSession): título,
+         artista, portada, duración y posición. Así el teléfono reconoce a
+         Gurru Music como reproductor (controles en la barra de
+         notificaciones, en la pantalla de bloqueo y en Bluetooth) y no
+         corta la música en segundo plano. */
       function bgAudioSync(){
         var p = getBgAudio();
-        if (!p || current < 0 || !tracks[current]) return;
+        if (!p || !p.updateSession || current < 0 || !tracks[current]) return;
         var t = tracks[current];
+        var pos = 0, dur = t.duration || 0;
         try {
-          if (!bgAudioOn){ p.enable({ title: t.title, artist: t.artist, playing: activeIsPlaying() }); bgAudioOn = true; }
-          else { p.updateTrack({ title: t.title, artist: t.artist, playing: activeIsPlaying() }); }
+          if (isHiddenYouTube()){ pos = ytCurrentTime(); var yd = ytDuration(); if (yd > 0) dur = yd; }
+          else { var el = curAudio(); if (el){ pos = el.currentTime || 0; if (el.duration) dur = el.duration; } }
         } catch(e){}
+        try {
+          p.updateSession({ title: t.title, artist: t.artist, album: t.album || "", art: t.artRaw || t.artUrl || "",
+            duration: Math.round(dur * 1000), position: Math.round(pos * 1000), playing: activeIsPlaying() });
+          bgAudioOn = true;
+        } catch(e){}
+      }
+      function seekToSeconds(s){
+        if (current < 0 || !tracks[current]) return;
+        if (isHiddenYouTube() && ytApiPlayer && ytApiPlayer.seekTo){
+          try{ ytApiPlayer.seekTo(Math.max(0, s), true); }catch(e){}
+          return;
+        }
+        var el = curAudio();
+        try{ el.currentTime = Math.max(0, Math.min(el.duration || 0, s)); }catch(e){}
       }
       function bgAudioStop(){
         var p = getBgAudio();
@@ -1273,6 +1389,8 @@
       /* Los botones de la notificación llaman a estas funciones. */
       window.__gurruTogglePlay = function(){ togglePlay(); bgAudioSync(); };
       window.__gurruNext = function(){ nextTrack(false); bgAudioSync(); };
+      window.__gurruPrev = function(){ prevTrack(); bgAudioSync(); };
+      window.__gurruSeek = function(ms){ seekToSeconds(ms / 1000); bgAudioSync(); };
       window.__gurruStop = function(){ stopPlayback(); bgAudioStop(); };
       (function(){
         var btns = document.querySelectorAll("#fmtRow .fmt-btn");
@@ -1280,6 +1398,8 @@
           btns[i].addEventListener("click", function(){ setDlFormat(this.getAttribute("data-fmt")); });
         }
         setDlFormat(dlFormat);
+        var clr = $("dlClearBtn");
+        if (clr) clr.addEventListener("click", clearDlHistory);
         var up = $("dlUpdateBtn");
         if (up) up.addEventListener("click", function(){
           var msg = $("dlUpdateMsg");
@@ -1316,6 +1436,7 @@
         for (var i = 0; i < dlEntries.length; i++) if (dlEntries[i].track === track) return dlEntries[i];
         var e = { id: ++dlEntryUid, track: track, groupId: groupId || null, status: "queued", progress: null, loaded: 0, total: 0, error: "" };
         dlEntries.push(e);
+        saveDlHistory();
         return e;
       }
       function dlGroupProgress(g){
@@ -1381,13 +1502,13 @@
         list.querySelectorAll("[data-retry]").forEach(function(b){
           b.addEventListener("click", function(){
             var e = dlEntries.find(function(x){ return x.id === Number(b.getAttribute("data-retry")); });
-            if (e){ e.status = "queued"; e.progress = null; e.error = ""; queueDownload(e.track, false, e.groupId); }
+            if (e){ var t = dlTrackFor(e); if (t){ e.track = t; e.status = "queued"; e.progress = null; e.error = ""; queueDownload(t, false, e.groupId); } }
           });
         });
         list.querySelectorAll("[data-play]").forEach(function(b){
           b.addEventListener("click", function(){
             var e = dlEntries.find(function(x){ return x.id === Number(b.getAttribute("data-play")); });
-            if (e){ var idx = tracks.indexOf(e.track); if (idx >= 0){ showView("player"); loadTrack(idx, true); } }
+            if (e){ var t = dlTrackFor(e); if (t){ var idx = tracks.indexOf(t); if (idx < 0){ tracks.push(t); idx = tracks.length - 1; renderPlaylist(); saveState(); } showView("player"); loadTrack(idx, true); } }
           });
         });
       }
@@ -1453,11 +1574,11 @@
           renderDownloads();
           track.type = "local";
           track.savedName = (res && res.fileName) || (dlSafeName(base) + "." + fmt);
-          track.album = "Guardada en el teléfono · " + fmt.toUpperCase() + " · yt-dlp (APK)";
           loadDuration(fileUrl).then(function(d){
             if (d){ track.duration = d; renderPlaylist(); if (tracks[current] === track) $("tTot").textContent = fmt(d); }
           });
           renderPlaylist();
+          saveState(); saveDlHistory();
           if (tracks[current] === track) showTrackOnScreen();
           if (wasCurrentYt) loadTrack(current, true);
           return true;
@@ -1894,7 +2015,7 @@
         var conv = (window.Capacitor && window.Capacitor.convertFileSrc) ? window.Capacitor.convertFileSrc : function(u){ return u; };
         return { id: "local-" + s.id, type: "local", url: conv(s.uri), title: s.title || s.fileName || "Canción",
           artist: s.artist || "Artista desconocido", album: s.album || "",
-          artUrl: s.albumArt ? conv(s.albumArt) : null, duration: s.duration || 0, scanned: true };
+          artUrl: s.albumArt ? conv(s.albumArt) : null, artRaw: s.albumArt || null, duration: s.duration || 0, scanned: true };
       }
       function scanLocalMusic(manual){
         var p = getLocalMusic();
@@ -1949,6 +2070,7 @@
             resetScreen();
           }
           renderPlaylist();
+          saveState();
           if (status) status.textContent = songs.length ? ("✓ " + songs.length + " canciones en tu teléfono.") : "No encontré canciones en el teléfono.";
           if (wasEmpty && tracks.length) loadTrack(0, false);
           return true;
@@ -2043,6 +2165,8 @@
         current = i;
         var t = tracks[i];
         ytLoadSeq++;
+        /* Al reabrir la app, vuelve a la posición donde quedó (solo local). */
+        var rs = restoreSeekSec; restoreSeekSec = null;
         if (t.type === "youtube"){
           pauseAllAudio();
           showTrackOnScreen();
@@ -2055,8 +2179,13 @@
         stopYouTube();
         try{ ytAudioEl.pause(); ytAudioEl.removeAttribute("src"); ytAudioEl.load(); }catch(e){}
         audio.src = t.url;
+        if (rs != null && rs > 1){
+          var onMeta = function(){ try{ if (rs < (audio.duration || 0)) audio.currentTime = rs; }catch(e){} audio.removeEventListener("loadedmetadata", onMeta); };
+          audio.addEventListener("loadedmetadata", onMeta);
+        }
         showTrackOnScreen();
         renderPlaylist();
+        saveState();
         if (autoplay) startPlayback(); else setPlayIcons(false);
         refreshLyricsForCurrent();
       }
@@ -2153,7 +2282,7 @@
         }
       });
       audio.addEventListener("play", function(){ setPlayIcons(true); bgAudioSync(); });
-      audio.addEventListener("pause", function(){ setPlayIcons(false); bgAudioSync(); });
+      audio.addEventListener("pause", function(){ setPlayIcons(false); bgAudioSync(); saveState(); });
       audio.addEventListener("ended", function(){ nextTrack(true); });
       audio.addEventListener("loadedmetadata", function(){
         $("tTot").textContent = fmt(audio.duration);
@@ -2179,6 +2308,7 @@
       $("seek").addEventListener("change", function(){
         seekToFraction(Number($("seek").value) / 1000);
         seeking = false;
+        bgAudioSync();
       });
 
       /* ---------- Volumen (sin barra visible) ----------
@@ -2355,6 +2485,17 @@
       renderPlaylist();
       resetScreen();
       showView("player");
+      /* Restaura la biblioteca y el historial guardados antes de pintar. */
+      loadDlHistory();
+      var restored = loadSavedState();
+      renderPlaylist();
+      renderDownloads();
+      if (restored && current >= 0 && tracks[current]){ loadTrack(current, false); }
+      /* Guarda la posición al salir de la app y cada 10 s mientras suena,
+         para que al reabrir siga donde quedó. */
+      document.addEventListener("visibilitychange", function(){ if (document.hidden) saveState(); });
+      window.addEventListener("beforeunload", saveState);
+      setInterval(function(){ try { if (current >= 0 && activeIsPlaying()){ bgAudioSync(); saveState(); } } catch(e){} }, 10000);
       /* Al abrir la app, en el APK, busca sola la música del teléfono. */
       initLocalScan();
     </script>
