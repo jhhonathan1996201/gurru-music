@@ -173,3 +173,33 @@ desplaza sola (sirve para MP3 locales y para YouTube). Si no se encuentra,
 la ventana lo dice y ofrece reintentar. Las letras se guardan en memoria
 por canción, así que abrirla de nuevo es instantáneo. El botón atrás del
 teléfono cierra primero la letra y luego vuelve al reproductor.
+
+## Música local automática (sin elegir carpetas)
+
+Al abrir la app, el APK busca solo todas las canciones del teléfono con
+el plugin nativo `LocalMusic` (lee MediaStore: título, artista, álbum,
+duración y portada). La primera vez Android pregunta el permiso para leer
+la música; si se niega, la app lo dice y se puede reintentar con el botón
+**Actualizar** de Biblioteca. Las canciones de YouTube ya agregadas y las
+descargadas se conservan; las locales se reemplazan por el resultado nuevo
+(las descargadas no se duplican: se detectan por título + artista aunque
+el archivo se llame "Artista - Título"). En la versión web no hay
+MediaStore y se sigue eligiendo carpeta o archivos a mano.
+
+## Pestaña YouTube
+
+La búsqueda de YouTube vive en su propia pestaña, junto a Descargas y
+Biblioteca (la misma fila de pestañas está en las tres vistas). Ahí la
+lista de resultados tiene todo el espacio y se puede deslizar por ella.
+Tocar un resultado lo agrega a la Biblioteca y abre la ventana para
+elegir Escuchar, Descargar o Solo agregar, como antes.
+
+## Radio: seguir con sugeridos de YouTube
+
+Cuando un tema online (YouTube) termina y no queda nada en la cola, la
+app sigue sola con música sugerida: busca en YouTube más música del mismo
+artista (o del título, si no hay artista) y suena el primer sugerido;
+al terminar ese, el siguiente, y así. YouTube no entrega su lista de
+"A continuación" a yt-dlp, así que la radio se arma con la búsqueda de
+YouTube del artista. La música local se detiene al final de su cola como
+siempre; el modo repetir tampoco cambia.

@@ -130,7 +130,10 @@
       .yt-wrap.show{ display:block; }
       .yt-wrap iframe, .yt-wrap #ytPlayer{ width:4px; height:4px; border:0; display:block; }
       /* YouTube en Biblioteca */
-      .yt-box{ flex:0 0 auto; margin-top:12px; border:1.5px solid rgba(255,80,80,.55); background:rgba(127,29,29,.22); border-radius:12px; padding:12px; }
+      .yt-box{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; margin-top:12px; border:1.5px solid rgba(255,80,80,.55); background:rgba(127,29,29,.22); border-radius:12px; padding:12px; }
+      .scan-box{ flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; border:1.5px solid rgba(125,249,255,.4); background:rgba(8,47,73,.5); border-radius:12px; padding:12px; }
+      .scan-box[hidden], .pick-grid[hidden], .lib-note[hidden]{ display:none; }
+      .scan-status{ font-size:13px; color:var(--soft); line-height:1.4; }
       .yt-box .yt-h{ display:flex; align-items:center; gap:8px; font-weight:900; font-size:15px; }
       .yt-box .yt-h .yt-badge{ background:#ff0033; color:#fff; font-size:11px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:.04em; }
       .yt-box p{ margin:6px 0 10px; font-size:12.5px; color:var(--soft); line-height:1.45; }
@@ -142,7 +145,7 @@
       .yt-msg.ok{ color:#a7f3d0; }
       /* Resultados del buscador de YouTube: tocar uno abre la ventana
          para elegir Escuchar o Descargar. */
-      .yt-results{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+      .yt-results{ margin-top:10px; display:flex; flex-direction:column; gap:8px; overflow:auto; min-height:0; }
       .yt-result{ display:flex; gap:10px; align-items:center; width:100%; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:8px; cursor:pointer; color:inherit; font:inherit; text-align:left; }
       .yt-result:active{ background:rgba(34,211,238,.14); }
       .yt-result img{ width:96px; height:54px; object-fit:cover; border-radius:6px; flex:0 0 96px; background:#000; }
@@ -443,14 +446,21 @@
         <section class="view" id="viewLibrary" aria-label="Biblioteca de música" hidden>
           <div class="lib">
           <div class="lib-tabs">
-            <button id="tabDownloads" type="button">Descargas</button>
-            <button id="tabLibrary" type="button" class="on">Biblioteca</button>
+            <button id="tabDownloads" class="lib-tab" data-view="downloads" type="button">Descargas</button>
+            <button id="tabLibrary" class="lib-tab on" data-view="library" type="button">Biblioteca</button>
+            <button id="tabYouTube" class="lib-tab" data-view="youtube" type="button">YouTube</button>
             <span class="lib-tabs-spacer"></span>
             <button class="ghost-btn" id="clearBtn" disabled>Vaciar</button>
           </div>
           <button class="add-toggle" id="addToggle" type="button">− Agregar música</button>
           <div class="add-section" id="addSection">
-            <div class="pick-grid">
+            <!-- En el APK la música local se busca sola (MediaStore); en la
+                 versión web se sigue eligiendo carpeta o archivos a mano. -->
+            <div class="scan-box" id="scanBox" hidden>
+              <div class="scan-status" id="scanStatus">Buscando tu música en el teléfono…</div>
+              <button class="pill-btn" id="scanRefreshBtn" type="button">Actualizar</button>
+            </div>
+            <div class="pick-grid" id="pickGrid">
               <button class="pick-btn" id="folderBtn" aria-label="Elegir una carpeta de música">
                 <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm0 12H4V6h5.17l2 2H20v10z"/></svg>
                 <div class="pz-t">Elegir carpeta</div>
@@ -462,17 +472,7 @@
                 <div class="pz-s">Selecciona canciones una por una o varias a la vez</div>
               </button>
             </div>
-            <div class="yt-box">
-              <div class="yt-h"><span class="yt-badge">YouTube</span><span>Buscar música</span></div>
-              <p>Escribe el nombre de una <b>canción</b> o un <b>artista</b> y toca <b>Buscar</b>. Toca un resultado y elige <b>Escuchar</b> (suena en el reproductor principal, solo audio, sin video) o <b>Descargar</b> (se guarda en el teléfono con yt-dlp, dentro del APK, en el formato que elijas, MP3 o M4A, y en la máxima calidad, en la carpeta <b>Música/Gurru Music</b>). Nada suena ni se descarga solo. La búsqueda funciona dentro del APK; en la versión web no está disponible.</p>
-              <div class="yt-row">
-                <input type="search" id="ytSearchInput" placeholder="Canción o artista…" aria-label="Buscar en YouTube" />
-                <button class="yt-add" id="ytSearchBtn">Buscar</button>
-              </div>
-              <div class="yt-msg" id="ytMsg" role="status"></div>
-              <div class="yt-results" id="ytSearchResults" aria-label="Resultados de YouTube"></div>
-            </div>
-            <p class="lib-note">Al elegir carpeta se agregan también las subcarpetas, en orden. Formatos: MP3 · M4A · OGG · WAV · FLAC. En computadora también puedes arrastrar la carpeta a la ventana.</p>
+            <p class="lib-note" id="libNote">Al elegir carpeta se agregan también las subcarpetas, en orden. Formatos: MP3 · M4A · OGG · WAV · FLAC. En computadora también puedes arrastrar la carpeta a la ventana.</p>
           </div>
             <input type="file" id="fileInput" accept="audio/*,.mp3,.m4a,.aac,.ogg,.opus,.wav,.flac" multiple hidden />
             <input type="file" id="folderInput" webkitdirectory directory multiple hidden />
@@ -491,7 +491,7 @@
             <div class="empty-state" id="emptyState">
               <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
               <div class="es-t">Todavía no hay canciones</div>
-              <p>Toca <b>«Elegir carpeta»</b> y selecciona la carpeta donde guardas tu música: se cargan todas de una vez.<br />Toca una canción de la lista para escucharla.</p>
+              <p id="emptyStateText">Toca <b>«Elegir carpeta»</b> y selecciona la carpeta donde guardas tu música: se cargan todas de una vez.<br />Toca una canción de la lista para escucharla.</p>
             </div>
             <div class="no-results" id="noResults">Ninguna canción coincide con tu búsqueda.</div>
           </div>
@@ -501,6 +501,11 @@
         <!-- ============ DESCARGAS ============ -->
         <section class="view" id="viewDownloads" aria-label="Descargas" hidden>
           <div class="dls">
+            <div class="lib-tabs">
+              <button class="lib-tab on" data-view="downloads" type="button">Descargas</button>
+              <button class="lib-tab" data-view="library" type="button">Biblioteca</button>
+              <button class="lib-tab" data-view="youtube" type="button">YouTube</button>
+            </div>
             <div class="dls-head">
               <div class="dls-title">Descargas</div>
               <p>Aquí se ve el avance de cada descarga: <b>canción por canción</b> y, cuando es una playlist, también el <b>total de la lista completa</b>. En el APK, los archivos se guardan con yt-dlp (dentro de la app) en la carpeta <b>Música/Gurru Music</b> del teléfono, en el formato elegido (MP3 o M4A) y en la máxima calidad disponible.</p>
@@ -508,12 +513,33 @@
             <div class="dls-list" id="dlList"></div>
             <div class="dls-empty" id="dlEmpty">
               <div class="es-t">Todavía no hay descargas</div>
-              <p>En Biblioteca busca una canción en YouTube y elige <b>«Descargar»</b>: aquí verás el porcentaje de cada canción mientras se guarda en tu teléfono.</p>
+              <p>En la pestaña YouTube busca una canción y elige <b>«Descargar»</b>: aquí verás el porcentaje de cada canción mientras se guarda en tu teléfono.</p>
             </div>
             <div class="dls-foot">
               <div class="dls-fmt">Formato de descarga: <b id="dlFmtCur">MP3</b> · Carpeta: <b>Música/Gurru Music</b></div>
               <button class="dls-btn" id="dlUpdateBtn" type="button">Actualizar yt-dlp</button>
               <div class="dls-msg" id="dlUpdateMsg">YouTube cambia sus bloqueos cada cierto tiempo; si una descarga falla, prueba actualizar yt-dlp aquí (solo en el APK).</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ YOUTUBE ============ -->
+        <section class="view" id="viewYouTube" aria-label="YouTube" hidden>
+          <div class="lib">
+            <div class="lib-tabs">
+              <button class="lib-tab" data-view="downloads" type="button">Descargas</button>
+              <button class="lib-tab" data-view="library" type="button">Biblioteca</button>
+              <button class="lib-tab on" data-view="youtube" type="button">YouTube</button>
+            </div>
+            <div class="yt-box">
+              <div class="yt-h"><span class="yt-badge">YouTube</span><span>Buscar música</span></div>
+              <p>Escribe el nombre de una <b>canción</b> o un <b>artista</b> y toca <b>Buscar</b>. Toca un resultado y elige <b>Escuchar</b> (suena en el reproductor principal, solo audio, sin video) o <b>Descargar</b> (se guarda en el teléfono con yt-dlp, dentro del APK, en el formato que elijas, MP3 o M4A, y en la máxima calidad, en la carpeta <b>Música/Gurru Music</b>). Nada suena ni se descarga solo. La búsqueda funciona dentro del APK; en la versión web no está disponible.</p>
+              <div class="yt-row">
+                <input type="search" id="ytSearchInput" placeholder="Canción o artista…" aria-label="Buscar en YouTube" />
+                <button class="yt-add" id="ytSearchBtn">Buscar</button>
+              </div>
+              <div class="yt-msg" id="ytMsg" role="status"></div>
+              <div class="yt-results" id="ytSearchResults" aria-label="Resultados de YouTube"></div>
             </div>
           </div>
         </section>
@@ -628,6 +654,7 @@
         $("viewPlayer").hidden = v !== "player";
         $("viewLibrary").hidden = v !== "library";
         $("viewDownloads").hidden = v !== "downloads";
+        $("viewYouTube").hidden = v !== "youtube";
         /* Sin botón de regreso: se vuelve al reproductor con el gesto atrás
            del teléfono. La barra inferior ofrece el apartado que NO estás
            viendo: Biblioteca a la derecha y Descargas a la izquierda. */
@@ -828,15 +855,23 @@
       }
 
       /* ---------- Lista ---------- */
+      /* ¿Estamos dentro del APK (Capacitor nativo) o en el navegador? */
+      function isNativeApp(){
+        try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }
+        catch(e){ return false; }
+      }
       /* Estado de la Biblioteca: filtro, orden y sección de agregar. */
       var libFilter = "all"; /* all | local | youtube | downloaded */
       var libSort = "added"; /* added | title | artist */
       var addSectionOpen = true, addSectionTouched = false;
+      /* En el APK la sección es la música del teléfono (búsqueda
+         automática); en la web es agregar carpeta o archivos a mano. */
+      var addToggleLabel = isNativeApp() ? "Tu música" : "Agregar música";
       function syncAddSection(){
         var s = $("addSection");
         if (s) s.classList.toggle("closed", !addSectionOpen);
         var b = $("addToggle");
-        if (b) b.textContent = addSectionOpen ? "− Agregar música" : "+ Agregar música";
+        if (b) b.textContent = (addSectionOpen ? "− " : "+ ") + addToggleLabel;
       }
       function syncLibToolState(){
         var f = $("filterBtn"); if (f) f.classList.toggle("on", libFilter !== "all");
@@ -1831,6 +1866,158 @@
           box.appendChild(row);
         });
       }
+      /* ---------- Música local automática (MediaStore, solo APK) ---------- */
+      /* En el APK la app busca sola todas las canciones del teléfono con
+         el plugin nativo LocalMusic (MediaStore): sin elegir carpetas.
+         En la versión web no hay MediaStore y se sigue con los botones
+         de carpeta/archivos. Las canciones de YouTube ya agregadas se
+         conservan; las locales se reemplazan por el resultado nuevo. */
+      var localMusicPlugin = null;
+      var localMusicChecked = false;
+      var localScanRunning = false;
+      function getLocalMusic(){
+        if (localMusicChecked) return localMusicPlugin;
+        try {
+          if (window.Capacitor && window.Capacitor.registerPlugin
+              && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()){
+            localMusicPlugin = window.Capacitor.registerPlugin("LocalMusic");
+            localMusicChecked = true;
+          }
+        } catch(e){ localMusicPlugin = null; }
+        return localMusicPlugin;
+      }
+      function makeLocalTrack(s){
+        var conv = (window.Capacitor && window.Capacitor.convertFileSrc) ? window.Capacitor.convertFileSrc : function(u){ return u; };
+        return { id: "local-" + s.id, type: "local", url: conv(s.uri), title: s.title || s.fileName || "Canción",
+          artist: s.artist || "Artista desconocido", album: s.album || "",
+          artUrl: s.albumArt ? conv(s.albumArt) : null, duration: s.duration || 0, scanned: true };
+      }
+      function scanLocalMusic(manual){
+        var p = getLocalMusic();
+        var status = $("scanStatus");
+        if (!p || !p.scanLibrary){
+          if (status) status.textContent = "La búsqueda automática solo funciona dentro del APK instalado (icono de la patita).";
+          return Promise.resolve(false);
+        }
+        if (localScanRunning) return Promise.resolve(false);
+        localScanRunning = true;
+        if (status) status.textContent = "Buscando tu música en el teléfono…";
+        return p.scanLibrary().then(function(res){
+          localScanRunning = false;
+          var songs = (res && res.songs) || [];
+          /* Se conservan las de YouTube y las ya descargadas (que tras
+             descargar pasan a ser type "local" con downloaded=true); las
+             locales se reemplazan por el resultado nuevo del escaneo. */
+          var kept = tracks.filter(function(t){ return t.type === "youtube" || t.type === "ytaudio" || t.downloaded; });
+          /* Las descargadas de YouTube también están en MediaStore (son
+             archivos en Música/Gurru Music): no duplicarlas como locales.
+             El título del archivo es "Artista - Título" y el de la pista
+             puede traer el artista como prefijo: se normaliza igual en
+             ambos lados para que coincidan. */
+          function dedupeKey(title, artist){
+            var t = (title || "").trim().toLowerCase();
+            var a = (artist || "").trim().toLowerCase();
+            if (!a || a === "artista desconocido"){
+              if (t.indexOf(" - ") !== -1){ var parts = t.split(" - "); a = parts[0].trim(); t = parts.slice(1).join(" - ").trim(); }
+              else a = "";
+            } else {
+              var prefix = a + " - ";
+              if (t.indexOf(prefix) === 0) t = t.substring(prefix.length);
+            }
+            return t + "|" + a;
+          }
+          var dlKeys = {};
+          kept.forEach(function(t){ if (t.downloaded) dlKeys[dedupeKey(t.title, t.artist)] = true; });
+          var newLocal = songs.filter(function(s){
+            return !dlKeys[dedupeKey(s.title, s.artist)];
+          }).map(makeLocalTrack);
+          var wasEmpty = tracks.length === 0;
+          var curId = (current >= 0 && tracks[current]) ? tracks[current].id : null;
+          tracks = newLocal.concat(kept);
+          current = -1;
+          if (curId){
+            for (var i = 0; i < tracks.length; i++){ if (tracks[i].id === curId){ current = i; break; } }
+          }
+          if (curId && current < 0){
+            pauseAllAudio();
+            try{ audio.removeAttribute("src"); audio.load(); }catch(e){}
+            resetScreen();
+          }
+          renderPlaylist();
+          if (status) status.textContent = songs.length ? ("✓ " + songs.length + " canciones en tu teléfono.") : "No encontré canciones en el teléfono.";
+          if (wasEmpty && tracks.length) loadTrack(0, false);
+          return true;
+        }).catch(function(err){
+          localScanRunning = false;
+          if (status) status.textContent = "No se pudo buscar la música: " + ((err && err.message) || "inténtalo de nuevo") + ".";
+          return false;
+        });
+      }
+      function initLocalScan(){
+        var native = isNativeApp();
+        var scanBox = $("scanBox"), pickGrid = $("pickGrid"), libNote = $("libNote");
+        if (scanBox) scanBox.hidden = !native;
+        if (pickGrid) pickGrid.hidden = native;
+        if (libNote) libNote.hidden = native;
+        var es = $("emptyStateText");
+        if (es) es.innerHTML = native
+          ? "Tu música se busca sola en el teléfono. Si no aparece nada, toca «Actualizar» en Biblioteca.<br />Toca una canción de la lista para escucharla."
+          : "Toca «Elegir carpeta» y selecciona la carpeta donde guardas tu música: se cargan todas de una vez.<br />Toca una canción de la lista para escucharla.";
+        if (native) scanLocalMusic(false);
+      }
+      /* ---------- Radio: seguir con sugeridos de YouTube ---------- */
+      /* YouTube no entrega su lista de "A continuación" a yt-dlp, así que
+         la radio se arma con la propia búsqueda de YouTube: más música
+         del mismo artista (o del título, si no hay artista). Cuando un
+         tema online termina y no queda nada en la cola, suena el primer
+         sugerido; al terminar ese, el siguiente, y así. Solo para temas
+         de YouTube; la música local se detiene al final como siempre. */
+      var suggestPool = [];
+      var suggestPlayed = {};
+      var suggestFetching = false;
+      function suggestQueryFor(t){
+        var a = (t.artist || "").trim();
+        if (a && a !== "Artista desconocido" && a !== "YouTube") return a;
+        return (t.title || "").trim();
+      }
+      function fetchSuggestions(t){
+        var p = getNativeDl();
+        if (!p || !p.searchYouTube) return Promise.resolve([]);
+        var q = suggestQueryFor(t);
+        if (!q) return Promise.resolve([]);
+        return p.searchYouTube({ query: q, limit: 10 }).then(function(res){
+          var list = (res && res.results) || [];
+          var fresh = list.filter(function(r){
+            if (!r || !r.id || suggestPlayed[r.id]) return false;
+            for (var i = 0; i < tracks.length; i++){ if (tracks[i].videoId === r.id) return false; }
+            return true;
+          });
+          suggestPool = fresh.map(function(r){
+            return makeYtTrack({ videoId: r.id, title: r.title || "Canción de YouTube", artist: r.channel || "YouTube", duration: r.duration || 0, artUrl: r.thumbnail });
+          });
+          return suggestPool;
+        }).catch(function(){ return []; });
+      }
+      function playNextSuggestion(fromTrack){
+        if (suggestPool.length){
+          var t = suggestPool.shift();
+          suggestPlayed[t.videoId] = true;
+          tracks.push(t);
+          loadTrack(tracks.length - 1, true);
+          return Promise.resolve(true);
+        }
+        if (suggestFetching) return Promise.resolve(false);
+        suggestFetching = true;
+        return fetchSuggestions(fromTrack).then(function(pool){
+          suggestFetching = false;
+          if (!pool.length) return false;
+          var t2 = suggestPool.shift();
+          suggestPlayed[t2.videoId] = true;
+          tracks.push(t2);
+          loadTrack(tracks.length - 1, true);
+          return true;
+        });
+      }
       $("ytSearchBtn").addEventListener("click", searchYouTube);
       $("ytSearchInput").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); searchYouTube(); } });
 
@@ -1893,7 +2080,18 @@
         else {
           n = current + 1;
           if (n >= tracks.length){
-            if (auto && repeatMode === 0){ pauseAllAudio(); if (ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } return; }
+            if (auto && repeatMode === 0){
+              var cur = tracks[current];
+              if (cur && (cur.type === "youtube" || cur.type === "ytaudio")){
+                /* Fin de la cola con un tema online: la radio sigue con
+                   música sugerida de YouTube; si no hay sugeridos, para. */
+                playNextSuggestion(cur).then(function(ok){
+                  if (!ok){ pauseAllAudio(); if (ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } }
+                });
+                return;
+              }
+              pauseAllAudio(); if (ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } return;
+            }
             n = 0;
           }
         }
@@ -2075,9 +2273,13 @@
       $("searchInput").addEventListener("input", renderPlaylist);
 
       /* Pestañas Descargas / Biblioteca y sección de agregar música. */
-      $("tabDownloads").addEventListener("click", function(){ showView("downloads"); });
-      $("tabLibrary").addEventListener("click", function(){ showView("library"); });
+      /* Pestañas Descargas / Biblioteca / YouTube (hay una fila en cada
+         vista; todas cambian de vista con el mismo mecanismo). */
+      document.querySelectorAll(".lib-tab").forEach(function(b){
+        b.addEventListener("click", function(){ showView(b.getAttribute("data-view")); });
+      });
       $("addToggle").addEventListener("click", function(){ addSectionTouched = true; addSectionOpen = !addSectionOpen; syncAddSection(); });
+      $("scanRefreshBtn").addEventListener("click", function(){ scanLocalMusic(true); });
       syncAddSection(); syncLibToolState();
       $("filterBtn").addEventListener("click", function(){
         var self = this;
@@ -2133,6 +2335,8 @@
       renderPlaylist();
       resetScreen();
       showView("player");
+      /* Al abrir la app, en el APK, busca sola la música del teléfono. */
+      initLocalScan();
     </script>
   </body>
 </html>
