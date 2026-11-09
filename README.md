@@ -128,7 +128,14 @@ tu celular.
   con la barra y la MediaSession lo controla. La URL del audio caduca
   en unas horas y no se guarda: se vuelve a pedir cada vez que suena
   la canción (si caducó a media reproducción, se pide una nueva una
-  sola vez).
+  sola vez). Cada petición de audio usa su propio id de proceso
+  (`gurru-stream-N`) para que dos canciones seguidas no choquen.
+- **Respaldo:** si el audio directo falla, la canción suena con el
+  reproductor oficial de YouTube (iframe, `playYtIframe`) en vez de
+  quedarse en silencio; arriba se avisa el motivo del fallo. Ahí sí
+  se pausa al salir de la app, pero al menos suena. El tiempo, el
+  adelanto, el volumen y play/pausa funcionan con los dos
+  reproductores (las funciones revisan primero si hay iframe).
 - La barra de progreso en YouTube funciona con `currentTime` del
   `<audio>` (el tiempo se lee cada medio segundo); el ecualizador se
   anima también en online con ondas generadas (mismo dibujo que en
