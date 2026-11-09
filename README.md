@@ -147,3 +147,29 @@ tu celular.
 Edita `www/index.html` y luego corre `npx cap sync` para copiar los cambios
 al proyecto Android. No edites los archivos dentro de
 `android/app/src/main/assets/public/` a mano: se sobrescriben en cada sync.
+
+## El puente nativo: por qué hace falta `www/capacitor.js`
+
+La app es HTML sin empaquetador (sin bundler). El runtime que Android
+inyecta en la página (`native-bridge.js`) trae `getPlatform`,
+`toNative` y `Capacitor.Plugins.*`, pero **no trae `registerPlugin`**
+(esa función vive en `@capacitor/core` y hay que cargarla en la página).
+Sin `www/capacitor.js` la app no podía usar ningún plugin nativo: la
+búsqueda y las descargas de YouTube decían "no es la app nativa", el
+audio en segundo plano no arrancaba y el botón atrás no cerraba la app
+desde el reproductor. El archivo `www/capacitor.js` es el UMD oficial
+de `@capacitor/core` (8 KB) y se carga en el `<head>` después del script
+inyectado: completa `window.Capacitor` con `registerPlugin` sin tocar
+el resto del runtime. No lo borres. Comprobado en simulación: con él,
+`isAvailable`, `searchYouTube`, `addListener("backButton")` y
+`BackgroundAudio.start` llegan al lado nativo.
+
+## Letra de la canción
+
+El botón **Letra** del reproductor abre la letra de la canción que suena,
+buscada en LRCLIB (`https://lrclib.net`, gratis y sin clave) por artista +
+título. Cuando la letra trae tiempos, la línea que suena se resalta y se
+desplaza sola (sirve para MP3 locales y para YouTube). Si no se encuentra,
+la ventana lo dice y ofrece reintentar. Las letras se guardan en memoria
+por canción, así que abrirla de nuevo es instantáneo. El botón atrás del
+teléfono cierra primero la letra y luego vuelve al reproductor.
