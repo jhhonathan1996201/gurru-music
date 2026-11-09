@@ -108,15 +108,17 @@ tu celular.
 
 ## Buscador de YouTube (sin link)
 
-- En **Biblioteca → Buscar música** se escribe la canción o el artista.
+- En la pestaña **YouTube** se escribe la canción o el artista.
   La búsqueda la hace yt-dlp dentro del APK (método `searchYouTube` del
   plugin `YtDlpDownloader`, con `ytsearch`, sin API key ni servidores de
-  terceros); devuelve hasta 10 resultados con miniatura, título, canal y
+  terceros); devuelve hasta 20 resultados con miniatura, título, canal y
   duración.
 - Al tocar un resultado se abre la ventana para elegir **Escuchar**,
   **Descargar** o **Solo agregarlo a la Biblioteca**. Al descargar, la
-  canción se guarda en Música/Gurru Music (MP3 o M4A, máxima calidad) y
-  el avance se ve en **Descargas**, canción por canción.
+  canción se guarda en Música/Gurru Music (MP3 o M4A, máxima calidad)
+  con su metadata original (título, artista y portada, con
+  `--add-metadata` y `--embed-thumbnail`) y el avance se ve en
+  **Descargas**, canción por canción.
 - La barra de progreso en YouTube funciona con `seekTo` del reproductor
   oficial: el tiempo se lee cada medio segundo (`getCurrentTime` /
   `getDuration`) porque el iframe no dispara `timeupdate`.
@@ -180,11 +182,21 @@ Al abrir la app, el APK busca solo todas las canciones del teléfono con
 el plugin nativo `LocalMusic` (lee MediaStore: título, artista, álbum,
 duración y portada). La primera vez Android pregunta el permiso para leer
 la música; si se niega, la app lo dice y se puede reintentar con el botón
-**Actualizar** de Biblioteca. Las canciones de YouTube ya agregadas y las
-descargadas se conservan; las locales se reemplazan por el resultado nuevo
-(las descargadas no se duplican: se detectan por título + artista aunque
-el archivo se llame "Artista - Título"). En la versión web no hay
-MediaStore y se sigue eligiendo carpeta o archivos a mano.
+**Actualizar** de Biblioteca. OJO: `Plugin.hasPermission(alias)` está
+obsoleto y recibe el nombre del permiso, no el alias — `hasPermission("media")`
+siempre daba falso, así que tras conceder el permiso el escaneo se
+rechazaba como "sin permiso"; ahora el plugin revisa el permiso real
+(`READ_MEDIA_AUDIO` en Android 13+ / `READ_EXTERNAL_STORAGE` antes) con
+`Context.checkSelfPermission`, y expone `checkPermission()` para que la
+página reintente el escaneo al abrir Biblioteca si el primero se atascó.
+El filtro de MediaStore acepta canciones marcadas como música o audios
+de 60 s o más aunque no estén marcados. Si el escaneo no encuentra nada,
+queda el botón **Elegir carpeta** como respaldo. Las canciones de YouTube
+ya agregadas y las descargadas se conservan; las locales se reemplazan
+por el resultado nuevo (las descargadas no se duplican: se detectan por
+título + artista aunque el archivo se llame "Artista - Título"). En la
+versión web no hay MediaStore y se sigue eligiendo carpeta o archivos a
+mano.
 
 ## Pestaña YouTube
 

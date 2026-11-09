@@ -2,6 +2,7 @@ package com.gurru.music;
 
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -46,10 +47,36 @@ public class LocalMusicPlugin extends Plugin {
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
+    /**
+     * OJO: Plugin.hasPermission(String) está obsoleto y recibe el NOMBRE
+     * DEL PERMISO, no el alias. hasPermission("media") siempre daba
+     * falso (no existe un permiso llamado "media"), así que después de
+     * conceder el permiso el escaneo se rechazaba como "sin permiso".
+     * Aquí se revisa el permiso real con el sistema.
+     */
+    private boolean hasMediaPermission() {
+        String perm = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                ? android.Manifest.permission.READ_MEDIA_AUDIO
+                : android.Manifest.permission.READ_EXTERNAL_STORAGE;
+        try {
+            return getContext().checkSelfPermission(perm) == PackageManager.PERMISSION_GRANTED;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /** Para que la página sepa si ya hay permiso sin volver a preguntar. */
+    @PluginMethod
+    public void checkPermission(final PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("granted", hasMediaPermission());
+        call.resolve(ret);
+    }
+
     @PluginMethod
     public void scanLibrary(final PluginCall call) {
-        String alias = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ? "media" : "storage";
-        if (!hasPermission(alias)) {
+        if (!hasMediaPermission()) {
+            String alias = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ? "media" : "storage";
             requestPermissionForAlias(alias, call, "scanPermissionCallback");
             return;
         }
@@ -58,7 +85,7 @@ public class LocalMusicPlugin extends Plugin {
 
     @PermissionCallback
     private void scanPermissionCallback(PluginCall call) {
-        if (hasPermission("media") || hasPermission("storage")) {
+        if (hasMediaPermission()) {
             runScan(call);
         } else {
             call.reject("Sin permiso para leer la música del teléfono. Actívalo en Ajustes > Aplicaciones > Gurru Music > Permisos.");
@@ -81,7 +108,11 @@ public class LocalMusicPlugin extends Plugin {
                         MediaStore.Audio.Media.DURATION,
                         MediaStore.Audio.Media.DISPLAY_NAME
                     };
-                    String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
+                    /* Música marcada como tal, o audios largos aunque no
+                       estén marcados (algunos MP3 no traen IS_MUSIC). Los
+                       tonos y sonidos cortos quedan fuera por duración. */
+                    String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0 OR "
+                            + MediaStore.Audio.Media.DURATION + " >= 60000";
                     Cursor cursor = ctx.getContentResolver().query(
                             collection, projection, selection, null,
                             MediaStore.Audio.Media.TITLE + " ASC");

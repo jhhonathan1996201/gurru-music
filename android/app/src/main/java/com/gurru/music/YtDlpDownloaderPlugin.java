@@ -463,6 +463,12 @@ public class YtDlpDownloaderPlugin extends Plugin {
                     request.addOption("--extract-audio");
                     request.addOption("--audio-format", fmt);
                     request.addOption("--audio-quality", "0");
+                    /* Metadata original: --add-metadata escribe en el
+                       archivo el título, artista y demás datos del video,
+                       y --embed-thumbnail incrusta su portada. El audio no
+                       se toca, solo sus etiquetas. */
+                    request.addOption("--add-metadata");
+                    request.addOption("--embed-thumbnail");
                     request.addOption("--no-playlist");
                     request.addOption("--no-warnings");
                     // YouTube bloquea cada vez más al cliente web con

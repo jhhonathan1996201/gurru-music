@@ -131,9 +131,10 @@
       .yt-wrap iframe, .yt-wrap #ytPlayer{ width:4px; height:4px; border:0; display:block; }
       /* YouTube en Biblioteca */
       .yt-box{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; margin-top:12px; border:1.5px solid rgba(255,80,80,.55); background:rgba(127,29,29,.22); border-radius:12px; padding:12px; }
-      .scan-box{ flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; border:1.5px solid rgba(125,249,255,.4); background:rgba(8,47,73,.5); border-radius:12px; padding:12px; }
+      .scan-box{ flex:0 0 auto; display:flex; flex-direction:column; align-items:stretch; gap:8px; margin-top:12px; border:1.5px solid rgba(125,249,255,.4); background:rgba(8,47,73,.5); border-radius:12px; padding:12px; }
       .scan-box[hidden], .pick-grid[hidden], .lib-note[hidden]{ display:none; }
       .scan-status{ font-size:13px; color:var(--soft); line-height:1.4; }
+      .scan-btns{ display:flex; gap:8px; }
       .yt-box .yt-h{ display:flex; align-items:center; gap:8px; font-weight:900; font-size:15px; }
       .yt-box .yt-h .yt-badge{ background:#ff0033; color:#fff; font-size:11px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:.04em; }
       .yt-box p{ margin:6px 0 10px; font-size:12.5px; color:var(--soft); line-height:1.45; }
@@ -227,7 +228,6 @@
       /* ===== Apartado DESCARGAS ===== */
       .dls{ flex:1; min-height:0; display:flex; flex-direction:column; padding:12px 16px 8px; }
       .dls-head{ flex:0 0 auto; }
-      .dls-head .dls-title{ font-size:21px; font-weight:900; color:var(--accent); text-shadow:0 0 8px var(--glow); }
       .dls-head p{ margin:5px 0 0; font-size:12.5px; color:var(--soft); line-height:1.45; }
       .dls-list{ flex:1; min-height:0; overflow:auto; margin-top:10px; padding-bottom:6px; }
       .dl-group{ border:1px solid rgba(125,211,252,.35); background:rgba(2,132,199,.14); border-radius:12px; padding:11px 12px; margin-bottom:12px; }
@@ -312,11 +312,11 @@
       .softbar button.sk-left{ grid-column:1; justify-self:start; }
       /* ===== Biblioteca: diseño con pestañas, buscador, filtro y orden ===== */
       .titlebar .app-name{ text-transform:uppercase; letter-spacing:.05em; }
-      .lib-tabs{ flex:0 0 auto; display:flex; align-items:baseline; gap:26px; padding:2px 2px 0; }
-      .lib-tabs button{ border:0; background:transparent; font:inherit; font-size:22px; font-weight:800; color:rgba(186,230,253,.55); padding:6px 2px 8px; cursor:pointer; }
+      .lib-tabs{ flex:0 0 auto; display:flex; align-items:baseline; gap:8px; padding:2px 2px 0; }
+      .lib-tabs button{ border:0; background:transparent; font:inherit; font-size:16px; font-weight:800; color:rgba(186,230,253,.55); padding:6px 2px 8px; cursor:pointer; white-space:nowrap; min-width:0; }
       .lib-tabs button.on{ color:var(--accent); text-shadow:0 0 10px var(--glow); border-bottom:3px solid var(--accent); }
       .lib-tabs .lib-tabs-spacer{ flex:1; }
-      .lib-tabs .ghost-btn{ padding:5px 10px; font-size:12px; }
+      .lib-tabs .ghost-btn{ padding:4px 8px; font-size:11px; }
       .add-toggle{ flex:0 0 auto; margin-top:10px; border:1.5px solid rgba(125,211,252,.55); background:rgba(2,132,199,.16); color:#fff; border-radius:10px; padding:10px; font:inherit; font-size:14px; font-weight:800; cursor:pointer; }
       .add-section{ flex:0 0 auto; }
       .add-section.closed{ display:none; }
@@ -458,7 +458,10 @@
                  versión web se sigue eligiendo carpeta o archivos a mano. -->
             <div class="scan-box" id="scanBox" hidden>
               <div class="scan-status" id="scanStatus">Buscando tu música en el teléfono…</div>
-              <button class="pill-btn" id="scanRefreshBtn" type="button">Actualizar</button>
+              <div class="scan-btns">
+                <button class="pill-btn" id="scanRefreshBtn" type="button">Actualizar</button>
+                <button class="pill-btn" id="scanPickBtn" type="button">Elegir carpeta</button>
+              </div>
             </div>
             <div class="pick-grid" id="pickGrid">
               <button class="pick-btn" id="folderBtn" aria-label="Elegir una carpeta de música">
@@ -507,7 +510,6 @@
               <button class="lib-tab" data-view="youtube" type="button">YouTube</button>
             </div>
             <div class="dls-head">
-              <div class="dls-title">Descargas</div>
               <p>Aquí se ve el avance de cada descarga: <b>canción por canción</b> y, cuando es una playlist, también el <b>total de la lista completa</b>. En el APK, los archivos se guardan con yt-dlp (dentro de la app) en la carpeta <b>Música/Gurru Music</b> del teléfono, en el formato elegido (MP3 o M4A) y en la máxima calidad disponible.</p>
             </div>
             <div class="dls-list" id="dlList"></div>
@@ -533,7 +535,7 @@
             </div>
             <div class="yt-box">
               <div class="yt-h"><span class="yt-badge">YouTube</span><span>Buscar música</span></div>
-              <p>Escribe el nombre de una <b>canción</b> o un <b>artista</b> y toca <b>Buscar</b>. Toca un resultado y elige <b>Escuchar</b> (suena en el reproductor principal, solo audio, sin video) o <b>Descargar</b> (se guarda en el teléfono con yt-dlp, dentro del APK, en el formato que elijas, MP3 o M4A, y en la máxima calidad, en la carpeta <b>Música/Gurru Music</b>). Nada suena ni se descarga solo. La búsqueda funciona dentro del APK; en la versión web no está disponible.</p>
+              <p>Escribe el nombre de una canción o un artista y toca <b>Buscar</b>.</p>
               <div class="yt-row">
                 <input type="search" id="ytSearchInput" placeholder="Canción o artista…" aria-label="Buscar en YouTube" />
                 <button class="yt-add" id="ytSearchBtn">Buscar</button>
@@ -655,6 +657,7 @@
         $("viewLibrary").hidden = v !== "library";
         $("viewDownloads").hidden = v !== "downloads";
         $("viewYouTube").hidden = v !== "youtube";
+        if (v === "library"){ maybeRetryLocalScan(); }
         /* Sin botón de regreso: se vuelve al reproductor con el gesto atrás
            del teléfono. La barra inferior ofrece el apartado que NO estás
            viendo: Biblioteca a la derecha y Descargas a la izquierda. */
@@ -1811,7 +1814,7 @@
         msg.textContent = "Buscando «" + q + "» en YouTube…";
         msg.className = "yt-msg";
         box.innerHTML = "";
-        p.searchYouTube({ query: q, limit: 10 }).then(function(res){
+        p.searchYouTube({ query: q, limit: 20 }).then(function(res){
           btn.disabled = false;
           var list = (res && res.results) || [];
           if (!list.length){
@@ -1875,6 +1878,7 @@
       var localMusicPlugin = null;
       var localMusicChecked = false;
       var localScanRunning = false;
+      var localScanDone = false;
       function getLocalMusic(){
         if (localMusicChecked) return localMusicPlugin;
         try {
@@ -1904,6 +1908,7 @@
         if (status) status.textContent = "Buscando tu música en el teléfono…";
         return p.scanLibrary().then(function(res){
           localScanRunning = false;
+          localScanDone = true;
           var songs = (res && res.songs) || [];
           /* Se conservan las de YouTube y las ya descargadas (que tras
              descargar pasan a ser type "local" con downloaded=true); las
@@ -1964,6 +1969,18 @@
           ? "Tu música se busca sola en el teléfono. Si no aparece nada, toca «Actualizar» en Biblioteca.<br />Toca una canción de la lista para escucharla."
           : "Toca «Elegir carpeta» y selecciona la carpeta donde guardas tu música: se cargan todas de una vez.<br />Toca una canción de la lista para escucharla.";
         if (native) scanLocalMusic(false);
+      }
+      /* Si el primer escaneo se atascó (por ejemplo, el permiso se
+         concedió pero el resultado no volvió), reintenta solo al abrir
+         Biblioteca y solo si el permiso ya está concedido: no vuelve a
+         preguntar. */
+      function maybeRetryLocalScan(){
+        if (!isNativeApp() || localScanDone || localScanRunning) return;
+        var p = getLocalMusic();
+        if (!p || !p.checkPermission) return;
+        p.checkPermission().then(function(res){
+          if (res && res.granted) scanLocalMusic(false);
+        }).catch(function(){});
       }
       /* ---------- Radio: seguir con sugeridos de YouTube ---------- */
       /* YouTube no entrega su lista de "A continuación" a yt-dlp, así que
@@ -2280,6 +2297,9 @@
       });
       $("addToggle").addEventListener("click", function(){ addSectionTouched = true; addSectionOpen = !addSectionOpen; syncAddSection(); });
       $("scanRefreshBtn").addEventListener("click", function(){ scanLocalMusic(true); });
+      /* Respaldo: si el escaneo automático no encuentra tu música, la
+         carpeta se sigue pudiendo elegir a mano como antes. */
+      $("scanPickBtn").addEventListener("click", function(){ $("folderInput").click(); });
       syncAddSection(); syncLibToolState();
       $("filterBtn").addEventListener("click", function(){
         var self = this;
