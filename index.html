@@ -345,6 +345,52 @@
       #dropOverlay.show{ display:grid; }
       #dropOverlay .do-box{ border:3px dashed #7dd3fc; border-radius:18px; padding:38px 48px; color:#fff; text-align:center; font-size:19px; font-weight:800; }
       #dropOverlay svg{ width:44px; height:44px; fill:#7dd3fc; margin-bottom:10px; }
+      /* ===== RESPONSIVO: la app se adapta a la resolución del teléfono =====
+         Los botones, las portadas y las letras crecen o se achican con el
+         ancho de la pantalla (clamp): en un teléfono chico nada se
+         desborda, y en uno grande o una tablet nada se ve diminuto.
+         También se corrige la fila de Biblioteca: llevaba una columna de
+         28px heredada del diseño con números, que recortaba la portada;
+         ahora la portada se ve completa (4 columnas: portada, datos,
+         play, menú). */
+      .tbtn{ width:clamp(40px,11.8vw,58px); height:clamp(46px,13.3vw,66px); }
+      .tbtn svg{ width:clamp(26px,7.7vw,38px); height:clamp(26px,7.7vw,38px); }
+      .tbtn.small svg{ width:clamp(22px,6.4vw,32px); height:clamp(22px,6.4vw,32px); }
+      .tbtn.txt{ font-size:clamp(13px,3.8vw,18px); min-width:clamp(40px,11.8vw,58px); }
+      .tbtn.play{ width:clamp(56px,16.4vw,80px); height:clamp(52px,15.4vw,76px); }
+      .tbtn.play svg{ width:clamp(40px,11.8vw,58px); height:clamp(40px,11.8vw,58px); }
+      .queue-list li{ grid-template-columns:clamp(52px,16vw,76px) 1fr auto; }
+      .playlist li{ grid-template-columns:clamp(44px,12vw,60px) 1fr auto auto; }
+      .playlist .thumb{ width:clamp(44px,12vw,60px); height:clamp(44px,12vw,60px); }
+      .playlist .row-play{ width:clamp(30px,9vw,40px); height:clamp(30px,9vw,40px); }
+      .playlist .row-play svg{ width:clamp(26px,7.7vw,36px); height:clamp(21px,6.2vw,29px); }
+      .playlist .kebab{ width:clamp(28px,8vw,36px); height:clamp(30px,9vw,40px); font-size:clamp(20px,5.6vw,26px); }
+      .lib-tabs button{ font-size:clamp(14px,4.2vw,18px); }
+      .lib-logo{ width:clamp(44px,13vw,60px); height:clamp(44px,13vw,60px); }
+      .icon-btn{ width:clamp(36px,10vw,46px); height:clamp(36px,10vw,46px); }
+      .icon-btn svg{ width:clamp(18px,5vw,24px); height:clamp(18px,5vw,24px); }
+      .yt-result img{ width:clamp(80px,24vw,112px); height:clamp(45px,13.5vw,63px); flex-basis:clamp(80px,24vw,112px); }
+      .pick-btn{ padding:clamp(12px,3.5vw,18px) 10px; }
+      /* Pantallas bajas (teléfono apaisado): todo compacto, nada se tapa. */
+      @media (max-height:560px){
+        .np{ padding:2px 14px 2px; }
+        .art-wrap{ min-height:32px; }
+        #viz{ height:14px; flex-basis:14px; }
+        .queue-list{ max-height:min(200px,32dvh); }
+        .t-title{ font-size:clamp(19px,5vw,26px); }
+        .t-artist{ font-size:clamp(15px,4vw,20px); }
+        .t-album{ font-size:clamp(13px,3.6vw,18px); }
+        .times{ font-size:clamp(16px,4.2vw,21px); margin-top:4px; }
+        .lib{ padding:8px 14px 6px; }
+      }
+      /* Pantallas anchas (tablet): la app aprovecha el ancho sin perder el estilo. */
+      @media (min-width:700px){
+        .app{ width:min(560px,100%); }
+        .np{ padding:10px 26px 6px; }
+        .lib{ padding:16px 26px 10px; }
+        .queue-list li{ padding:8px 10px; }
+        .playlist li{ padding:12px 10px; }
+      }
     </style>
     <!-- Capacitor JS (núcleo): la app es HTML sin empaquetador, así que el
          runtime que inyecta Android NO trae registerPlugin; sin este archivo
@@ -533,7 +579,7 @@
               <button class="lib-tab on" data-view="youtube" type="button">YouTube</button>
             </div>
             <div class="yt-box">
-              <div class="yt-h"><span class="yt-badge">YouTube</span><span>Buscar música</span></div>
+              <div class="yt-h"><span class="yt-badge">YouTube Music</span><span>Buscar música</span></div>
               <p>Escribe el nombre de una canción o un artista y toca <b>Buscar</b>.</p>
               <div class="yt-row">
                 <input type="search" id="ytSearchInput" placeholder="Canción o artista…" aria-label="Buscar en YouTube" />

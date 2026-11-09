@@ -113,7 +113,12 @@ tu celular.
   plugin `YtDlpDownloader`, con `ytsearch`, sin API key ni servidores de
   terceros); devuelve hasta 20 resultados con miniatura, título, canal y
   duración.
-- Al tocar un resultado se abre la ventana para elegir **Escuchar**,
+- La búsqueda es en **YouTube Music** (`ytmsearch`): salen las
+  canciones (audio oficial, mejor calidad) y no videoclips. Si esa
+  búsqueda falla o no trae nada, se busca en YouTube normal
+  (`ytsearch`). En los resultados solo se muestran videos (los
+  álbumes y artistas de YouTube Music, que son listas, se filtran).
+  Al tocar un resultado se abre la ventana para elegir **Escuchar**,
   **Descargar** o **Solo agregarlo a la Biblioteca**. Al descargar, la
   canción se guarda en Música/Gurru Music (MP3 o M4A, máxima calidad)
   con su metadata original (título, artista y portada, con
@@ -123,7 +128,8 @@ tu celular.
   (iframe): ese reproductor pausa el audio cuando la app pasa a
   segundo plano (restricción de YouTube para no suscriptores de
   Premium). El audio se pide directo a yt-dlp dentro del APK (método
-  `getAudioUrl`, `yt-dlp -g -f bestaudio`) y suena en un `<audio>`
+  `getAudioUrl`, `yt-dlp --dump-json` con cliente Android) y se elige
+  el mejor formato solo-audio por bitrate; suena en un `<audio>`
   normal, igual que un MP3 local: sigue en segundo plano, se adelanta
   con la barra y la MediaSession lo controla. La URL del audio caduca
   en unas horas y no se guarda: se vuelve a pedir cada vez que suena
@@ -182,6 +188,20 @@ un botón **Borrar historial** que borra solo el historial: las
 canciones guardadas siguen en el teléfono y en la Biblioteca. Si la
 app se cerró a media descarga, esa entrada queda como detenida al
 reabrir, no como "descargando" para siempre.
+
+## Responsivo: la app se adapta a cada teléfono
+
+Los botones, las portadas y las letras usan `clamp()` con el ancho de
+la pantalla: en un teléfono chico nada se desborda, y en uno grande o
+una tablet nada se ve diminuto. En pantallas bajas (teléfono
+apaisado) todo se compacta para que nada se tape; en pantallas
+anchas (tablet, ≥700px) la app aprovecha el ancho (hasta 560px) sin
+perder el estilo. Las filas de Biblioteca tenían una columna de 28px
+heredada del diseño con números que recortaba la portada; ahora la
+portada se ve completa (4 columnas: portada, datos, play, menú). Al
+tocar una fila de la lista suena la canción de inmediato (y el botón
+de play de la fila hace lo mismo); al tocar un resultado de YouTube
+se pregunta Escuchar o Descargar.
 
 ## Si cambias algo del reproductor
 
