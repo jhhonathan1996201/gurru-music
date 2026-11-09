@@ -635,7 +635,13 @@
       var DL_KEY = "gurru-dlhistory-v1";
       var restoreSeekSec = null;
       function serializeTrack(t){
-        if (!t || !t.url || (typeof t.url === "string" && t.url.indexOf("blob:") === 0)) return null;
+        if (!t) return null;
+        /* Las de YouTube no tienen url (su identidad es el videoId), así
+           que sí se guardan; las locales necesitan una dirección estable
+           (las blob: del selector de carpetas no sobreviven al cierre). */
+        if (t.type === "youtube" || t.type === "ytaudio"){
+          if (!t.videoId) return null;
+        } else if (!t.url || (typeof t.url === "string" && t.url.indexOf("blob:") === 0)) return null;
         return { id: t.id, type: t.type, kind: t.kind || null, videoId: t.videoId || null, playlistId: t.playlistId || null,
           url: t.url, title: t.title, artist: t.artist, album: t.album || "", artUrl: t.artUrl || null, artRaw: t.artRaw || null,
           duration: t.duration || 0, downloaded: !!t.downloaded, savedName: t.savedName || null, nativePath: t.nativePath || null,
@@ -1177,32 +1183,16 @@
          Ya no se usa el link: se busca la canción o el artista y en cada
          resultado el usuario elige Escuchar o Descargar. La búsqueda la
          hace yt-dlp dentro del APK (plugin YtDlpDownloader.searchYouTube,
-         sin API key ni servidores de terceros). Todo se resuelve SOLO con
-         YouTube (iframe_api, oEmbed y el reproductor oficial). El video
-         nunca se muestra: el reproductor queda oculto y se le pide su
-         máxima calidad (highres); solo se escucha el audio. */
+         sin API key ni servidores de terceros). El audio se pide directo
+         a yt-dlp (getAudioUrl) y suena en un <audio> normal, no en el
+         reproductor oficial: ese reproductor pausa el audio al salir de
+         la app, y el <audio> propio sigue en segundo plano. */
       var ytAudioEl = $("audioYt");
       var ytLoadSeq = 0;
-      var ytApiPlayer = null;
-      var ytApiPromise = null;
       var ytHiddenActive = false;
       var ytHiddenPlaying = false;
       var ytHiddenTrack = null;
 
-      function ensureYTApi(){
-        if (window.YT && window.YT.Player) return Promise.resolve();
-        if (ytApiPromise) return ytApiPromise;
-        ytApiPromise = new Promise(function(resolve, reject){
-          var prev = window.onYouTubeIframeAPIReady, done = false;
-          window.onYouTubeIframeAPIReady = function(){ if (typeof prev === "function"){ try{ prev(); }catch(e){} } done = true; resolve(); };
-          var s = document.createElement("script");
-          s.src = "https://www.youtube.com/iframe_api"; s.async = true;
-          s.onerror = function(){ if (!done){ ytApiPromise = null; reject(new Error("api")); } };
-          document.head.appendChild(s);
-          setTimeout(function(){ if (!done){ ytApiPromise = null; reject(new Error("api-timeout")); } }, 9000);
-        });
-        return ytApiPromise;
-      }
       /* Título, autor y miniatura reales, desde el oEmbed de YouTube */
       function enrichYouTubeTrack(track){
         if (!track.videoId) return Promise.resolve();
@@ -1373,8 +1363,8 @@
       }
       function seekToSeconds(s){
         if (current < 0 || !tracks[current]) return;
-        if (isHiddenYouTube() && ytApiPlayer && ytApiPlayer.seekTo){
-          try{ ytApiPlayer.seekTo(Math.max(0, s), true); }catch(e){}
+        if (isHiddenYouTube()){
+          try{ ytAudioEl.currentTime = Math.max(0, s); }catch(e){}
           return;
         }
         var el = curAudio();
@@ -1665,82 +1655,81 @@
         }
       });
 
-      /* ----- Reproductor oficial OCULTO: solo audio, máxima calidad ----- */
-      function ytEmbedSrc(t, autoplay){
-        var base = "https://www.youtube-nocookie.com/embed/";
-        var extra = "rel=0&playsinline=1" + (autoplay ? "&autoplay=1" : "");
-        if (t.videoId){
-          var src = base + encodeURIComponent(t.videoId) + "?" + extra + "&enablejsapi=1";
-          if (t.playlistId) src += "&list=" + encodeURIComponent(t.playlistId);
-          return src;
-        }
-        return base + "videoseries?list=" + encodeURIComponent(t.playlistId) + "&" + extra;
-      }
-      function playHiddenYouTube(track, autoplay){
+      var ytStreamSeq = 0;
+      var ytStreamRetried = false;
+      /* El audio de YouTube ya no pasa por el reproductor oficial (iframe):
+         ese reproductor pausa el audio cuando la app pasa a segundo plano
+         (es una restricción de YouTube para no suscriptores de Premium).
+         Ahora el audio se pide directo a yt-dlp dentro del APK
+         (getAudioUrl) y suena en un <audio> normal, igual que un MP3
+         local: sigue en segundo plano, se adelanta con la barra y la
+         sesión del sistema lo controla. La URL del audio caduca en unas
+         horas, así que no se guarda: se vuelve a pedir cada vez que
+         suena la canción. */
+      function playHiddenYouTube(track, autoplay, seekSec, retried){
         stopYouTube();
         ytHiddenActive = true; ytHiddenTrack = track; ytHiddenPlaying = false;
-        $("ytWrap").classList.add("show");
+        ytStreamRetried = !!retried;
+        var seq = ++ytStreamSeq;
         /* El visualizador también tiene que arrancar en YouTube (si no,
            las barritas nunca se dibujan en online) y el temporizador de
            tiempo/progreso. */
         ensureViz();
         startYtTimeTimer();
-        ensureYTApi().then(function(){
-          if (!ytHiddenActive || ytHiddenTrack !== track) return;
-          var vars = { autoplay: autoplay ? 1 : 0, playsinline: 1, rel: 0 };
-          var vid = track.videoId || undefined;
-          if (track.kind === "playlist" && !vid){ vars.listType = "playlist"; vars.list = track.playlistId; }
-          ytApiPlayer = new YT.Player("ytPlayer", { width: "4", height: "4", videoId: vid, playerVars: vars, events: {
-            onReady: function(e){
-              try{
-                e.target.setPlaybackQuality("highres");
-                e.target.setVolume(Math.round(audio.volume * 100));
-                if (track.kind === "playlist" && track.videoId && track.playlistId) e.target.loadPlaylist({ list: track.playlistId, listType: "playlist" });
-                if (autoplay) e.target.playVideo();
-              }catch(err){}
-            },
-            onStateChange: function(e){
-              if (!window.YT) return;
-              if (e.data === YT.PlayerState.PLAYING){ ytHiddenPlaying = true; try{ e.target.setPlaybackQuality("highres"); }catch(err){} setPlayIcons(true); bgAudioSync(); }
-              else if (e.data === YT.PlayerState.PAUSED){ ytHiddenPlaying = false; setPlayIcons(false); bgAudioSync(); }
-              else if (e.data === YT.PlayerState.ENDED){ ytHiddenPlaying = false; if (track.kind === "video") nextTrack(true); else setPlayIcons(false); bgAudioSync(); }
-            },
-            onError: function(){ ytHiddenPlaying = false; setPlayIcons(false); }
-          }});
-        }).catch(function(){
-          if (!ytHiddenActive || ytHiddenTrack !== track) return;
-          var wrap = $("ytPlayer");
-          if (!wrap) return;
-          wrap.innerHTML = "";
-          var ifr = document.createElement("iframe");
-          ifr.src = ytEmbedSrc(track, autoplay);
-          ifr.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture");
-          ifr.setAttribute("title", track.title);
-          wrap.appendChild(ifr);
-          ytHiddenPlaying = !!autoplay;
-          setPlayIcons(!!autoplay);
-        });
         setPlayIcons(!!autoplay);
+        /* Si ya tenemos la URL del audio de hace un momento, suena sin
+           volver a pedirla (solo si el tema es el mismo). */
+        if (track.streamUrl){ useYtStream(track.streamUrl, autoplay, seekSec, seq); return; }
+        var p = getNativeDl();
+        if (!p || !p.getAudioUrl){
+          dlSetStatus("La música de YouTube solo suena dentro del APK.", true);
+          setPlayIcons(false);
+          return;
+        }
+        var watch = "https://www.youtube.com/watch?v=" + encodeURIComponent(track.videoId);
+        p.getAudioUrl({ url: watch }).then(function(res){
+          if (seq !== ytStreamSeq || !ytHiddenActive || ytHiddenTrack !== track) return;
+          var u = res && res.url;
+          if (!u) throw new Error("sin url");
+          track.streamUrl = u;
+          useYtStream(u, autoplay, seekSec, seq);
+        }).catch(function(err){
+          if (seq !== ytStreamSeq || !ytHiddenActive || ytHiddenTrack !== track) return;
+          ytHiddenPlaying = false; setPlayIcons(false);
+          dlSetStatus("No se pudo obtener el audio de YouTube" + ((err && err.message) ? " (" + err.message + ")" : "") + ". Prueba actualizar yt-dlp en Descargas.", true);
+        });
+      }
+      function useYtStream(u, autoplay, seekSec, seq){
+        if (seq !== ytStreamSeq) return;
+        try{ ytAudioEl.pause(); ytAudioEl.removeAttribute("src"); ytAudioEl.load(); }catch(e){}
+        ytAudioEl.src = u;
+        try{ ytAudioEl.volume = audio.volume; }catch(e){}
+        if (seekSec != null && seekSec > 1){
+          var onMeta = function(){ try{ if (seekSec < (ytAudioEl.duration || 0)) ytAudioEl.currentTime = seekSec; }catch(e){} ytAudioEl.removeEventListener("loadedmetadata", onMeta); };
+          ytAudioEl.addEventListener("loadedmetadata", onMeta);
+        }
+        if (autoplay){
+          var pr = ytAudioEl.play();
+          if (pr && pr.catch) pr.catch(function(){ ytHiddenPlaying = false; setPlayIcons(false); });
+        }
       }
       function stopYouTube(){
         stopYtTimeTimer();
         ytHiddenActive = false; ytHiddenPlaying = false; ytHiddenTrack = null;
-        if (ytApiPlayer){ try{ ytApiPlayer.stopVideo(); }catch(e){} try{ ytApiPlayer.destroy(); }catch(e){} ytApiPlayer = null; }
-        var wrap = $("ytWrap");
-        if (wrap){ wrap.innerHTML = '<div id="ytPlayer"></div>'; wrap.classList.remove("show"); }
+        try{ ytAudioEl.pause(); ytAudioEl.removeAttribute("src"); ytAudioEl.load(); }catch(e){}
       }
       function isCurrentYouTube(){ return current >= 0 && tracks[current] && tracks[current].type === "youtube"; }
       function isHiddenYouTube(){ return ytHiddenActive && current >= 0 && ytHiddenTrack === tracks[current]; }
 
       /* ---------- Tiempo y adelanto en YouTube ----------
-         El reproductor oculto de YouTube no dispara timeupdate como el
-         <audio> local: su tiempo se lee cada medio segundo con
-         getCurrentTime()/getDuration() y ahí se actualizan la barra de
-         progreso, el tiempo y el total. Con esto la barra ya sirve para
-         adelantar o retroceder también en las canciones online. */
+         El audio de YouTube suena en un <audio> normal (ytAudioEl): su
+         tiempo se lee cada medio segundo y ahí se actualizan la barra de
+         progreso, el tiempo y el total, y se resalta la línea de la
+         letra. Con esto la barra ya sirve para adelantar o retroceder
+         también en las canciones online. */
       var ytTimeTimer = null;
-      function ytDuration(){ try{ if (ytApiPlayer && ytApiPlayer.getDuration) return ytApiPlayer.getDuration() || 0; }catch(e){} return 0; }
-      function ytCurrentTime(){ try{ if (ytApiPlayer && ytApiPlayer.getCurrentTime) return ytApiPlayer.getCurrentTime() || 0; }catch(e){} return 0; }
+      function ytDuration(){ try{ return ytAudioEl.duration || 0; }catch(e){} return 0; }
+      function ytCurrentTime(){ try{ return ytAudioEl.currentTime || 0; }catch(e){} return 0; }
       function updateYtTime(){
         if (!isHiddenYouTube() || seeking) return;
         var d = ytDuration(), c = ytCurrentTime();
@@ -1762,9 +1751,10 @@
       }
       function seekToFraction(f){
         f = Math.max(0, Math.min(1, f));
-        if (isHiddenYouTube() && ytApiPlayer && ytApiPlayer.seekTo){
+        if (isHiddenYouTube()){
           var d = ytDuration();
-          if (d > 0){ try{ ytApiPlayer.seekTo(f * d, true); }catch(e){} }
+          if (d > 0){ try{ ytAudioEl.currentTime = f * d; }catch(e){} }
+          bgAudioSync();
           return;
         }
         var el = curAudio();
@@ -1772,9 +1762,10 @@
         try{ el.currentTime = f * dd; }catch(e){}
       }
       function seekBySeconds(delta){
-        if (isHiddenYouTube() && ytApiPlayer && ytApiPlayer.seekTo){
+        if (isHiddenYouTube()){
           var d = ytDuration(), c = ytCurrentTime();
-          if (d > 0){ try{ ytApiPlayer.seekTo(Math.max(0, Math.min(d, c + delta)), true); }catch(e){} }
+          if (d > 0){ try{ ytAudioEl.currentTime = Math.max(0, Math.min(d, c + delta)); }catch(e){} }
+          bgAudioSync();
           return;
         }
         var ea = curAudio();
@@ -2171,7 +2162,8 @@
           pauseAllAudio();
           showTrackOnScreen();
           renderPlaylist();
-          playHiddenYouTube(t, autoplay);
+          saveState();
+          playHiddenYouTube(t, autoplay, rs);
           $("tCur").textContent = "00:00:00"; $("tTot").textContent = "YouTube · Audio";
           refreshLyricsForCurrent();
           return;
@@ -2197,8 +2189,12 @@
         if (current < 0) return;
         var t = tracks[current];
         if (t.type === "youtube" || t.type === "ytaudio" || isHiddenYouTube()){
-          if (ytApiPlayer && ytApiPlayer.playVideo){ try{ ytApiPlayer.setPlaybackQuality("highres"); ytApiPlayer.setVolume(Math.round(audio.volume * 100)); ytApiPlayer.playVideo(); }catch(e){} }
-          else playHiddenYouTube(t, true);
+          if (isHiddenYouTube()){
+            var hasSrc = false;
+            try{ hasSrc = !!ytAudioEl.getAttribute("src"); }catch(e){}
+            if (hasSrc){ var pr = ytAudioEl.play(); if (pr && pr.catch) pr.catch(function(){}); }
+            else playHiddenYouTube(t, true);
+          } else playHiddenYouTube(t, true);
           return;
         }
         ensureViz();
@@ -2209,9 +2205,11 @@
       function togglePlay(){
         if (current < 0){ if (tracks.length) loadTrack(0, true); else showView("library"); return; }
         if (isHiddenYouTube()){
-          if (ytApiPlayer && ytApiPlayer.pauseVideo && ytApiPlayer.playVideo){
-            try{ if (ytHiddenPlaying) ytApiPlayer.pauseVideo(); else { ytApiPlayer.setPlaybackQuality("highres"); ytApiPlayer.playVideo(); } }catch(e){}
-          } else if (!$("ytPlayer").querySelector("iframe")){ playHiddenYouTube(tracks[current], true); }
+          var hasSrc = false;
+          try{ hasSrc = !!ytAudioEl.getAttribute("src"); }catch(e){}
+          if (!hasSrc){ playHiddenYouTube(tracks[current], true); return; }
+          if (ytHiddenPlaying){ try{ ytAudioEl.pause(); }catch(e){} }
+          else { var pr = ytAudioEl.play(); if (pr && pr.catch) pr.catch(function(){}); }
           return;
         }
         var el = curAudio();
@@ -2232,11 +2230,11 @@
                 /* Fin de la cola con un tema online: la radio sigue con
                    música sugerida de YouTube; si no hay sugeridos, para. */
                 playNextSuggestion(cur).then(function(ok){
-                  if (!ok){ pauseAllAudio(); if (ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } }
+                  if (!ok){ pauseAllAudio(); }
                 });
                 return;
               }
-              pauseAllAudio(); if (ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } return;
+              pauseAllAudio(); return;
             }
             n = 0;
           }
@@ -2246,7 +2244,7 @@
       function prevTrack(){
         if (!tracks.length) return;
         if (isHiddenYouTube()){
-          if (ytCurrentTime() > 3){ try{ ytApiPlayer.seekTo(0, true); }catch(e){} return; }
+          if (ytCurrentTime() > 3){ try{ ytAudioEl.currentTime = 0; }catch(e){} return; }
         } else if (curAudio().currentTime > 3){ curAudio().currentTime = 0; return; }
         var n = current - 1;
         if (n < 0) n = tracks.length - 1;
@@ -2284,6 +2282,24 @@
       audio.addEventListener("play", function(){ setPlayIcons(true); bgAudioSync(); });
       audio.addEventListener("pause", function(){ setPlayIcons(false); bgAudioSync(); saveState(); });
       audio.addEventListener("ended", function(){ nextTrack(true); });
+      /* El audio de YouTube suena en este <audio> (ya no en el iframe):
+         sus eventos mueven los iconos, la sesión del sistema y la
+         siguiente canción igual que el audio local. */
+      ytAudioEl.addEventListener("play", function(){ ytHiddenPlaying = true; setPlayIcons(true); bgAudioSync(); });
+      ytAudioEl.addEventListener("pause", function(){ ytHiddenPlaying = false; setPlayIcons(false); bgAudioSync(); saveState(); });
+      ytAudioEl.addEventListener("ended", function(){
+        ytHiddenPlaying = false;
+        if (ytHiddenTrack && ytHiddenTrack.kind === "video") nextTrack(true);
+        else setPlayIcons(false);
+        bgAudioSync();
+      });
+      ytAudioEl.addEventListener("error", function(){
+        if (!ytHiddenActive || !ytHiddenTrack || ytStreamRetried) return;
+        /* La URL del audio caducó o falló: se pide una nueva una sola vez. */
+        var t = ytHiddenTrack;
+        t.streamUrl = null;
+        playHiddenYouTube(t, true, null, true);
+      });
       audio.addEventListener("loadedmetadata", function(){
         $("tTot").textContent = fmt(audio.duration);
         if (current >= 0 && !tracks[current].duration){ tracks[current].duration = audio.duration || 0; renderPlaylist(); }
@@ -2319,7 +2335,6 @@
         v = Math.max(0, Math.min(1, v));
         audio.volume = v;
         try{ ytAudioEl.volume = v; }catch(e){}
-        if (ytApiPlayer && ytApiPlayer.setVolume){ try{ ytApiPlayer.setVolume(Math.round(v * 100)); }catch(e){} }
         if (v > 0) lastVol = v;
       }
       audio.volume = 0.8;
@@ -2406,7 +2421,7 @@
       if ("mediaSession" in navigator){
         try{
           navigator.mediaSession.setActionHandler("play", function(){ startPlayback(); });
-          navigator.mediaSession.setActionHandler("pause", function(){ if (isHiddenYouTube() && ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } else pauseAllAudio(); });
+          navigator.mediaSession.setActionHandler("pause", function(){ if (isHiddenYouTube()){ try{ ytAudioEl.pause(); }catch(e){} } else pauseAllAudio(); });
           navigator.mediaSession.setActionHandler("previoustrack", prevTrack);
           navigator.mediaSession.setActionHandler("nexttrack", function(){ nextTrack(false); });
         }catch(e){}

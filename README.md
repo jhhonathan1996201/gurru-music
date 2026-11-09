@@ -119,13 +119,20 @@ tu celular.
   con su metadata original (título, artista y portada, con
   `--add-metadata` y `--embed-thumbnail`) y el avance se ve en
   **Descargas**, canción por canción.
-- La barra de progreso en YouTube funciona con `seekTo` del reproductor
-  oficial: el tiempo se lee cada medio segundo (`getCurrentTime` /
-  `getDuration`) porque el iframe no dispara `timeupdate`.
-- El ecualizador se anima también en online: como en YouTube no hay un
-  `<audio>` al que conectar el analizador, las barritas se dibujan con
-  ondas generadas (mismo dibujo que en local); en pausa quedan en la
-  línea base, igual que en local.
+- Al escuchar, el audio NO pasa por el reproductor oficial de YouTube
+  (iframe): ese reproductor pausa el audio cuando la app pasa a
+  segundo plano (restricción de YouTube para no suscriptores de
+  Premium). El audio se pide directo a yt-dlp dentro del APK (método
+  `getAudioUrl`, `yt-dlp -g -f bestaudio`) y suena en un `<audio>`
+  normal, igual que un MP3 local: sigue en segundo plano, se adelanta
+  con la barra y la MediaSession lo controla. La URL del audio caduca
+  en unas horas y no se guarda: se vuelve a pedir cada vez que suena
+  la canción (si caducó a media reproducción, se pide una nueva una
+  sola vez).
+- La barra de progreso en YouTube funciona con `currentTime` del
+  `<audio>` (el tiempo se lee cada medio segundo); el ecualizador se
+  anima también en online con ondas generadas (mismo dibujo que en
+  local); en pausa quedan en la línea base, igual que en local.
 
 ## Reproducción en segundo plano
 
@@ -156,14 +163,18 @@ tu celular.
 
 La biblioteca (canciones de YouTube y descargadas), la canción actual
 y su posición, y el historial de Descargas se guardan en
-`localStorage` y se restauran al abrir la app. Las canciones locales
-del escaneo se vuelven a buscar solas; las del selector de carpetas
-usan URLs `blob:` que no sobreviven al cierre y no se guardan (el
-escaneo las vuelve a encontrar). En Descargas hay un botón **Borrar
-historial** que borra solo el historial: las canciones guardadas
-siguen en el teléfono y en la Biblioteca. Si la app se cerró a media
-descarga, esa entrada queda como detenida al reabrir, no como
-"descargando" para siempre.
+`localStorage` y se restauran al abrir la app. OJO: las canciones de
+YouTube no tienen `url` (su identidad es el `videoId`), así que al
+principio no se guardaban y la lista de YouTube se borraba al cerrar;
+ahora `serializeTrack` guarda las de YouTube por su `videoId` (la URL
+del audio no se guarda porque caduca, se vuelve a pedir al sonar).
+Las canciones locales del escaneo se vuelven a buscar solas; las del
+selector de carpetas usan URLs `blob:` que no sobreviven al cierre y
+no se guardan (el escaneo las vuelve a encontrar). En Descargas hay
+un botón **Borrar historial** que borra solo el historial: las
+canciones guardadas siguen en el teléfono y en la Biblioteca. Si la
+app se cerró a media descarga, esa entrada queda como detenida al
+reabrir, no como "descargando" para siempre.
 
 ## Si cambias algo del reproductor
 

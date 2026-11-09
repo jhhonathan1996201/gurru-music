@@ -382,6 +382,82 @@ public class YtDlpDownloaderPlugin extends Plugin {
     }
 
     /**
+     * Devuelve la URL directa del audio de un video de YouTube
+     * (yt-dlp -g -f bestaudio), para reproducirla en un <audio> normal.
+     * El reproductor oficial de YouTube (iframe) pausa el audio cuando
+     * la app pasa a segundo plano — es una restricción de YouTube para
+     * no suscriptores de Premium —, mientras que el <audio> propio de
+     * la app sigue sonando con el servicio en primer plano y la
+     * MediaSession, igual que un MP3 local. La URL caduca en unas
+     * horas: no se guarda, se vuelve a pedir al reproducir.
+     * Resuelve: { url }.
+     */
+    @PluginMethod
+    public void getAudioUrl(final PluginCall call) {
+        final String url = call.getString("url", "");
+        if (url == null || url.trim().isEmpty()) {
+            call.reject("Falta la dirección del video de YouTube.");
+            return;
+        }
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ensureInitialized();
+                    YoutubeDLRequest request = new YoutubeDLRequest(url.trim());
+                    request.addOption("-f", "bestaudio/best");
+                    request.addOption("-g");
+                    request.addOption("--no-playlist");
+                    request.addOption("--no-warnings");
+                    // Igual que en las descargas: el cliente Android pasa
+                    // mejor el bloqueo de YouTube que el cliente web.
+                    request.addOption("--extractor-args", "youtube:player_client=android");
+                    YoutubeDLResponse response = YoutubeDL.getInstance().execute(
+                            request, "gurru-stream",
+                            new Function3<Float, Long, String, Unit>() {
+                                @Override
+                                public Unit invoke(Float progress, Long eta, String line) {
+                                    return Unit.INSTANCE;
+                                }
+                            });
+                    if (response == null || response.getExitCode() != 0) {
+                        throw new Exception("yt-dlp no pudo obtener el audio (código "
+                                + (response == null ? "?" : response.getExitCode()) + "): "
+                                + shortError(response == null ? "" : response.getErr(), 200));
+                    }
+                    String out = response == null ? null : response.getOut();
+                    String streamUrl = null;
+                    if (out != null) {
+                        for (String line : out.split("\\r?\\n")) {
+                            String t = line.trim();
+                            if (!t.isEmpty()) { streamUrl = t; break; }
+                        }
+                    }
+                    if (streamUrl == null || streamUrl.isEmpty()) {
+                        throw new Exception("yt-dlp no devolvió la dirección del audio");
+                    }
+                    final String finalUrl = streamUrl;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSObject ret = new JSObject();
+                            ret.put("url", finalUrl);
+                            call.resolve(ret);
+                        }
+                    });
+                } catch (final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            call.reject(shortError(e.getMessage(), 300));
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    /**
      * Actualiza yt-dlp en runtime desde GitHub (canal "stable" por defecto,
      * o "nightly" / "master"). Necesario cuando YouTube rompe extractores.
      * Resuelve: { status: "DONE" | "ALREADY_UP_TO_DATE", version }.
