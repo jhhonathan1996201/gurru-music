@@ -9,6 +9,9 @@ public class MainActivity extends BridgeActivity {
         // El plugin nativo de descargas (yt-dlp dentro del APK) debe
         // registrarse ANTES de super.onCreate, que es cuando se crea el Bridge.
         registerPlugin(YtDlpDownloaderPlugin.class);
+        // Servicio en primer plano para que la música siga sonando
+        // con la app en segundo plano o la pantalla apagada.
+        registerPlugin(BackgroundAudioPlugin.class);
         super.onCreate(savedInstanceState);
         // Pantalla completa: oculta la barra de estado del sistema (hora,
         // señal y batería) mientras la app está abierta. Se vuelve a ver

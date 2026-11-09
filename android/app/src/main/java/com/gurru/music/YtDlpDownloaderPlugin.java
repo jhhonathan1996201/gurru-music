@@ -28,6 +28,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import kotlin.Unit;
 import kotlin.jvm.functions.Function3;
 
@@ -281,6 +284,96 @@ public class YtDlpDownloaderPlugin extends Plugin {
                         @Override
                         public void run() {
                             call.reject("No se pudo leer la versión de yt-dlp: " + e.getMessage());
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    /**
+     * Busca canciones en YouTube con yt-dlp (ytsearch) DENTRO del APK.
+     * Parámetros JS: { query, limit } (limit por defecto 10, máx 20).
+     * Resuelve: { results: [{ id, title, channel, duration, thumbnail }] }.
+     * Sin API key y sin servidores de terceros: la búsqueda la hace yt-dlp,
+     * igual que las descargas (mismo cliente Android para pasar el bloqueo
+     * de YouTube). Solo devuelve videos; la miniatura es la oficial de
+     * YouTube (i.ytimg.com), como ya se usa en el resto de la app.
+     */
+    @PluginMethod
+    public void searchYouTube(final PluginCall call) {
+        final String query = call.getString("query", "");
+        final int limit = call.getInt("limit", 10);
+        if (query == null || query.trim().isEmpty()) {
+            call.reject("Escribe el nombre de una canción o artista para buscar.");
+            return;
+        }
+        final int n = Math.max(1, Math.min(20, limit));
+        final String q = query.trim();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ensureInitialized();
+                    YoutubeDLRequest request = new YoutubeDLRequest("ytsearch" + n + ":" + q);
+                    request.addOption("--flat-playlist");
+                    request.addOption("--dump-single-json");
+                    request.addOption("--no-playlist");
+                    request.addOption("--no-warnings");
+                    // Igual que en las descargas: el cliente Android pasa
+                    // mejor el bloqueo de YouTube que el cliente web.
+                    request.addOption("--extractor-args", "youtube:player_client=android");
+                    YoutubeDLResponse response = YoutubeDL.getInstance().execute(
+                            request, "gurru-search",
+                            new Function3<Float, Long, String, Unit>() {
+                                @Override
+                                public Unit invoke(Float progress, Long eta, String line) {
+                                    return Unit.INSTANCE;
+                                }
+                            });
+                    if (response == null || response.getExitCode() != 0) {
+                        throw new Exception("yt-dlp no pudo buscar (código "
+                                + (response == null ? "?" : response.getExitCode()) + "): "
+                                + shortError(response == null ? "" : response.getErr(), 200));
+                    }
+                    String out = response.getOut();
+                    if (out == null) throw new Exception("yt-dlp no devolvió resultados");
+                    int start = out.indexOf('{');
+                    if (start >= 0) out = out.substring(start);
+                    JSONObject root = new JSONObject(out.trim());
+                    JSONArray entries = root.optJSONArray("entries");
+                    JSONArray results = new JSONArray();
+                    if (entries != null) {
+                        for (int i = 0; i < entries.length(); i++) {
+                            JSONObject e = entries.optJSONObject(i);
+                            if (e == null) continue;
+                            String id = e.optString("id", "");
+                            if (id.isEmpty()) continue;
+                            JSONObject r = new JSONObject();
+                            r.put("id", id);
+                            r.put("title", e.optString("title", "Canción de YouTube"));
+                            String channel = e.optString("uploader", "");
+                            if (channel.isEmpty()) channel = e.optString("channel", "YouTube");
+                            r.put("channel", channel);
+                            r.put("duration", e.optDouble("duration", 0));
+                            r.put("thumbnail", "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg");
+                            results.put(r);
+                        }
+                    }
+                    final JSONArray resArr = results;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSObject ret = new JSObject();
+                            ret.put("results", resArr);
+                            call.resolve(ret);
+                        }
+                    });
+                } catch (final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            call.reject(shortError(e.getMessage(), 300));
                         }
                     });
                 }

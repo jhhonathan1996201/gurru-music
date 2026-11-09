@@ -79,26 +79,68 @@ En Android Studio:
 2. Pulsa **Elegir carpeta** y selecciona la carpeta donde guardas tu música.
    Se cargan todas las canciones y subcarpetas de una vez, en orden.
 3. También puedes elegir archivos sueltos si prefieres.
-4. En la pantalla de reproducción ves, bajo el volumen, la cola
-   "A continuación" con las canciones que siguen. Toca cualquiera para
-   saltar a ella.
+4. Para música de YouTube, en **Biblioteca → Buscar música** escribe el
+   nombre de una canción o un artista: salen los resultados y al tocar uno
+   eliges **Escuchar** (solo audio, sin video) o **Descargar** (se guarda
+   en Música/Gurru Music con yt-dlp dentro del APK). Nada suena ni se
+   descarga solo. Ya no se usa el link de YouTube.
+5. En la pantalla de reproducción ves la cola "A continuación" con las
+   canciones que siguen. Toca cualquiera para saltar a ella. La barra de
+   progreso sirve para adelantar o retroceder tanto en canciones locales
+   como en las de YouTube, y las barritas del ecualizador se animan en
+   las dos.
 
 Tus archivos MP3 no se suben a ningún lado: se reproducen directo desde
 tu celular.
 
 ## Nota honesta sobre el volumen y las carpetas
 
-- El deslizador de volumen de esta versión controla el **volumen de
-  reproducción de la música dentro de la app**, y se mantiene sincronizado
-  con el audio. No mueve el volumen del sistema del teléfono (timbres y
-  avisos): ese se sigue ajustando con los botones físicos del celular.
-- Para controlar el volumen del sistema y para que la app recuerde tu
-  carpeta de música entre sesiones sin tener que elegirla cada vez, harán
-  falta **plugins nativos de Capacitor** después. El envoltorio web por sí
-  solo no resuelve eso: es el siguiente paso, no está incluido en este
-  proyecto.
+- La barra de volumen se quitó de la pantalla: el volumen de la música
+  queda en 80% al arrancar. Se puede silenciar con el botón de la bocina
+  del reproductor, y el volumen del sistema del teléfono (timbres y
+  avisos) se sigue ajustando con los botones físicos del celular.
+- Para que la app recuerde tu carpeta de música entre sesiones sin tener
+  que elegirla cada vez, hará falta un **plugin nativo de Capacitor**
+  después. El envoltorio web por sí solo no resuelve eso: es el siguiente
+  paso, no está incluido en este proyecto.
 - La app usa las fuentes de Google Fonts de internet la primera vez; sin
   conexión usa las fuentes de respaldo del sistema y se sigue viendo bien.
+
+## Buscador de YouTube (sin link)
+
+- En **Biblioteca → Buscar música** se escribe la canción o el artista.
+  La búsqueda la hace yt-dlp dentro del APK (método `searchYouTube` del
+  plugin `YtDlpDownloader`, con `ytsearch`, sin API key ni servidores de
+  terceros); devuelve hasta 10 resultados con miniatura, título, canal y
+  duración.
+- Al tocar un resultado se abre la ventana para elegir **Escuchar**,
+  **Descargar** o **Solo agregarlo a la Biblioteca**. Al descargar, la
+  canción se guarda en Música/Gurru Music (MP3 o M4A, máxima calidad) y
+  el avance se ve en **Descargas**, canción por canción.
+- La barra de progreso en YouTube funciona con `seekTo` del reproductor
+  oficial: el tiempo se lee cada medio segundo (`getCurrentTime` /
+  `getDuration`) porque el iframe no dispara `timeupdate`.
+- El ecualizador se anima también en online: como en YouTube no hay un
+  `<audio>` al que conectar el analizador, las barritas se dibujan con
+  ondas generadas (mismo dibujo que en local); en pausa quedan en la
+  línea base, igual que en local.
+
+## Reproducción en segundo plano
+
+- Al sonar una canción, el plugin nativo `BackgroundAudio` arranca un
+  servicio en primer plano (`BackgroundAudioService`, tipo
+  `mediaPlayback`) con una notificación que muestra la canción actual
+  y botones de **Pausa / Siguiente / Detener**. El servicio sostiene
+  un wake lock parcial para que la CPU no se duerma con la pantalla
+  apagada. El audio en sí sigue sonando en el WebView (`<audio>` para
+  MP3 locales, reproductor de YouTube para online).
+- El servicio se detiene con el botón Detener de la notificación o con
+  el botón de parar del reproductor. Si la música se pausa, la
+  notificación queda con el botón de reproducir para retomarla.
+- **Importante en OPPO/ColorOS:** el sistema puede matar la app en
+  segundo plano aunque tenga el servicio. Si la música se corta al
+  apagar la pantalla, ve a **Ajustes > Batería > Gurru Music** y
+  permite la actividad en segundo plano / sin restricciones de batería.
 
 ## Si cambias algo del reproductor
 

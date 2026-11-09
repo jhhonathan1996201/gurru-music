@@ -25,6 +25,13 @@
 
         </activity>
 
+        <!-- Servicio en primer plano para la reproducción en segundo plano.
+             Android 14 exige el tipo mediaPlayback y su permiso. -->
+        <service
+            android:name=".BackgroundAudioService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -49,4 +56,12 @@
         android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+    <!-- Reproducción en segundo plano: servicio en primer plano con
+         notificación, wake lock para que la CPU no se duerma, y permiso
+         de notificaciones (Android 13+; las notificaciones de servicios
+         en primer plano se muestran aunque no se haya concedido). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>
