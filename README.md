@@ -339,3 +339,47 @@ referenciados existen, lógica de cola y de limpieza probada en Node
 (8/8 casos de títulos; cola YouTube [1,3,5] y local [0,2,4] con 6
 canciones mezcladas; subir una canción en la cola la intercambia bien),
 `npx cap sync` OK, md5 de `www/index.html` == copia en assets.
+
+## NUEVO8 — El error rojo ya se puede leer y tocar + sugerencias en la cola (2026-11-09)
+
+Jonathan reportó ~21:21 CST que el YouTube online sigue cortándose
+en segundo plano y que la cola se sigue mezclando, y ~21:23 CST que
+el error rojo ("no se puede cargar el YouTube") se queda fijo, no
+desaparece y no se puede tocar para verlo de nuevo. No confirmó si
+instaló el APK de NUEVO7, así que este ZIP trae también todo lo de
+NUEVO7 (la separación de la cola por origen ya estaba en el código y
+se verificó: al sonar YouTube la cola solo muestra YouTube).
+
+- **La barra roja ya se puede tocar:** el aviso "Audio directo falló
+  (…)" se cortaba con "…" porque la barra es de una sola línea y no
+  tenía forma de cerrarse ni de verse completo. Ahora al tocar la
+  barra vuelve a salir el error completo con su detalle y su botón
+  Reintentar, y tiene una ✕ para cerrarla. Lo mismo con el mensaje
+  de error de la búsqueda de YouTube: al tocarlo vuelve a mostrarse
+  completo. El aviso flotante sigue cerrándose solo a los 10 s, pero
+  la barra queda como recordatorio para volver a verlo.
+- **Sugerencias en "A continuación":** al sonar un tema de YouTube,
+  si quedan menos de 3 canciones por delante en la cola, la app busca
+  sugerencias del mismo artista (igual que la radio) y las agrega a
+  la cola con la marca "Sugerencia". Se pueden tocar para saltar a
+  ellas como cualquier canción de la cola; al sonar una sugerencia se
+  buscan más si hacen falta. En música local no se agregan.
+- **Audio directo con segundo intento:** `getAudioUrl` ahora acepta
+  el cliente de YouTube (`android` por defecto; también `ios`, `web`
+  o `tv`). Al reproducir, la app pide el audio primero con el
+  cliente Android y si falla reintenta con el cliente iOS antes de
+  caer al reproductor oficial, porque un cliente puede no devolver
+  la dirección del audio para un video y el otro sí. Si los dos
+  fallan, el aviso muestra los dos motivos (Android: … · iOS: …).
+- **Para diagnosticar el segundo plano:** con este cambio, al tocar
+  la barra roja se lee el motivo exacto del fallo. Ese texto es el
+  que hace falta para arreglar de raíz que se corte al salir de la
+  app; si el audio directo ya funciona con el segundo intento, la
+  música seguirá sonando al salir.
+
+Validado: JS `node --check` OK (2 bloques), todos los ids
+referenciados existen, lógica de sugerencias probada en Node (cola
+YouTube [1,3] + 5 sugerencias = [1,3,4,5,6,7,8]; no duplica al
+repetir; con 5 por delante no agrega más; en local no agrega),
+plugins compilan con javac, `npx cap sync` OK, md5 de
+`www/index.html` == copia en assets.

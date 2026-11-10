@@ -68,6 +68,11 @@ public class YtDlpDownloaderPlugin extends Plugin {
 
     /** Prefijo del id de proceso de yt-dlp (sirve para cancelar). */
     private static final String PROCESS_PREFIX = "gurru-";
+    /* Contador para que cada petición de audio directo tenga su propio
+       id de proceso: si se tocan dos canciones seguidas, el segundo
+       yt-dlp no choca con el primero por usar el mismo id. */
+    private static int streamSeq = 0;
+    private static synchronized int nextStreamSeq() { return ++streamSeq; }
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final ConcurrentHashMap<String, String> runningProcesses = new ConcurrentHashMap<>();
@@ -292,12 +297,15 @@ public class YtDlpDownloaderPlugin extends Plugin {
     }
 
     /**
-     * Busca canciones en YouTube con yt-dlp (ytsearch) DENTRO del APK.
+     * Busca canciones en YouTube Music con yt-dlp (ytmsearch) DENTRO del APK.
      * Parámetros JS: { query, limit } (limit por defecto 10, máx 20).
      * Resuelve: { results: [{ id, title, channel, duration, thumbnail }] }.
      * Sin API key y sin servidores de terceros: la búsqueda la hace yt-dlp,
      * igual que las descargas (mismo cliente Android para pasar el bloqueo
-     * de YouTube). Solo devuelve videos; la miniatura es la oficial de
+     * de YouTube). Se busca en YouTube Music (music.youtube.com) para que
+     * salgan las canciones (audio oficial, mejor calidad) y no videoclips;
+     * si esa búsqueda falla o no trae nada, se busca en YouTube normal
+     * (ytsearch). Solo se devuelven videos; la miniatura es la oficial de
      * YouTube (i.ytimg.com), como ya se usa en el resto de la app.
      */
     @PluginMethod
@@ -315,50 +323,19 @@ public class YtDlpDownloaderPlugin extends Plugin {
             public void run() {
                 try {
                     ensureInitialized();
-                    YoutubeDLRequest request = new YoutubeDLRequest("ytsearch" + n + ":" + q);
-                    request.addOption("--flat-playlist");
-                    request.addOption("--dump-single-json");
-                    request.addOption("--no-playlist");
-                    request.addOption("--no-warnings");
-                    // Igual que en las descargas: el cliente Android pasa
-                    // mejor el bloqueo de YouTube que el cliente web.
-                    request.addOption("--extractor-args", "youtube:player_client=android");
-                    YoutubeDLResponse response = YoutubeDL.getInstance().execute(
-                            request, "gurru-search",
-                            new Function3<Float, Long, String, Unit>() {
-                                @Override
-                                public Unit invoke(Float progress, Long eta, String line) {
-                                    return Unit.INSTANCE;
-                                }
-                            });
-                    if (response == null || response.getExitCode() != 0) {
-                        throw new Exception("yt-dlp no pudo buscar (código "
-                                + (response == null ? "?" : response.getExitCode()) + "): "
-                                + shortError(response == null ? "" : response.getErr(), 200));
+                    JSONArray results = null;
+                    Exception lastErr = null;
+                    try {
+                        results = runYtSearch("ytmsearch" + n + ":" + q);
+                    } catch (Exception e) { lastErr = e; }
+                    if (results == null || results.length() == 0) {
+                        try {
+                            results = runYtSearch("ytsearch" + n + ":" + q);
+                        } catch (Exception e) { lastErr = e; }
                     }
-                    String out = response.getOut();
-                    if (out == null) throw new Exception("yt-dlp no devolvió resultados");
-                    int start = out.indexOf('{');
-                    if (start >= 0) out = out.substring(start);
-                    JSONObject root = new JSONObject(out.trim());
-                    JSONArray entries = root.optJSONArray("entries");
-                    JSONArray results = new JSONArray();
-                    if (entries != null) {
-                        for (int i = 0; i < entries.length(); i++) {
-                            JSONObject e = entries.optJSONObject(i);
-                            if (e == null) continue;
-                            String id = e.optString("id", "");
-                            if (id.isEmpty()) continue;
-                            JSONObject r = new JSONObject();
-                            r.put("id", id);
-                            r.put("title", e.optString("title", "Canción de YouTube"));
-                            String channel = e.optString("uploader", "");
-                            if (channel.isEmpty()) channel = e.optString("channel", "YouTube");
-                            r.put("channel", channel);
-                            r.put("duration", e.optDouble("duration", 0));
-                            r.put("thumbnail", "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg");
-                            results.put(r);
-                        }
+                    if (results == null) {
+                        throw lastErr != null ? lastErr
+                                : new Exception("yt-dlp no devolvió resultados");
                     }
                     final JSONArray resArr = results;
                     runOnUiThread(new Runnable() {
@@ -381,23 +358,92 @@ public class YtDlpDownloaderPlugin extends Plugin {
         });
     }
 
+    /** Una búsqueda (ytmsearch o ytsearch) con yt-dlp; devuelve los videos. */
+    private JSONArray runYtSearch(String searchQuery) throws Exception {
+        YoutubeDLRequest request = new YoutubeDLRequest(searchQuery);
+        request.addOption("--flat-playlist");
+        request.addOption("--dump-single-json");
+        request.addOption("--no-playlist");
+        request.addOption("--no-warnings");
+        // Igual que en las descargas: el cliente Android pasa
+        // mejor el bloqueo de YouTube que el cliente web.
+        request.addOption("--extractor-args", "youtube:player_client=android");
+        YoutubeDLResponse response = YoutubeDL.getInstance().execute(
+                request, "gurru-search-" + nextStreamSeq(),
+                new Function3<Float, Long, String, Unit>() {
+                    @Override
+                    public Unit invoke(Float progress, Long eta, String line) {
+                        return Unit.INSTANCE;
+                    }
+                });
+        if (response == null || response.getExitCode() != 0) {
+            throw new Exception("yt-dlp no pudo buscar (código "
+                    + (response == null ? "?" : response.getExitCode()) + "): "
+                    + shortError(response == null ? "" : response.getErr(), 200));
+        }
+        String out = response.getOut();
+        if (out == null) throw new Exception("yt-dlp no devolvió resultados");
+        int start = out.indexOf('{');
+        if (start >= 0) out = out.substring(start);
+        JSONObject root = new JSONObject(out.trim());
+        JSONArray entries = root.optJSONArray("entries");
+        JSONArray results = new JSONArray();
+        if (entries != null) {
+            for (int i = 0; i < entries.length(); i++) {
+                JSONObject e = entries.optJSONObject(i);
+                if (e == null) continue;
+                // En YouTube Music salen también álbumes y artistas (listas):
+                // solo nos quedamos con videos (canciones).
+                String type = e.optString("_type", "video");
+                if (!"video".equals(type)) continue;
+                String id = e.optString("id", "");
+                if (id.isEmpty()) continue;
+                JSONObject r = new JSONObject();
+                r.put("id", id);
+                r.put("title", e.optString("title", "Canción de YouTube"));
+                String channel = e.optString("uploader", "");
+                if (channel.isEmpty()) channel = e.optString("channel", "YouTube");
+                r.put("channel", channel);
+                r.put("duration", e.optDouble("duration", 0));
+                r.put("thumbnail", "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg");
+                results.put(r);
+            }
+        }
+        return results;
+    }
+
     /**
-     * Devuelve la URL directa del audio de un video de YouTube
-     * (yt-dlp -g -f bestaudio), para reproducirla en un <audio> normal.
+     * Devuelve la URL directa del mejor audio de un video de YouTube,
+     * para reproducirla en un <audio> normal.
      * El reproductor oficial de YouTube (iframe) pausa el audio cuando
      * la app pasa a segundo plano — es una restricción de YouTube para
      * no suscriptores de Premium —, mientras que el <audio> propio de
      * la app sigue sonando con el servicio en primer plano y la
      * MediaSession, igual que un MP3 local. La URL caduca en unas
      * horas: no se guarda, se vuelve a pedir al reproducir.
-     * Resuelve: { url }.
+     * Se usa --dump-json (el mismo mecanismo que la búsqueda, que sí
+     * funciona) y se elige el mejor formato solo-audio por bitrate, en
+     * vez de -g: así se evita depender de la salida de -g y se suena
+     * con la mejor calidad de audio disponible. Resuelve: { url }.
+     * Parámetro opcional: { url, client } — client es el cliente de
+     * YouTube que usa yt-dlp ("android" por defecto; también "ios",
+     * "web" o "tv"). El cliente cambia qué formatos devuelve YouTube:
+     * si uno no trae la dirección del audio, otro puede traerla.
      */
     @PluginMethod
     public void getAudioUrl(final PluginCall call) {
         final String url = call.getString("url", "");
+        final String client = call.getString("client", "android");
         if (url == null || url.trim().isEmpty()) {
             call.reject("Falta la dirección del video de YouTube.");
             return;
+        }
+        // Solo clientes conocidos: cualquier otro valor vuelve a android.
+        final String playerClient;
+        if ("ios".equals(client) || "web".equals(client) || "tv".equals(client)) {
+            playerClient = client;
+        } else {
+            playerClient = "android";
         }
         executor.execute(new Runnable() {
             @Override
@@ -405,15 +451,14 @@ public class YtDlpDownloaderPlugin extends Plugin {
                 try {
                     ensureInitialized();
                     YoutubeDLRequest request = new YoutubeDLRequest(url.trim());
-                    request.addOption("-f", "bestaudio/best");
-                    request.addOption("-g");
+                    request.addOption("--dump-json");
                     request.addOption("--no-playlist");
                     request.addOption("--no-warnings");
                     // Igual que en las descargas: el cliente Android pasa
                     // mejor el bloqueo de YouTube que el cliente web.
-                    request.addOption("--extractor-args", "youtube:player_client=android");
+                    request.addOption("--extractor-args", "youtube:player_client=" + playerClient);
                     YoutubeDLResponse response = YoutubeDL.getInstance().execute(
-                            request, "gurru-stream",
+                            request, "gurru-stream-" + nextStreamSeq(),
                             new Function3<Float, Long, String, Unit>() {
                                 @Override
                                 public Unit invoke(Float progress, Long eta, String line) {
@@ -426,13 +471,11 @@ public class YtDlpDownloaderPlugin extends Plugin {
                                 + shortError(response == null ? "" : response.getErr(), 200));
                     }
                     String out = response == null ? null : response.getOut();
-                    String streamUrl = null;
-                    if (out != null) {
-                        for (String line : out.split("\\r?\\n")) {
-                            String t = line.trim();
-                            if (!t.isEmpty()) { streamUrl = t; break; }
-                        }
-                    }
+                    if (out == null) throw new Exception("yt-dlp no devolvió información del video");
+                    int start = out.indexOf('{');
+                    if (start >= 0) out = out.substring(start);
+                    JSONObject info = new JSONObject(out.trim());
+                    String streamUrl = pickBestAudioUrl(info);
                     if (streamUrl == null || streamUrl.isEmpty()) {
                         throw new Exception("yt-dlp no devolvió la dirección del audio");
                     }
@@ -455,6 +498,38 @@ public class YtDlpDownloaderPlugin extends Plugin {
                 }
             }
         });
+    }
+
+    /** Elige la URL del mejor formato solo-audio (sin video), por bitrate. */
+    private static String pickBestAudioUrl(JSONObject info) {
+        JSONArray formats = info.optJSONArray("formats");
+        if (formats == null) return null;
+        String bestUrl = null;
+        double bestAbr = -1;
+        // Primero: solo audio (vcodec none), mayor bitrate.
+        for (int i = 0; i < formats.length(); i++) {
+            JSONObject f = formats.optJSONObject(i);
+            if (f == null) continue;
+            String vcodec = f.optString("vcodec", "none");
+            String acodec = f.optString("acodec", "none");
+            String u = f.optString("url", "");
+            if (u.isEmpty() || "none".equals(acodec)) continue;
+            if (!"none".equals(vcodec)) continue; // tiene video: no es solo audio
+            double abr = f.optDouble("abr", 0);
+            if (abr > bestAbr) { bestAbr = abr; bestUrl = u; }
+        }
+        if (bestUrl != null) return bestUrl;
+        // Respaldo: cualquier formato con audio, mayor bitrate.
+        for (int i = 0; i < formats.length(); i++) {
+            JSONObject f = formats.optJSONObject(i);
+            if (f == null) continue;
+            String acodec = f.optString("acodec", "none");
+            String u = f.optString("url", "");
+            if (u.isEmpty() || "none".equals(acodec)) continue;
+            double abr = f.optDouble("abr", 0);
+            if (abr > bestAbr) { bestAbr = abr; bestUrl = u; }
+        }
+        return bestUrl;
     }
 
     /**
