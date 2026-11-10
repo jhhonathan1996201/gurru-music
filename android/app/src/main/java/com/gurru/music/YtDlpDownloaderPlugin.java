@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -297,7 +298,7 @@ public class YtDlpDownloaderPlugin extends Plugin {
     }
 
     /**
-     * Busca canciones en YouTube Music con yt-dlp (ytmsearch) DENTRO del APK.
+     * Busca canciones en YouTube Music con yt-dlp DENTRO del APK.
      * Parámetros JS: { query, limit } (limit por defecto 10, máx 20).
      * Resuelve: { results: [{ id, title, channel, duration, thumbnail }] }.
      * Sin API key y sin servidores de terceros: la búsqueda la hace yt-dlp,
@@ -305,8 +306,9 @@ public class YtDlpDownloaderPlugin extends Plugin {
      * de YouTube). Se busca en YouTube Music (music.youtube.com) para que
      * salgan las canciones (audio oficial, mejor calidad) y no videoclips;
      * si esa búsqueda falla o no trae nada, se busca en YouTube normal
-     * (ytsearch). Solo se devuelven videos; la miniatura es la oficial de
-     * YouTube (i.ytimg.com), como ya se usa en el resto de la app.
+     * (ytsearch). Solo se devuelven videos (ids de 11 caracteres); la
+     * miniatura es la oficial de YouTube (i.ytimg.com), como ya se usa en
+     * el resto de la app.
      */
     @PluginMethod
     public void searchYouTube(final PluginCall call) {
@@ -326,11 +328,18 @@ public class YtDlpDownloaderPlugin extends Plugin {
                     JSONArray results = null;
                     Exception lastErr = null;
                     try {
-                        results = runYtSearch("ytmsearch" + n + ":" + q);
+                        /* YouTube Music por su URL de búsqueda. El prefijo
+                           ytmsearch: NO existe en yt-dlp (lo rechaza como
+                           "Unsupported url scheme"), así que esa búsqueda
+                           siempre fallaba y se caía al respaldo. */
+                        String encQ;
+                        try { encQ = URLEncoder.encode(q, "UTF-8"); }
+                        catch (Exception ue) { encQ = q.replace(" ", "%20"); }
+                        results = runYtSearch("https://music.youtube.com/search?q=" + encQ, n);
                     } catch (Exception e) { lastErr = e; }
                     if (results == null || results.length() == 0) {
                         try {
-                            results = runYtSearch("ytsearch" + n + ":" + q);
+                            results = runYtSearch("ytsearch" + n + ":" + q, n);
                         } catch (Exception e) { lastErr = e; }
                     }
                     if (results == null) {
@@ -358,8 +367,8 @@ public class YtDlpDownloaderPlugin extends Plugin {
         });
     }
 
-    /** Una búsqueda (ytmsearch o ytsearch) con yt-dlp; devuelve los videos. */
-    private JSONArray runYtSearch(String searchQuery) throws Exception {
+    /** Una búsqueda (URL de YouTube Music o ytsearch) con yt-dlp; devuelve los videos. */
+    private JSONArray runYtSearch(String searchQuery, int maxResults) throws Exception {
         YoutubeDLRequest request = new YoutubeDLRequest(searchQuery);
         request.addOption("--flat-playlist");
         request.addOption("--dump-single-json");
@@ -390,17 +399,26 @@ public class YtDlpDownloaderPlugin extends Plugin {
         JSONArray results = new JSONArray();
         if (entries != null) {
             for (int i = 0; i < entries.length(); i++) {
+                if (results.length() >= maxResults) break;
                 JSONObject e = entries.optJSONObject(i);
                 if (e == null) continue;
-                // En YouTube Music salen también álbumes y artistas (listas):
-                // solo nos quedamos con videos (canciones).
+                /* Con --flat-playlist las entradas son _type "url", NO
+                   "video": el filtro viejo ("video") tiraba TODOS los
+                   resultados y la búsqueda siempre decía que no encontró
+                   nada. Se aceptan video y url, pero solo si el id parece
+                   un video de YouTube (11 caracteres): así se excluyen
+                   los álbumes (listas) y los artistas (canales) que
+                   también salen en YouTube Music, que no son canciones. */
                 String type = e.optString("_type", "video");
-                if (!"video".equals(type)) continue;
+                if (!"video".equals(type) && !"url".equals(type)) continue;
                 String id = e.optString("id", "");
                 if (id.isEmpty()) continue;
+                if (!id.matches("[A-Za-z0-9_-]{11}")) continue;
+                String title = e.optString("title", "");
+                if (title.isEmpty()) continue;
                 JSONObject r = new JSONObject();
                 r.put("id", id);
-                r.put("title", e.optString("title", "Canción de YouTube"));
+                r.put("title", title);
                 String channel = e.optString("uploader", "");
                 if (channel.isEmpty()) channel = e.optString("channel", "YouTube");
                 r.put("channel", channel);

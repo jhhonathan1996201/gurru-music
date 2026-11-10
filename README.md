@@ -383,3 +383,41 @@ YouTube [1,3] + 5 sugerencias = [1,3,4,5,6,7,8]; no duplica al
 repetir; con 5 por delante no agrega más; en local no agrega),
 plugins compilan con javac, `npx cap sync` OK, md5 de
 `www/index.html` == copia en assets.
+
+## NUEVO9 — El buscador de YouTube ya encuentra canciones (2026-11-09)
+
+Jonathan probó el APK de NUEVO8 y reportó que el buscador de YouTube
+decía "No encontré nada para … Prueba con otro nombre" con cualquier
+búsqueda. Causa encontrada y comprobada con yt-dlp real: dos errores
+juntos en el plugin. (1) El filtro de resultados pedía `_type ==
+"video"`, pero con `--flat-playlist` yt-dlp devuelve las entradas
+con `_type == "url"`, así que se tiraban TODOS los resultados (5 de
+5 en la prueba con "Belanova Rosa Pastel"). (2) La primera búsqueda
+usaba el prefijo `ytmsearch:`, que no existe en yt-dlp (lo rechaza
+como "Unsupported url scheme"), así que siempre fallaba y se caía
+al respaldo, que también se vaciaba por el filtro. Por eso el
+mensaje era "no encontré nada" y no un error: las dos búsquedas
+devolvían cero sin romperse. La búsqueda funcionaba antes de NUEVO6
+porque no existía ese filtro; NUEVO6 lo agregó y nunca se probó
+hasta ahora.
+
+- **Filtro arreglado:** se aceptan entradas `video` y `url`, pero
+  solo si el id parece un video de YouTube (11 caracteres) y el
+  título no está vacío. Así se siguen excluyendo los álbumes
+  (listas), los artistas (canales) y las radios que salen en
+  YouTube Music, que no son canciones.
+- **YouTube Music por su URL:** la primera búsqueda ya no usa el
+  prefijo `ytmsearch:`; usa la URL de búsqueda de
+  `music.youtube.com/search?q=…` (con la búsqueda codificada). Si
+  falla o no trae nada, se busca en YouTube normal (ytsearch), como
+  antes. La radio y las sugerencias usan el mismo buscador, así que
+  también se arreglan.
+- Los resultados se limitan a 20 como antes.
+
+Validado: búsqueda real con yt-dlp 2026.10.26 en esta sesión —
+con el filtro viejo: 0 resultados en ytsearch y 0 en YouTube
+Music; con el filtro nuevo: 5 resultados en ytsearch y 11 en
+YouTube Music (canciones de Belanova), y los 17 excluidos en
+YouTube Music son artistas, listas y radios, ninguna canción.
+Plugin compila con javac, `npx cap sync` OK, md5 de
+`www/index.html` == copia en assets (sin cambios en la web).
