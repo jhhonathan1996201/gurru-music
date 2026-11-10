@@ -421,3 +421,121 @@ YouTube Music (canciones de Belanova), y los 17 excluidos en
 YouTube Music son artistas, listas y radios, ninguna canción.
 Plugin compila con javac, `npx cap sync` OK, md5 de
 `www/index.html` == copia en assets (sin cambios en la web).
+
+## Ronda NUEVO10 (2026-11-09 ~22:20 CST)
+
+Jonathan confirmó a las 22:05 CST que NUEVO9 arregló el buscador
+("Ok ya se arregló") y levantó el hold del caché invisible: "ahora
+implementemos esto porfa". En el mismo mensaje pidió dos arreglos
+(cola "A continuación" mal centrada en local y ecualizador distinto
+en online). Después mandó la captura con el error exacto del audio
+directo, pidió sugerencias por ARTISTA, que la última búsqueda de
+YouTube permanezca al salir y entrar, y más fuentes de letras.
+
+### 1) Caché invisible para YouTube online (lo principal)
+- **El error que lo motivó** (captura de Jonathan, video
+  `324UfrjhL9Q` "Por Esta Vez" de Belanova): "Audio directo falló.
+  Android: ERROR: [youtube] 324UfrjhL9Q: Requested format is not
+  available. Use --list-formats for a list of available formats ·
+  iOS: ERROR: [youtube] 324UfrjhL9Q: Requested format is not
+  available…". Reproducido y comprobado con yt-dlp real en esta
+  sesión: con yt-dlp 2026.10.26 `--dump-json` (sin `-f`) devuelve
+  el video bien (formatos: storyboards + formato 18 combinado
+  360p, sin formatos solo-audio); con las versiones viejas
+  (2023.10.07, 2024.10.07) el mismo video da "Sign in to confirm
+  you're not a bot". El yt-dlp del APK es viejo, así que el audio
+  directo falla según el video y la versión. El caché usa el camino
+  de la descarga (`-f bestaudio/best`, que sí funciona) y por eso
+  lo esquiva.
+- **Cómo funciona:** al darle play a una canción de YouTube, la app
+  muestra "Preparando «…»… N%" y descarga el audio en silencio a la
+  carpeta privada de la app (`getCacheDir()/ytcache`, invisible para
+  MediaStore y para el usuario) con un método nuevo del plugin
+  `cacheAudio({url, videoId})` (sin `--extract-audio`: el archivo
+  original m4a/mp4 suena directo y la preparación es rápida) en su
+  propio hilo (`cacheExecutor`, separado del de Descargas, para que
+  no se estorben). Al terminar, la canción suena en el `<audio>`
+  local como un MP3: sigue en segundo plano, se adelanta con la
+  barra, la sesión del sistema la controla y el ecualizador usa el
+  audio real. Si el caché falla, suena por el camino de siempre
+  (audio directo o reproductor oficial).
+- **Sigue pareciendo YouTube online:** el tipo de la canción no
+  cambia (`"youtube"`), así que conserva su botón rojo, su cola, sus
+  sugerencias y su pestaña. El caché NO aparece en Descargas ni en
+  Música/Gurru Music (eso sigue siendo solo para el botón Descargar,
+  que guarda para siempre). `cacheUrl`/`cachePath` viven solo en
+  memoria (`serializeTrack` no los guarda): al cerrar la app se
+  pierden y el caché se vacía al abrir (`clearAudioCache()` en el
+  inicio). Solo se guardan 3 canciones (LRU con `registerCache`):
+  al preparar la cuarta, la más vieja se borra (`deleteCachedAudio`).
+  Si el usuario pausa durante "Preparando…", se cancela la
+  reproducción automática pero el caché sigue preparándose y queda
+  guardado para cuando le dé play. Si el archivo en caché se pierde
+  (el sistema lo borró), al fallar el `<audio>` se prepara de nuevo
+  una sola vez por canción.
+- **Audio directo también se endureció:** `getAudioUrl` ahora pide
+  `--dump-json` con `-f bestaudio/best` explícito (verificado con
+  yt-dlp real: devuelve el formato 18 con su URL de audio), en vez
+  de confiar en el selector por defecto que fallaba con "Requested
+  format is not available" en estos videos.
+
+### 2) Sugerencias por ARTISTA, no por canción ni por canal
+- Antes se buscaba por el artista de la pista, que en YouTube es el
+  CANAL que subió el video ("armxndo", "LatinHype"…), o por el título
+  cuando el canal era "YouTube". Por eso no salían más canciones de
+  Belanova al buscar "Rosa Pastel".
+- Ahora `artistForSuggestions(t)` saca el artista del TÍTULO
+  ("Belanova - Rosa Pastel" → "Belanova", también con "—", "|", y
+  con el artista después del guion si coincide), ignora palabras
+  genéricas ("Mix", "Official Video"…), y si la canción se encontró
+  buscando ("rosa pastel belanova" + título "Rosa Pastel"), lo que
+  sobra de la búsqueda es el artista. La búsqueda con la que se
+  encontró cada canción se guarda en la pista (`track.searchQuery`).
+  La radio y las sugerencias de "A continuación" usan lo mismo.
+  Validado en Node con 8 casos (incluido el ejemplo exacto de
+  Jonathan), 8/8.
+
+### 3) "A continuación" mal centrada en local
+- Causa: `.queue-head` no tenía reglas de encogimiento y el contador
+  era largo en local ("12/305 · 293 siguen"), así que el botón
+  "Ocultar ▴" se salía de la pantalla. Arreglo: `.q-title` y
+  `.q-toggle` no se encogen, `.q-right` ocupa el espacio libre,
+  `.q-count` se recorta con "…" si falta sitio, y la cabecera puede
+  partirse en dos líneas si hace falta. Además el contador ya no
+  lleva "· N siguen" (las que siguen ya se ven en la lista): ahora
+  es solo "12/305" (y "· aleatorio" si está el aleatorio).
+
+### 4) Ecualizador igual en online y en local
+- Causa: el analizador solo estaba conectado al `<audio>` local; en
+  online se dibujaban ondas generadas (se veían distintas). Arreglo:
+  `ensureViz` también conecta `ytAudioEl` al mismo analizador y
+  `drawViz` usa los datos reales cuando suena el audio directo (sin
+  iframe). El caché ya sonaba por el `<audio>` local, así que ahí el
+  ecualizador es real automáticamente. Las ondas generadas solo
+  quedan para el reproductor oficial (iframe), que no se puede
+  analizar.
+
+### 5) La última búsqueda de YouTube permanece
+- Al salir y entrar a YouTube (o al reabrir la app, si el sistema
+  la cerró en segundo plano) los resultados se borraban porque solo
+  vivían en memoria. Ahora la última búsqueda con sus resultados se
+  guarda en `localStorage` (`gurru-ytsearch-v1`) y se restaura al
+  abrir la app y al entrar a la pestaña YouTube si la vista se
+  vació (sin pisar una búsqueda a medias distinta).
+
+### 6) Más fuentes de letras
+- Antes solo LRCLIB (muy limitado). Ahora la letra se busca en
+  cadena, sin clave: **LRCLIB** primero (la única con tiempos para
+  resaltar la línea que suena), si no la tiene **lyrics.ovh** y
+  luego **some-random-api** (texto plano). El artista para buscar se
+  saca del título con el mismo parseo de las sugerencias. Abajo de
+  la letra se ve de qué fuente salió ("Letra: LRCLIB" / "lyrics.ovh"
+  / "some-random-api").
+
+Validado: JS `node --check` OK (los 2 bloques), todos los
+`$("...")` existen (96 ids), javac OK (los 5 archivos), `npx cap
+sync` OK, md5 de `www/index.html` == copia en assets. Lógica
+probada en Node: artista 8/8, LRU del caché OK (guarda 3, la cuarta
+saca la más vieja y limpia sus campos). Descarga estilo caché
+verificada con yt-dlp real: `-f bestaudio/best` produce un .mp4 de
+1.67 MB para "Por Esta Vez" (324UfrjhL9Q).

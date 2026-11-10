@@ -76,6 +76,10 @@ public class YtDlpDownloaderPlugin extends Plugin {
     private static synchronized int nextStreamSeq() { return ++streamSeq; }
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    /* El caché de YouTube online corre en su propio hilo: preparar una
+       canción nunca se queda esperando detrás de una descarga (ni una
+       descarga detrás de una preparación). */
+    private final ExecutorService cacheExecutor = Executors.newSingleThreadExecutor();
     private final ConcurrentHashMap<String, String> runningProcesses = new ConcurrentHashMap<>();
 
     private volatile boolean initialized = false;
@@ -125,6 +129,20 @@ public class YtDlpDownloaderPlugin extends Plugin {
         });
     }
 
+    /** Progreso de la preparación del caché invisible (una canción a la
+        vez): el evento "cacheProgress" lleva {videoId, progress}. */
+    private void emitCacheProgress(final String videoId, final float progress) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                JSObject data = new JSObject();
+                data.put("videoId", videoId);
+                data.put("progress", (double) progress);
+                notifyListeners("cacheProgress", data);
+            }
+        });
+    }
+
     /** Nombre de archivo seguro para Android/MediaStore. */
     private static String safeFileName(String base, String ext) {
         if (base == null || base.trim().isEmpty()) base = "Gurru Music";
@@ -143,6 +161,16 @@ public class YtDlpDownloaderPlugin extends Plugin {
 
     private File tmpDir() {
         File dir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_MUSIC), ".gurru-tmp");
+        if (!dir.exists()) dir.mkdirs();
+        return dir;
+    }
+
+    /** Carpeta privada de la app para el caché invisible de YouTube:
+        getCacheDir() no la ve MediaStore ni el usuario (no aparece en
+        Música ni en Descargas) y el sistema puede limpiarla si falta
+        espacio en el teléfono. */
+    private File cacheDir() {
+        File dir = new File(getContext().getCacheDir(), "ytcache");
         if (!dir.exists()) dir.mkdirs();
         return dir;
     }
@@ -470,6 +498,13 @@ public class YtDlpDownloaderPlugin extends Plugin {
                     ensureInitialized();
                     YoutubeDLRequest request = new YoutubeDLRequest(url.trim());
                     request.addOption("--dump-json");
+                    /* Formato explícito: sin -f, yt-dlp usa su selector
+                       por defecto y en algunos videos (p. ej. los
+                       auto-generados de YouTube Music, que solo traen el
+                       formato 18 combinado) falla con "Requested format
+                       is not available". Con bestaudio/best devuelve ese
+                       formato combinado, que trae audio. */
+                    request.addOption("-f", "bestaudio/best");
                     request.addOption("--no-playlist");
                     request.addOption("--no-warnings");
                     // Igual que en las descargas: el cliente Android pasa
@@ -742,6 +777,136 @@ public class YtDlpDownloaderPlugin extends Plugin {
         }
         JSObject ret = new JSObject();
         ret.put("cancelled", cancelled);
+        call.resolve(ret);
+    }
+
+    /**
+     * Caché invisible para escuchar YouTube online como si fuera local:
+     * descarga el audio del video (sin convertir, sin metadatos: rápido)
+     * a la carpeta privada de la app y devuelve su ruta. La canción
+     * sigue siendo "YouTube" en la app (mismo botón, misma cola, mismas
+     * sugerencias); solo su fuente de audio cambia por dentro. No toca
+     * Descargas ni Música/Gurru Music: eso sigue siendo solo para el
+     * botón Descargar. Resuelve: { path }.
+     */
+    @PluginMethod
+    public void cacheAudio(final PluginCall call) {
+        final String url = call.getString("url", "");
+        final String videoId = call.getString("videoId", "");
+        if (url == null || url.trim().isEmpty() || videoId == null || videoId.trim().isEmpty()) {
+            call.reject("cacheAudio necesita url y videoId");
+            return;
+        }
+        final String vid = videoId.trim();
+        cacheExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                File produced = null;
+                try {
+                    ensureInitialized();
+                    File dir = cacheDir();
+                    /* Si ya está en caché de una preparación anterior, se
+                       reutiliza sin descargar de nuevo. */
+                    File[] existing = dir.listFiles();
+                    if (existing != null) {
+                        for (File f : existing) {
+                            if (f.getName().startsWith(vid + ".")) { produced = f; break; }
+                        }
+                    }
+                    if (produced == null) {
+                        emitCacheProgress(vid, 0f);
+                        String template = new File(dir, vid + ".%(ext)s").getAbsolutePath();
+                        YoutubeDLRequest request = new YoutubeDLRequest(url.trim());
+                        request.addOption("-f", "bestaudio/best");
+                        /* Sin --extract-audio: el archivo original (m4a o
+                           mp4 con audio) suena directo en el <audio> del
+                           WebView y la preparación es mucho más rápida. */
+                        request.addOption("--no-playlist");
+                        request.addOption("--no-warnings");
+                        request.addOption("--extractor-args", "youtube:player_client=android");
+                        request.addOption("-o", template);
+                        YoutubeDLResponse response = YoutubeDL.getInstance().execute(
+                                request, "gurru-cache-" + nextStreamSeq(),
+                                new Function3<Float, Long, String, Unit>() {
+                                    @Override
+                                    public Unit invoke(Float progress, Long eta, String line) {
+                                        emitCacheProgress(vid, progress == null ? 0f : progress);
+                                        return Unit.INSTANCE;
+                                    }
+                                });
+                        if (response == null || response.getExitCode() != 0) {
+                            throw new Exception("yt-dlp no pudo preparar el audio (código "
+                                    + (response == null ? "?" : response.getExitCode()) + "): "
+                                    + shortError(response == null ? "" : response.getErr(), 300));
+                        }
+                        File[] out = dir.listFiles();
+                        if (out != null) {
+                            for (File f : out) {
+                                if (f.getName().startsWith(vid + ".")) { produced = f; break; }
+                            }
+                        }
+                        if (produced == null || !produced.exists() || produced.length() == 0) {
+                            throw new Exception("yt-dlp no produjo el archivo de audio para este video");
+                        }
+                    }
+                    final String path = produced.getAbsolutePath();
+                    emitCacheProgress(vid, 100f);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSObject ret = new JSObject();
+                            ret.put("path", path);
+                            call.resolve(ret);
+                        }
+                    });
+                } catch (final Exception e) {
+                    final String msg = shortError(e.getMessage(), 300);
+                    if (produced != null) { try { produced.delete(); } catch (Exception ignored) {} }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            call.reject(msg);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    /** Borra el archivo en caché de un video (si existe). */
+    @PluginMethod
+    public void deleteCachedAudio(PluginCall call) {
+        String videoId = call.getString("videoId", "");
+        int deleted = 0;
+        if (videoId != null && !videoId.trim().isEmpty()) {
+            File dir = cacheDir();
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    if (f.getName().startsWith(videoId.trim() + ".")) {
+                        if (f.delete()) deleted++;
+                    }
+                }
+            }
+        }
+        JSObject ret = new JSObject();
+        ret.put("deleted", deleted);
+        call.resolve(ret);
+    }
+
+    /** Vacía todo el caché invisible de YouTube (al abrir la app). */
+    @PluginMethod
+    public void clearAudioCache(PluginCall call) {
+        int deleted = 0;
+        File dir = cacheDir();
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File f : files) {
+                if (f.delete()) deleted++;
+            }
+        }
+        JSObject ret = new JSObject();
+        ret.put("deleted", deleted);
         call.resolve(ret);
     }
 }
