@@ -539,3 +539,81 @@ probada en Node: artista 8/8, LRU del caché OK (guarda 3, la cuarta
 saca la más vieja y limpia sus campos). Descarga estilo caché
 verificada con yt-dlp real: `-f bestaudio/best` produce un .mp4 de
 1.67 MB para "Por Esta Vez" (324UfrjhL9Q).
+
+## Ronda NUEVO11 (2026-11-09 ~23:00 CST)
+
+Jonathan actualizó yt-dlp desde Descargas y confirmó: ya aparece
+"Preparando…" y ya no hay error, pero la música se sigue apagando en
+segundo plano. Pidió 4 cosas:
+
+### 1) El caché es la ÚNICA opción online
+- `playYouTubeOnline` ya no cae al audio directo ni al reproductor
+  oficial cuando el caché falla o cuando otra canción se está
+  preparando: esos dos caminos se pausan al salir de la app y daban
+  los errores ("Requested format is not available"). Ahora, si otra
+  canción se estaba preparando, se cancela su reproducción
+  automática y se prepara la nueva; si el caché falla, sale un aviso
+  con el motivo, botón Reintentar (vuelve a preparar) y la pista de
+  actualizar yt-dlp en Descargas. `playHiddenYouTube` y el
+  reproductor oficial quedan en el código sin usarse para nuevas
+  reproducciones.
+- Además se corrigió una carrera: al cancelar una preparación, su
+  `.then`/`.catch` ya no apaga `cacheBusy` (solo lo apaga la
+  preparación con el token vigente).
+
+### 2) Sugerencias por artista en TODAS las canciones, y cola nueva al abrir un audio online
+- El parseo por artista (`artistForSuggestions`) ya era general,
+  pero `ensureYtSuggestions` solo se llamaba en la rama online de
+  `loadTrack`: con el caché, la canción suena por el `<audio>` local
+  y las sugerencias nunca se sembraban. Ahora también se siembran
+  en esa rama, para cualquier canción online, no solo "Rosa Pastel".
+- `clearYtQueueExcept(idx)`: al abrir una canción nueva desde
+  online (resultado de búsqueda → Escuchar, o fila de Biblioteca /
+  cola), la cola "A continuación" se borra y se genera una nueva
+  desde esa canción: salen las de YouTube anteriores (las locales y
+  las descargadas no se tocan) y se siembran sugerencias frescas de
+  su artista. Siguiente/anterior y la radio NO borran la cola (se
+  mueven dentro de ella). Un contador `suggestGen` descarta las
+  búsquedas de sugerencias viejas que terminen después del cambio.
+
+### 3) yt-dlp se actualiza solo al instalar la app
+- Al abrir la app por primera vez (sin la marca
+  `gurru-ytdlp-auto` en `localStorage`), se llama en segundo plano
+  a `updateYtDlp({channel:"stable"})` y se guarda la marca al
+  terminar. Si no hay internet, falla en silencio y se reintenta en
+  la próxima apertura. El botón manual de Descargas sigue igual.
+
+### 4) Segundo plano: el código ya está bien; lo que falta es el ajuste de batería de OPPO
+- Se revisó todo el camino: el WebView NO se pausa al salir
+  (`KeepRunning` es `true` por defecto en Capacitor, verificado en
+  el código de `Bridge.java`), el servicio en primer plano arranca
+  bien (`startForeground` + WakeLock + `START_STICKY`, tipo
+  `mediaPlayback`) y nada en JS pausa el audio al salir. El que
+  mata el proceso es **ColorOS** (OPPO): aunque haya servicio en
+  primer plano, apaga las apps en segundo plano si no están en "Sin
+  restricciones". Por eso la app ahora muestra un aviso único al
+  abrirla (marca `gurru-batt-tip`): Ajustes → Batería → Gurru Music
+  → "Sin restricciones". Preguntas pendientes para Jonathan: ¿ya
+  puso ese ajuste? ¿la música se apaga al salir de la app o al
+  apagar la pantalla / después de un rato? ¿la música local también
+  se apaga en segundo plano o solo la de YouTube?
+
+### Sobre ytmusicapi (pregunta de Jonathan)
+- Sí se puede usar: es una librería que habla con la API interna
+  de YouTube Music y saca el audio por otra ruta. Pero se probó esa
+  API desde aquí y YouTube bloqueó hasta un video normal
+  (`UNPLAYABLE` en `music.youtube.com/youtubei/v1/player` y en el
+  cliente web), así que esa ruta no está verificada y podría chocar
+  con el mismo muro; además meter la librería Python dentro del APK
+  es un cambio grande y se rompe cada que YouTube cambia algo. Se
+  quedó como plan B: si con el caché + yt-dlp actualizado sigue
+  fallando, se agrega la llamada directa a la API de YouTube Music
+  (sin la librería) como otro respaldo.
+
+Validado: JS `node --check` OK (los 2 bloques), todos los
+`$("...")` existen (96 ids), `npx cap sync` OK, md5 de
+`www/index.html` == copia en assets. Sin cambios en Java (no hace
+falta javac). Lógica probada en Node con las funciones reales:
+abrir ytC en una cola mixta deja solo [locales + ytC] con current
+correcto y gen subido; abrir un tema local no toca nada; abrir ytA
+quita las sugerencias viejas sembradas.

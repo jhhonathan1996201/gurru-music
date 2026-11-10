@@ -2100,15 +2100,17 @@
           setPlayIcons(false);
           return;
         }
-        if (cacheBusy){
-          /* Ya se está preparando otra canción: suena por el camino de
-             siempre (audio directo o reproductor oficial) sin esperar. */
-          playHiddenYouTube(track, true, seekSec);
-          return;
-        }
+        /* El caché es la ÚNICA forma de escuchar online (NUEVO11): el
+           audio directo y el reproductor oficial se pausan al salir de
+           la app y daban errores, así que ya no se usan como respaldo.
+           Si otra canción se estaba preparando, se cancela su
+           reproducción automática y se prepara esta. */
+        if (cacheBusy){ cacheToken++; cachePreparing = null; dlSetStatus("", false); }
         var p = getNativeDl();
         if (!p || !p.cacheAudio){
-          playHiddenYouTube(track, true, seekSec);
+          dlSetStatus("Esta versión no tiene la descarga invisible: instala el APK nuevo.", true);
+          showToast({ kind: "err", title: "Falta la descarga invisible", msg: "Esta versión de la app no trae el caché para escuchar online. Instala el APK nuevo.", details: "El método nativo cacheAudio no existe en esta versión." });
+          setPlayIcons(false);
           return;
         }
         nativeDlOnCacheProgress();
@@ -2119,7 +2121,7 @@
         setPlayIcons(false);
         var watch = "https://www.youtube.com/watch?v=" + encodeURIComponent(track.videoId);
         p.cacheAudio({ url: watch, videoId: track.videoId }).then(function(res){
-          cacheBusy = false;
+          if (token === cacheToken) cacheBusy = false;
           var path = res && res.path;
           if (!path) throw new Error("sin ruta de caché");
           track.cachePath = path;
@@ -2132,12 +2134,19 @@
           if (seekSec != null && seekSec > 1) restoreSeekSec = seekSec;
           loadTrack(current, true);
         }).catch(function(err){
-          cacheBusy = false;
+          if (token === cacheToken) cacheBusy = false;
           if (cachePreparing && cachePreparing.track === track) cachePreparing = null;
           if (token !== cacheToken) return;
-          dlSetStatus("", false);
-          /* Si el caché falló, suena por el camino de siempre. */
-          if (tracks[current] === track) playHiddenYouTube(track, true, seekSec);
+          var detail = (err && err.message) ? String(err.message) : "sin motivo";
+          var short = "No se pudo preparar «" + cleanTitle(track.title) + "».";
+          dlSetStatus(short + " " + detail, true);
+          /* Sin respaldo: si el caché falla, la canción no suena por el
+             camino viejo (se pausa al salir); se avisa el motivo con
+             Reintentar, o actualizar yt-dlp en Descargas. */
+          if (tracks[current] === track){
+            showToast({ kind: "err", title: "No se pudo preparar la canción", msg: "El audio no se pudo descargar para escuchar en segundo plano. Reintenta, o actualiza yt-dlp en Descargas y vuelve a intentar.", details: detail, retryLabel: "Reintentar", onRetry: function(){ if (tracks[current] === track) playYouTubeOnline(track, true, seekSec); } });
+            setPlayIcons(false);
+          }
         });
       }
       function playHiddenYouTube(track, autoplay, seekSec, retried){
@@ -2510,7 +2519,7 @@
         if (!choiceCtx) return;
         var firstIdx = choiceCtx.indices[0];
         closeChoice();
-        if (typeof firstIdx === "number" && tracks[firstIdx]){ showView("player"); loadTrack(firstIdx, true); }
+        if (typeof firstIdx === "number" && tracks[firstIdx]){ showView("player"); loadTrack(clearYtQueueExcept(firstIdx), true); }
       });
       $("choiceDownloadBtn").addEventListener("click", function(){
         if (!choiceCtx) return;
@@ -2744,6 +2753,7 @@
          de YouTube; la música local se detiene al final como siempre. */
       var suggestPool = [];
       var suggestPlayed = {};
+      var suggestGen = 0; /* sube cada vez que la cola online se regenera: las búsquedas viejas de sugerencias se descartan */
       var suggestFetching = false;
       /* El ARTISTA para sugerir más música: sale del TÍTULO ("Belanova
          - Rosa Pastel"), no del canal que subió el video ("armxndo",
@@ -2791,7 +2801,11 @@
         if (!p || !p.searchYouTube) return Promise.resolve([]);
         var q = suggestQueryFor(t);
         if (!q) return Promise.resolve([]);
+        var gen = suggestGen;
         return p.searchYouTube({ query: q, limit: 10 }).then(function(res){
+          /* Si mientras tanto se abrió otra canción online, la cola se
+             regeneró y estas sugerencias ya son de otro artista. */
+          if (gen !== suggestGen) return [];
           var list = (res && res.results) || [];
           var fresh = list.filter(function(r){
             if (!r || !r.id || suggestPlayed[r.id]) return false;
@@ -2868,6 +2882,28 @@
       });
       $("ytSearchInput").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); searchYouTube(); } });
 
+      /* Al abrir una canción nueva desde online, la cola "A continuación"
+         se borra y se genera una nueva desde esa canción (sus sugerencias
+         del mismo artista): las de YouTube anteriores salen de la cola;
+         las locales y las descargadas no se tocan. */
+      function clearYtQueueExcept(idx){
+        var keep = tracks[idx];
+        if (!keep || (keep.type !== "youtube" && keep.type !== "ytaudio")) return idx;
+        suggestGen++;
+        suggestPool = [];
+        var kept = [];
+        for (var i = 0; i < tracks.length; i++){
+          var s = tracks[i];
+          if (s.type === "youtube" || s.type === "ytaudio"){ if (i === idx) kept.push(s); }
+          else kept.push(s);
+        }
+        tracks = kept;
+        current = kept.indexOf(keep);
+        saveState();
+        renderPlaylist();
+        return current;
+      }
+
       /* ---------- Reproducción ---------- */
       function loadTrack(i, autoplay){
         current = i;
@@ -2897,10 +2933,19 @@
         renderPlaylist();
         saveState();
         if (autoplay) startPlayback(); else setPlayIcons(false);
+        /* En caché la canción es online aunque suene por el <audio>
+           local: las sugerencias del artista también se siembran aquí. */
+        if (t.type === "youtube" || t.type === "ytaudio") ensureYtSuggestions(t);
         refreshLyricsForCurrent();
       }
       function playTrack(i){
         if (i === current && tracks.length){ togglePlay(); return; }
+        var t = tracks[i];
+        if (t && (t.type === "youtube" || t.type === "ytaudio")){
+          /* Abrir una canción online regenera la cola desde ella. */
+          loadTrack(clearYtQueueExcept(i), true);
+          return;
+        }
         loadTrack(i, true);
       }
       function startPlayback(){
@@ -3028,8 +3073,8 @@
         var t = tracks[current];
         if (!t || !t.cacheUrl || t._cacheRetry) return;
         /* El archivo en caché se perdió (el sistema lo borró): se
-           prepara de nuevo o suena por el camino de siempre. Solo se
-           reintenta una vez por canción para no entrar en bucle. */
+           prepara de nuevo por el caché. Solo se reintenta una vez
+           por canción para no entrar en bucle. */
         t._cacheRetry = true;
         t.cacheUrl = null; t.cachePath = null;
         var i = cacheOrder.indexOf(t.videoId);
@@ -3285,6 +3330,31 @@
         if (p0 && p0.clearAudioCache) p0.clearAudioCache().catch(function(){});
       } catch(e){}
       nativeDlOnCacheProgress();
+      /* Al instalar la app por primera vez, yt-dlp se actualiza solo en
+         segundo plano (una sola vez): así el caché no falla por la
+         versión vieja que trae el APK. Si no hay internet, se reintenta
+         en la próxima apertura. */
+      try {
+        if (window.localStorage && !localStorage.getItem("gurru-ytdlp-auto")){
+          var up0 = getNativeDl();
+          if (up0 && up0.updateYtDlp){
+            up0.updateYtDlp({ channel: "stable" }).then(function(r){
+              try{ localStorage.setItem("gurru-ytdlp-auto", "1"); }catch(e){}
+              try{ var m = $("dlUpdateMsg"); if (m) m.textContent = (r && r.status === "ALREADY_UP_TO_DATE") ? "yt-dlp ya está al día (" + (r.version || "") + ")." : "yt-dlp actualizado (" + ((r && r.version) || "") + ")."; }catch(e){}
+            }).catch(function(){ /* se reintenta en la próxima apertura */ });
+          }
+        }
+      } catch(e){}
+      /* Aviso único sobre la batería: OPPO/ColorOS apaga las apps en
+         segundo plano aunque tengan servicio en primer plano; si la
+         música se apaga al salir, hay que poner la app en Sin
+         restricciones en Ajustes → Batería. */
+      try {
+        if (window.localStorage && !localStorage.getItem("gurru-batt-tip")){
+          localStorage.setItem("gurru-batt-tip", "1");
+          showToast({ title: "Si la música se apaga al salir de la app", msg: "En OPPO, ve a Ajustes → Batería → Gurru Music y ponla en «Sin restricciones» para que siga sonando en segundo plano.", ms: 15000 });
+        }
+      } catch(e){}
       if (restored && current >= 0 && tracks[current]){ loadTrack(current, false); }
       /* Guarda la posición al salir de la app y cada 10 s mientras suena,
          para que al reabrir siga donde quedó. */
