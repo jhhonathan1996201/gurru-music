@@ -59,9 +59,6 @@
       .art{ flex:1; position:relative; overflow:hidden; display:grid; place-items:center; border-radius:6px; }
       .art img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; }
       .art.has-art img{ display:block; }
-      .art.has-art .xpress{ display:none; }
-      .xpress{ font-size:clamp(32px,9vw,44px); font-weight:800; letter-spacing:-.01em; color:var(--accent); text-shadow:0 0 10px var(--glow), 0 0 30px var(--glow); text-align:center; padding:0 10px; }
-      .xpress small{ display:block; font-size:11px; letter-spacing:.34em; font-weight:700; color:rgba(255,255,255,.75); text-shadow:none; margin-top:8px; }
 
       .track-meta{ flex:0 0 auto; text-align:center; margin-top:6px; }
       .marquee{ overflow:hidden; white-space:nowrap; }
@@ -74,19 +71,19 @@
       .t-album{ font-size:clamp(16px,4.6vw,22px); font-weight:700; color:#fff; text-shadow:0 0 8px rgba(255,255,255,.4); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
 
       .times{ display:flex; justify-content:space-between; font-family:"Share Tech Mono",monospace; font-size:clamp(19px,5vw,25px); color:#fff; text-shadow:0 0 8px rgba(255,255,255,.5); margin-top:8px; }
-      input[type="range"].seek{ -webkit-appearance:none; appearance:none; width:100%; height:24px; background:transparent; margin:0; cursor:pointer; }
+      input[type="range"].seek{ -webkit-appearance:none; appearance:none; width:100%; height:30px; background:transparent; margin:0; cursor:pointer; }
       input[type="range"].seek::-webkit-slider-runnable-track{ height:6px; border-radius:3px; background:linear-gradient(90deg, var(--accent) var(--fill,0%), rgba(255,255,255,.28) var(--fill,0%)); box-shadow:0 0 8px var(--glow); }
-      input[type="range"].seek::-webkit-slider-thumb{ -webkit-appearance:none; width:18px; height:18px; border-radius:50%; margin-top:-6px; background:#fff; border:1px solid var(--accent); box-shadow:0 0 10px var(--glow); }
+      input[type="range"].seek::-webkit-slider-thumb{ -webkit-appearance:none; width:26px; height:26px; border-radius:50%; margin-top:-10px; background:#fff; border:1px solid var(--accent); box-shadow:0 0 10px var(--glow); }
       input[type="range"].seek::-moz-range-track{ height:6px; border-radius:3px; background:rgba(255,255,255,.28); }
       input[type="range"].seek::-moz-range-progress{ height:6px; border-radius:3px; background:var(--accent); }
-      input[type="range"].seek::-moz-range-thumb{ width:16px; height:16px; border-radius:50%; background:#fff; border:1px solid var(--accent); }
+      input[type="range"].seek::-moz-range-thumb{ width:24px; height:24px; border-radius:50%; background:#fff; border:1px solid var(--accent); }
       input[type="range"].seek:disabled{ opacity:.4; cursor:default; }
 
       /* Fila de controles como la foto: volumen | anterior play siguiente | aleatorio repetir */
       .transport{ flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; padding:2px 0 0; }
       .t-group{ display:flex; align-items:center; gap:2px; }
       .t-group.center{ gap:6px; }
-      .tbtn{ border:0; background:transparent; color:#fff; width:46px; height:52px; display:grid; place-items:center; position:relative; }
+      .tbtn{ border:0; background:transparent; color:#fff; width:48px; height:52px; display:grid; place-items:center; position:relative; }
       .tbtn svg{ width:30px; height:30px; fill:#fff; filter:drop-shadow(0 0 6px rgba(255,255,255,.65)); display:block; }
       .tbtn.small svg{ width:25px; height:25px; }
       .tbtn:active{ transform:scale(.92); }
@@ -104,24 +101,24 @@
          (Biblioteca) va en su propia capa, siempre visible. */
       .queue{ flex:0 1 auto; min-height:0; display:flex; flex-direction:column; margin-top:2px; border-top:1px solid rgba(125,211,252,.28); padding-top:5px; }
       .queue-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 2px 4px; }
-      .queue-head .q-title{ font-size:11.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); text-shadow:0 0 6px var(--glow); }
+      .queue-head .q-title{ font-size:12.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); text-shadow:0 0 6px var(--glow); }
       .queue-head .q-right{ display:flex; align-items:center; gap:8px; }
-      .queue-head .q-count{ font-family:"Share Tech Mono",monospace; font-size:11.5px; color:var(--soft); white-space:nowrap; }
+      .queue-head .q-count{ font-family:"Share Tech Mono",monospace; font-size:12.5px; color:var(--soft); white-space:nowrap; }
       .q-toggle{ border:1px solid rgba(125,211,252,.55); background:rgba(255,255,255,.08); color:#fff; border-radius:999px; padding:4px 10px; font-size:11.5px; font-weight:800; }
       .queue-body{ display:flex; flex-direction:column; min-height:0; overflow:hidden; }
       .queue.collapsed .queue-body{ display:none; }
       .queue-list{ list-style:none; margin:0; padding:0; max-height:min(320px,46dvh); min-height:0; overflow:auto; overscroll-behavior:contain; }
-      .queue-list li{ display:grid; grid-template-columns:64px 1fr auto; align-items:center; gap:8px; padding:6px 6px; border-radius:8px; cursor:pointer; }
+      .queue-list li{ display:grid; grid-template-columns:64px 1fr auto auto; align-items:center; gap:8px; padding:6px 6px; border-radius:8px; cursor:pointer; }
       .queue-list li:hover{ background:rgba(255,255,255,.07); }
       .queue-list li.is-prev{ opacity:.62; }
       .queue-list li.is-current{ background:rgba(2,132,199,.38); box-shadow:inset 0 0 0 1px rgba(125,211,252,.55); opacity:1; cursor:default; }
       .queue-list li.is-current .q-t{ color:#fff; }
-      .queue-list .q-tag{ font-size:9.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); text-align:left; white-space:nowrap; }
+      .queue-list .q-tag{ font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); text-align:left; white-space:nowrap; }
       .queue-list li.is-prev .q-tag{ color:var(--soft); }
       .queue-list li.is-next .q-tag{ color:#7dd3fc; }
       .queue-list .q-t{ font-size:13px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; display:block; }
       .queue-list .q-a{ font-weight:400; color:var(--soft); }
-      .queue-list .q-dur{ font-family:"Share Tech Mono",monospace; font-size:11.5px; color:var(--soft); }
+      .queue-list .q-dur{ font-family:"Share Tech Mono",monospace; font-size:12.5px; color:var(--soft); }
       .queue-empty{ font-size:12.5px; color:var(--soft); padding:2px 2px 4px; }
       /* YouTube en la vista Reproduciendo */
       /* YouTube nunca se muestra: el reproductor queda oculto (4px, casi invisible)
@@ -137,7 +134,7 @@
       .scan-btns{ display:flex; gap:8px; }
       .yt-box .yt-h{ display:flex; align-items:center; gap:8px; font-weight:900; font-size:15px; }
       .yt-box .yt-h .yt-badge{ background:#ff0033; color:#fff; font-size:11px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:.04em; }
-      .yt-box p{ margin:6px 0 10px; font-size:12.5px; color:var(--soft); line-height:1.45; }
+      .yt-box p{ margin:6px 0 10px; font-size:13px; color:var(--soft); line-height:1.45; }
       .yt-row{ display:flex; gap:8px; }
       .yt-row input{ flex:1; min-width:0; padding:10px 11px; border-radius:9px; border:1px solid rgba(255,255,255,.28); background:rgba(255,255,255,.09); color:#fff; font:inherit; font-size:13.5px; }
       .yt-row input::placeholder{ color:rgba(186,230,253,.6); }
@@ -152,9 +149,9 @@
       .yt-result img{ width:96px; height:54px; object-fit:cover; border-radius:6px; flex:0 0 96px; background:#000; }
       .yt-result .yr-meta{ flex:1; min-width:0; display:flex; flex-direction:column; }
       .yt-result .yr-t{ font-weight:700; font-size:13.5px; line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-      .yt-result .yr-c{ font-size:12px; color:var(--soft); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .yt-result .yr-c{ font-size:12.5px; color:var(--soft); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .yt-result .yr-go{ margin-left:auto; font-size:22px; line-height:1; color:var(--accent); flex:0 0 auto; }
-      .src-badge{ font-size:9.5px; font-weight:900; letter-spacing:.06em; padding:2px 6px; border-radius:999px; background:#ff0033; color:#fff; vertical-align:2px; margin-left:6px; }
+      .src-badge{ font-size:11px; font-weight:900; letter-spacing:.06em; padding:2px 6px; border-radius:999px; background:#ff0033; color:#fff; vertical-align:2px; margin-left:6px; }
 
       /* ===== Biblioteca ===== */
       .lib{ flex:1; min-height:0; display:flex; flex-direction:column; padding:12px 16px 8px; }
@@ -164,7 +161,7 @@
       .pick-btn svg{ width:28px; height:28px; fill:var(--accent); margin-bottom:5px; filter:drop-shadow(0 0 6px var(--glow)); }
       .pick-btn .pz-t{ font-weight:800; font-size:14.5px; }
       .pick-btn .pz-s{ font-size:11.5px; color:var(--soft); margin-top:2px; line-height:1.35; }
-      .lib-note{ flex:0 0 auto; font-size:11.5px; color:var(--soft); text-align:center; margin:9px 2px 0; line-height:1.4; }
+      .lib-note{ flex:0 0 auto; font-size:12.5px; color:var(--soft); text-align:center; margin:9px 2px 0; line-height:1.4; }
       .lib-tools{ flex:0 0 auto; display:flex; gap:8px; margin:12px 0 6px; }
       .search-wrap{ flex:1; position:relative; }
       .search-wrap svg{ position:absolute; left:10px; top:50%; transform:translateY(-50%); width:15px; height:15px; fill:#7dd3fc; }
@@ -186,7 +183,7 @@
       @media (prefers-reduced-motion: reduce){ .eq i{ animation:none; height:10px; } }
       .playlist .meta{ min-width:0; }
       .playlist .pt{ font-size:14.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff; display:block; }
-      .playlist .pa{ font-size:12px; color:var(--soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
+      .playlist .pa{ font-size:13px; color:var(--soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
       .playlist .dur{ font-family:"Share Tech Mono",monospace; font-size:12px; color:var(--soft); }
       .playlist .rm{ border:0; background:transparent; color:#7dd3fc; font-size:18px; line-height:1; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; }
       .empty-state{ text-align:center; padding:26px 12px 14px; color:var(--soft); }
@@ -195,16 +192,16 @@
       .empty-state p{ font-size:13px; margin:5px 0 0; line-height:1.5; }
       .no-results{ padding:16px; text-align:center; font-size:13px; color:var(--soft); display:none; }
 
-      /* Barra inferior: solo Biblioteca (en el reproductor) y el contador centrado.
-         Sin botón de cola ni de Atrás: no se sobreponen con nada y el regreso es con el gesto del teléfono. */
-      .softbar{ flex:0 0 auto; position:relative; z-index:6; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; padding-bottom:env(safe-area-inset-bottom); background:linear-gradient(180deg, rgba(1,10,36,.25), rgba(1,10,36,.92) 30%); border-top:1px solid rgba(125,211,252,.22); }
-      .softbar .sk-mid{ grid-column:2; justify-self:center; }
-      .softbar button{ grid-column:3; justify-self:end; }
-      .softbar button{ border:0; background:transparent; font-size:clamp(19px,5vw,24px); font-weight:800; padding:10px 14px 12px; color:var(--accent); text-shadow:0 0 8px var(--glow), 0 0 22px var(--glow); }
-      .softbar button:active{ opacity:.7; }
-      .softbar .sk-mid{ display:flex; align-items:center; gap:7px; color:rgba(186,230,253,.75); font-size:11px; font-weight:700; font-family:"Share Tech Mono",monospace; }
-      .softbar .sk-mid .dot{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.25); }
-      .softbar .sk-mid .dot.on{ background:var(--accent); box-shadow:0 0 7px var(--glow); }
+      /* Barra inferior fija de navegación (uso con el pulgar): las tres
+         secciones principales — Descargas, Biblioteca y YouTube — siempre
+         visibles. Reemplaza las pestañas de arriba (ya no hay dos
+         navegaciones). */
+      .softbar{ flex:0 0 auto; position:relative; z-index:6; display:flex; padding-bottom:env(safe-area-inset-bottom); background:linear-gradient(180deg, rgba(1,10,36,.25), rgba(1,10,36,.92) 30%); border-top:1px solid rgba(125,211,252,.22); }
+      .nav-btn{ flex:1; min-width:0; border:0; background:transparent; color:rgba(186,230,253,.75); display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 4px 10px; font-size:13px; font-weight:800; min-height:56px; cursor:pointer; }
+      .nav-btn svg{ width:24px; height:24px; fill:currentColor; }
+      .nav-btn.yt svg{ fill:#ff4d6d; }
+      .nav-btn.on{ color:var(--accent); text-shadow:0 0 8px var(--glow); box-shadow:inset 0 2px 0 var(--accent); }
+      .nav-btn:active{ opacity:.75; }
 
       /* Estado de las descargas MP3 de YouTube (visible en el reproductor) */
       .dl-status{ flex:0 0 auto; display:none; align-items:center; gap:8px; margin-top:4px; padding:6px 9px; border:1px solid rgba(167,243,208,.45); background:rgba(6,78,59,.35); border-radius:9px; font-size:12px; font-weight:700; color:#d1fae5; line-height:1.35; }
@@ -228,7 +225,7 @@
       /* ===== Apartado DESCARGAS ===== */
       .dls{ flex:1; min-height:0; display:flex; flex-direction:column; padding:12px 16px 8px; }
       .dls-head{ flex:0 0 auto; }
-      .dls-head p{ margin:5px 0 0; font-size:12.5px; color:var(--soft); line-height:1.45; }
+      .dls-head p{ margin:5px 0 0; font-size:13px; color:var(--soft); line-height:1.45; }
       .dls-list{ flex:1; min-height:0; overflow:auto; margin-top:10px; padding-bottom:6px; }
       .dl-group{ border:1px solid rgba(125,211,252,.35); background:rgba(2,132,199,.14); border-radius:12px; padding:11px 12px; margin-bottom:12px; }
       .dl-group-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
@@ -246,8 +243,8 @@
       .dl-item-top{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
       .dl-item .di-t{ font-size:13.5px; font-weight:800; color:#fff; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .dl-item .di-pct{ font-family:"Share Tech Mono",monospace; font-size:16px; color:var(--accent); white-space:nowrap; }
-      .dl-item .di-sub{ font-size:11.5px; color:var(--soft); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-      .dl-item .di-status{ font-size:11.5px; font-weight:700; margin-top:3px; color:#bae6fd; }
+      .dl-item .di-sub{ font-size:12.5px; color:var(--soft); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .dl-item .di-status{ font-size:12.5px; font-weight:700; margin-top:3px; color:#bae6fd; }
       .dl-item .di-status.done{ color:#a7f3d0; }
       .dl-item .di-status.err{ color:#fecdd3; }
       .dl-item .di-actions{ display:flex; gap:8px; margin-top:7px; }
@@ -259,7 +256,6 @@
 
       /* ===== Al tocar un resultado de la búsqueda: Escuchar o Descargar ===== */
       .choice-overlay{ position:absolute; inset:0; z-index:30; display:none; place-items:center; background:rgba(1,8,28,.78); padding:20px; }
-      .tbtn.txt{ font-size:12px; font-weight:800; letter-spacing:.4px; color:#a5f3fc; }
       .lyrics-overlay{ position:fixed; inset:0; z-index:32; display:none; place-items:center; background:rgba(1,8,28,.82); padding:20px; }
       .lyrics-overlay.show{ display:grid; }
       .lyrics-box{ width:min(560px,94vw); max-height:80dvh; display:flex; flex-direction:column; background:linear-gradient(180deg,#0a2a5e,#04163c); border:2px solid rgba(125,249,255,.45); border-radius:18px; box-shadow:0 10px 40px rgba(0,0,0,.6); overflow:hidden; }
@@ -308,14 +304,6 @@
       .boot-bar i{ display:block; height:100%; width:0; border-radius:99px; background:#00e5ff; box-shadow:0 0 12px #00e5ff; animation:bootLoad 1.5s ease .15s forwards; }
       @keyframes bootLoad{ to{ width:100%; } }
 
-      /* Barra inferior con dos destinos: Descargas (izquierda) y Biblioteca (derecha) */
-      .softbar button.sk-left{ grid-column:1; justify-self:start; }
-      /* ===== Biblioteca: diseño con pestañas, buscador, filtro y orden ===== */
-      .titlebar .app-name{ text-transform:uppercase; letter-spacing:.05em; }
-      .lib-tabs{ flex:0 0 auto; display:flex; align-items:baseline; justify-content:space-between; gap:0; padding:2px 2px 0; }
-      .lib-tabs button{ border:0; background:transparent; font:inherit; font-size:16px; font-weight:800; color:rgba(186,230,253,.55); padding:6px 2px 8px; cursor:pointer; white-space:nowrap; min-width:0; }
-      .lib-tabs button.on{ color:var(--accent); text-shadow:0 0 10px var(--glow); border-bottom:3px solid var(--accent); }
-      .lib-tabs .ghost-btn{ padding:4px 8px; font-size:11px; }
       .add-toggle{ flex:0 0 auto; margin-top:10px; border:1.5px solid rgba(125,211,252,.55); background:rgba(2,132,199,.16); color:#fff; border-radius:10px; padding:10px; font:inherit; font-size:14px; font-weight:800; cursor:pointer; }
       .add-section{ flex:0 0 auto; }
       .add-section.closed{ display:none; }
@@ -323,7 +311,7 @@
       .lib-logo{ flex:0 0 auto; width:52px; height:52px; border-radius:12px; object-fit:cover; box-shadow:0 0 12px rgba(0,229,255,.35); }
       .lib-top .search-wrap{ flex:1; min-width:0; }
       .lib-top .search-wrap input{ border-radius:999px; }
-      .icon-btn{ flex:0 0 auto; width:40px; height:40px; border-radius:50%; border:1px solid rgba(125,211,252,.5); background:rgba(255,255,255,.07); color:#7dd3fc; display:grid; place-items:center; cursor:pointer; padding:0; }
+      .icon-btn{ flex:0 0 auto; width:44px; height:44px; border-radius:50%; border:1px solid rgba(125,211,252,.5); background:rgba(255,255,255,.07); color:#7dd3fc; display:grid; place-items:center; cursor:pointer; padding:0; }
       .icon-btn.on{ background:rgba(2,132,199,.35); color:#fff; box-shadow:inset 0 0 0 1px rgba(125,211,252,.6); }
       .icon-btn svg{ width:20px; height:20px; fill:currentColor; }
       .lib-menu{ position:fixed; z-index:80; min-width:200px; max-width:82vw; background:#0a2247; border:1px solid rgba(125,211,252,.5); border-radius:12px; padding:6px; box-shadow:0 14px 34px rgba(0,0,0,.6); display:none; }
@@ -337,10 +325,10 @@
       .playlist .thumb{ width:52px; height:52px; border-radius:8px; overflow:hidden; flex:0 0 auto; background:rgba(255,255,255,.08); }
       .playlist .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
       .playlist li.playing .thumb{ box-shadow:0 0 0 2px var(--accent), 0 0 12px var(--glow); }
-      .playlist .row-play{ border:0; background:transparent; width:34px; height:34px; display:grid; place-items:center; cursor:pointer; padding:0; }
+      .playlist .row-play{ border:0; background:transparent; width:44px; height:44px; display:grid; place-items:center; cursor:pointer; padding:0; }
       .playlist .row-play svg{ width:30px; height:24px; }
-      .playlist .kebab{ border:0; background:transparent; color:#fff; font-size:22px; line-height:1; width:30px; height:34px; cursor:pointer; padding:0; }
-      .playlist .dl-badge{ font-size:10px; font-weight:800; color:#a7f3d0; background:rgba(16,185,129,.2); border-radius:999px; padding:2px 7px; margin-left:6px; vertical-align:2px; }
+      .playlist .kebab{ border:0; background:transparent; color:#fff; font-size:22px; line-height:1; width:40px; height:44px; cursor:pointer; padding:0; }
+      .playlist .dl-badge{ font-size:11px; font-weight:800; color:#a7f3d0; background:rgba(16,185,129,.2); border-radius:999px; padding:2px 7px; margin-left:6px; vertical-align:2px; }
       #dropOverlay{ position:fixed; inset:0; z-index:50; display:none; place-items:center; background:rgba(1,10,36,.8); backdrop-filter:blur(2px); }
       #dropOverlay.show{ display:grid; }
       #dropOverlay .do-box{ border:3px dashed #7dd3fc; border-radius:18px; padding:38px 48px; color:#fff; text-align:center; font-size:19px; font-weight:800; }
@@ -353,21 +341,19 @@
          28px heredada del diseño con números, que recortaba la portada;
          ahora la portada se ve completa (4 columnas: portada, datos,
          play, menú). */
-      .tbtn{ width:clamp(40px,11.8vw,58px); height:clamp(46px,13.3vw,66px); }
+      .tbtn{ width:clamp(48px,12.5vw,58px); height:clamp(48px,13.3vw,66px); }
       .tbtn svg{ width:clamp(26px,7.7vw,38px); height:clamp(26px,7.7vw,38px); }
       .tbtn.small svg{ width:clamp(22px,6.4vw,32px); height:clamp(22px,6.4vw,32px); }
-      .tbtn.txt{ font-size:clamp(13px,3.8vw,18px); min-width:clamp(40px,11.8vw,58px); }
       .tbtn.play{ width:clamp(56px,16.4vw,80px); height:clamp(52px,15.4vw,76px); }
       .tbtn.play svg{ width:clamp(40px,11.8vw,58px); height:clamp(40px,11.8vw,58px); }
-      .queue-list li{ grid-template-columns:clamp(52px,16vw,76px) 1fr auto; }
+      .queue-list li{ grid-template-columns:clamp(64px,18vw,84px) 1fr auto auto; }
       .playlist li{ grid-template-columns:clamp(44px,12vw,60px) 1fr auto auto; }
       .playlist .thumb{ width:clamp(44px,12vw,60px); height:clamp(44px,12vw,60px); }
-      .playlist .row-play{ width:clamp(30px,9vw,40px); height:clamp(30px,9vw,40px); }
+      .playlist .row-play{ width:clamp(40px,11vw,48px); height:clamp(40px,11vw,48px); }
       .playlist .row-play svg{ width:clamp(26px,7.7vw,36px); height:clamp(21px,6.2vw,29px); }
-      .playlist .kebab{ width:clamp(28px,8vw,36px); height:clamp(30px,9vw,40px); font-size:clamp(20px,5.6vw,26px); }
-      .lib-tabs button{ font-size:clamp(14px,4.2vw,18px); }
+      .playlist .kebab{ width:clamp(36px,10vw,44px); height:clamp(40px,11vw,48px); font-size:clamp(20px,5.6vw,26px); }
       .lib-logo{ width:clamp(44px,13vw,60px); height:clamp(44px,13vw,60px); }
-      .icon-btn{ width:clamp(36px,10vw,46px); height:clamp(36px,10vw,46px); }
+      .icon-btn{ width:clamp(44px,11vw,48px); height:clamp(44px,11vw,48px); }
       .icon-btn svg{ width:clamp(18px,5vw,24px); height:clamp(18px,5vw,24px); }
       .yt-result img{ width:clamp(80px,24vw,112px); height:clamp(45px,13.5vw,63px); flex-basis:clamp(80px,24vw,112px); }
       .pick-btn{ padding:clamp(12px,3.5vw,18px) 10px; }
@@ -391,6 +377,68 @@
         .queue-list li{ padding:8px 10px; }
         .playlist li{ padding:12px 10px; }
       }
+      /* ===== NUEVO7: diseño UX/UI =====
+         - Botón Letra centrado y visible (ya no escondido en el transporte).
+         - Logo de Gurru Music como portada cuando la canción no tiene carátula.
+         - Cola con número por fila y botones ↑ ↓ para reordenar.
+         - Biblioteca con vista de cuadrícula (Grid View).
+         - Avisos flotantes (toasts) con Reintentar y detalle expandible.
+         - Diálogo para editar datos y buscar la carátula del álbum. */
+      .pill-btn{ border:1.5px solid rgba(125,211,252,.55); background:rgba(2,132,199,.22); color:#fff; border-radius:999px; padding:9px 16px; font-size:13px; font-weight:800; cursor:pointer; }
+      .lyrics-row{ flex:0 0 auto; display:flex; justify-content:center; padding:5px 0 0; }
+      .lyrics-btn{ min-width:150px; min-height:44px; border:1.5px solid rgba(125,211,252,.6); background:rgba(2,132,199,.22); color:#a5f3fc; border-radius:999px; font-size:15px; font-weight:800; letter-spacing:.04em; padding:8px 24px; box-shadow:0 0 10px rgba(34,211,238,.25); cursor:pointer; }
+      .lyrics-btn:active{ transform:scale(.97); }
+      .art img.art-logo{ position:static; inset:auto; width:min(62%,230px); height:auto; object-fit:contain; display:none; border-radius:20px; box-shadow:0 0 26px rgba(0,229,255,.4); }
+      .art.has-art img.art-logo{ display:none; }
+      .art:not(.has-art) img.art-logo{ display:block; }
+      .queue-list .q-first{ display:flex; flex-direction:column; align-items:flex-start; gap:1px; min-width:0; }
+      .queue-list .q-num{ font-family:"Share Tech Mono",monospace; font-size:13px; font-weight:700; color:var(--accent); line-height:1.1; }
+      .queue-list li.is-prev .q-num{ color:var(--soft); }
+      .queue-list .q-move{ display:flex; flex-direction:column; gap:3px; }
+      .queue-list .q-move button{ border:1px solid rgba(125,211,252,.4); background:rgba(255,255,255,.07); color:#fff; width:30px; height:24px; border-radius:7px; font-size:12px; line-height:1; padding:0; cursor:pointer; }
+      .queue-list .q-move button:disabled{ opacity:.3; cursor:default; }
+      .queue-list .q-move button:active{ background:rgba(2,132,199,.4); }
+      /* Biblioteca en cuadrícula: tarjetas con portada, título y artista. */
+      .playlist.grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+      .playlist.grid li{ display:flex; flex-direction:column; align-items:stretch; gap:0; padding:0; border:1px solid rgba(125,211,252,.25); border-bottom:1px solid rgba(125,211,252,.25); border-radius:12px; overflow:hidden; background:rgba(255,255,255,.05); position:relative; }
+      .playlist.grid .thumb{ width:100%; height:auto; aspect-ratio:1; border-radius:0; }
+      .playlist.grid .thumb img{ width:100%; height:100%; }
+      .playlist.grid .meta{ padding:8px 10px 10px; }
+      .playlist.grid .row-play{ display:none; }
+      .playlist.grid .kebab{ position:absolute; top:4px; right:4px; background:rgba(1,10,36,.65); border-radius:50%; }
+      .playlist.grid li.playing .thumb{ box-shadow:inset 0 0 0 2px var(--accent); }
+      @media (min-width:700px){ .playlist.grid{ grid-template-columns:repeat(3,1fr); } }
+      /* Avisos flotantes (toasts): errores con Reintentar y detalle que se expande al tocar. */
+      #toastWrap{ position:absolute; left:12px; right:12px; bottom:76px; z-index:25; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
+      .toast{ pointer-events:auto; background:#0a2247; border:1.5px solid rgba(125,211,252,.55); border-radius:12px; padding:10px 12px; box-shadow:0 12px 30px rgba(0,0,0,.55); cursor:pointer; }
+      .toast.err{ border-color:rgba(254,205,211,.65); background:#3f0d1e; }
+      .toast-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+      .toast-title{ font-size:14px; font-weight:900; color:#fff; }
+      .toast.err .toast-title{ color:#fecdd3; }
+      .toast-x{ border:0; background:transparent; color:var(--soft); font-size:15px; line-height:1; width:28px; height:28px; cursor:pointer; }
+      .toast-msg{ font-size:13px; color:#dbeafe; line-height:1.45; margin-top:3px; }
+      .toast-details{ display:none; font-family:"Share Tech Mono",monospace; font-size:11.5px; color:#bae6fd; line-height:1.5; margin-top:8px; max-height:150px; overflow:auto; white-space:pre-wrap; word-break:break-word; background:rgba(0,0,0,.3); border-radius:8px; padding:8px; }
+      .toast.open .toast-details{ display:block; }
+      .toast-actions{ display:flex; gap:8px; margin-top:8px; }
+      .toast-retry{ border:0; background:var(--accent2); color:#fff; border-radius:999px; padding:7px 14px; font-size:13px; font-weight:800; cursor:pointer; }
+      .toast-detail-btn{ border:1px solid rgba(125,211,252,.5); background:transparent; color:#fff; border-radius:999px; padding:7px 12px; font-size:12.5px; font-weight:700; cursor:pointer; }
+      /* Diálogo para editar datos de la canción y buscar su carátula. */
+      .edit-overlay{ position:absolute; inset:0; z-index:31; display:none; place-items:center; background:rgba(1,8,28,.78); padding:20px; }
+      .edit-overlay.show{ display:grid; }
+      .edit-card{ width:100%; max-width:400px; border:1.5px solid rgba(125,211,252,.55); background:linear-gradient(180deg,#06245c,#03122f); border-radius:16px; padding:20px 18px; box-shadow:0 24px 50px rgba(0,0,0,.6); max-height:88dvh; overflow:auto; }
+      .edit-card h2{ margin:0 0 4px; font-size:20px; font-weight:900; color:#fff; }
+      .edit-sub{ font-size:12.5px; color:var(--soft); line-height:1.5; margin:0 0 12px; }
+      .edit-field{ display:block; font-size:12.5px; font-weight:800; color:var(--soft); margin-bottom:10px; }
+      .edit-field input{ display:block; width:100%; margin-top:4px; padding:10px 11px; border-radius:9px; border:1px solid rgba(255,255,255,.28); background:rgba(255,255,255,.09); color:#fff; font:inherit; font-size:14px; }
+      .cover-row{ display:flex; align-items:center; gap:10px; margin:2px 0 8px; }
+      .cover-msg{ font-size:12px; color:var(--soft); line-height:1.4; }
+      .cover-results{ display:flex; gap:8px; flex-wrap:wrap; }
+      .cover-pick{ border:2px solid transparent; background:transparent; padding:0; border-radius:8px; overflow:hidden; cursor:pointer; }
+      .cover-pick.on{ border-color:var(--accent); box-shadow:0 0 10px var(--glow); }
+      .cover-pick img{ width:64px; height:64px; object-fit:cover; display:block; }
+      .cover-preview{ margin-top:8px; }
+      .cover-preview img{ width:96px; height:96px; object-fit:cover; border-radius:10px; display:block; box-shadow:0 0 12px rgba(0,229,255,.3); }
+      .edit-actions{ margin-top:14px; }
     </style>
     <!-- Capacitor JS (núcleo): la app es HTML sin empaquetador, así que el
          runtime que inyecta Android NO trae registerPlugin; sin este archivo
@@ -424,7 +472,7 @@
             <div class="art-wrap" id="artWrap">
               <div class="art" id="artBox">
                 <img id="artImg" alt="Portada del álbum" />
-                <div class="xpress">Gurru Music<small>REPRODUCTOR DE MÚSICA</small></div>
+                <img class="art-logo" id="artLogo" src="logo.png" alt="Gurru Music" />
               </div>
               <div class="yt-wrap" id="ytWrap" aria-label="Reproductor de audio de YouTube (oculto)"><div id="ytPlayer"></div></div>
             </div>
@@ -463,8 +511,11 @@
                   <svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
                   <span class="rep-badge" id="repBadge">1</span>
                 </button>
-                <button class="tbtn txt" id="btnLyrics" title="Ver la letra de la canción" aria-label="Ver la letra de la canción">Letra</button>
               </div>
+            </div>
+
+            <div class="lyrics-row">
+              <button class="lyrics-btn" id="btnLyrics" type="button" title="Ver la letra de la canción" aria-label="Ver la letra de la canción">♪&nbsp; Letra</button>
             </div>
 
             <canvas id="viz" width="560" height="30" aria-hidden="true"></canvas>
@@ -490,12 +541,6 @@
         <!-- ============ BIBLIOTECA ============ -->
         <section class="view" id="viewLibrary" aria-label="Biblioteca de música" hidden>
           <div class="lib">
-          <div class="lib-tabs">
-            <button id="tabDownloads" class="lib-tab" data-view="downloads" type="button">Descargas</button>
-            <button id="tabLibrary" class="lib-tab on" data-view="library" type="button">Biblioteca</button>
-            <button id="tabYouTube" class="lib-tab" data-view="youtube" type="button">YouTube</button>
-            <button class="ghost-btn" id="clearBtn" disabled>Vaciar</button>
-          </div>
           <button class="add-toggle" id="addToggle" type="button">− Agregar música</button>
           <div class="add-section" id="addSection">
             <!-- En el APK la música local se busca sola (MediaStore); en la
@@ -532,6 +577,7 @@
               </div>
               <button class="icon-btn" id="filterBtn" type="button" title="Filtrar" aria-label="Filtrar"><svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v5.5l-4 2.5v-8L3 5z"/></svg></button>
               <button class="icon-btn" id="sortBtn" type="button" title="Ordenar" aria-label="Ordenar"><svg viewBox="0 0 24 24"><path d="M3 6h18v2H3V6zm4 5h10v2H7v-2zm3 5h4v2h-4v-2z"/></svg></button>
+              <button class="icon-btn" id="viewBtn" type="button" title="Vista de cuadrícula o lista" aria-label="Cambiar vista de lista o cuadrícula"><svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></button>
             </div>
 
             <ul class="playlist" id="playlist"></ul>
@@ -548,11 +594,6 @@
         <!-- ============ DESCARGAS ============ -->
         <section class="view" id="viewDownloads" aria-label="Descargas" hidden>
           <div class="dls">
-            <div class="lib-tabs">
-              <button class="lib-tab on" data-view="downloads" type="button">Descargas</button>
-              <button class="lib-tab" data-view="library" type="button">Biblioteca</button>
-              <button class="lib-tab" data-view="youtube" type="button">YouTube</button>
-            </div>
             <div class="dls-head">
               <p>Aquí se ve el avance de cada descarga: <b>canción por canción</b> y, cuando es una playlist, también el <b>total de la lista completa</b>. En el APK, los archivos se guardan con yt-dlp (dentro de la app) en la carpeta <b>Música/Gurru Music</b> del teléfono, en el formato elegido (MP3 o M4A) y en la máxima calidad disponible.</p>
             </div>
@@ -573,11 +614,6 @@
         <!-- ============ YOUTUBE ============ -->
         <section class="view" id="viewYouTube" aria-label="YouTube" hidden>
           <div class="lib">
-            <div class="lib-tabs">
-              <button class="lib-tab" data-view="downloads" type="button">Descargas</button>
-              <button class="lib-tab" data-view="library" type="button">Biblioteca</button>
-              <button class="lib-tab on" data-view="youtube" type="button">YouTube</button>
-            </div>
             <div class="yt-box">
               <div class="yt-h"><span class="yt-badge">YouTube Music</span><span>Buscar música</span></div>
               <p>Escribe el nombre de una canción o un artista y toca <b>Buscar</b>.</p>
@@ -592,17 +628,27 @@
         </section>
       </main>
 
-      <!-- Barra inferior sin botones de cola ni de Atrás: solo Biblioteca en el reproductor.
-           En Biblioteca no hay botón de regreso: se vuelve con el gesto atrás del teléfono. -->
-      <div class="softbar">
-        <button class="sk-left" id="skLeft">Descargas</button>
-        <span class="sk-mid">
-          <span class="dot" id="dotShuffle" title="Aleatorio"></span>
-          <span id="tPosSoft">0 / 0</span>
-          <span class="dot" id="dotRepeat" title="Repetir"></span>
-        </span>
-        <button id="skRight">Biblioteca</button>
+      <!-- Barra inferior fija de navegación (uso con el pulgar): Descargas,
+           Biblioteca y YouTube siempre visibles. En Biblioteca no hay botón
+           de regreso: se vuelve con el gesto atrás del teléfono. -->
+      <div class="softbar" role="navigation" aria-label="Secciones principales">
+        <button class="nav-btn" id="navDownloads" data-view="downloads" type="button">
+          <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          <span>Descargas</span>
+        </button>
+        <button class="nav-btn" id="navLibrary" data-view="library" type="button">
+          <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+          <span>Biblioteca</span>
+        </button>
+        <button class="nav-btn yt" id="navYouTube" data-view="youtube" type="button">
+          <svg viewBox="0 0 24 24"><path d="M23 12s0-3.8-.5-5.6c-.3-1-1.7-1-2-2C18.7 4 12 4 12 4s-6.7 0-8.5.4c-1 .3-1.7 1-2 2C1 8.2 1 12 1 12s0 3.8.5 5.6c.3 1 1 1.7 2 2 1.8.4 8.5.4 8.5.4s6.7 0 8.5-.4c1-.3 1.7-1 2-2 .5-1.8.5-5.6.5-5.6zM9.8 15.5v-7l6 3.5-6 3.5z"/></svg>
+          <span>YouTube</span>
+        </button>
       </div>
+
+      <!-- Avisos flotantes (toasts): los errores aparecen aquí con botón
+           Reintentar y se pueden tocar para leer el detalle completo. -->
+      <div id="toastWrap" aria-live="polite"></div>
 
       <!-- Al tocar un resultado de la búsqueda NO suena ni se descarga solo:
            el usuario elige Escuchar o Descargar. -->
@@ -641,6 +687,31 @@
             <button class="icon-btn" id="lyricsClose" title="Cerrar letra" aria-label="Cerrar letra">✕</button>
           </div>
           <div class="lyrics-body" id="lyricsBody"></div>
+        </div>
+      </div>
+      <!-- Editar los datos de una canción (título, artista, álbum) y
+           buscar su carátula. Los cambios se ven en la app; el archivo
+           original no se modifica. -->
+      <div class="edit-overlay" id="editOverlay" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+        <div class="edit-card">
+          <h2 id="editTitle">Editar datos</h2>
+          <p class="edit-sub">Corrige el nombre, el artista o el álbum. Los cambios se guardan en la app; el archivo original no se modifica.</p>
+          <label class="edit-field">Título<input id="editTitleInput" type="text" autocomplete="off" /></label>
+          <label class="edit-field">Artista<input id="editArtistInput" type="text" autocomplete="off" /></label>
+          <label class="edit-field">Álbum<input id="editAlbumInput" type="text" autocomplete="off" /></label>
+          <div class="cover-row">
+            <button class="pill-btn" id="coverSearchBtn" type="button">Buscar carátula</button>
+            <span class="cover-msg" id="coverMsg"></span>
+          </div>
+          <div class="cover-results" id="coverResults"></div>
+          <div class="cover-preview"><img id="coverPreview" alt="Carátula elegida" style="display:none" /></div>
+          <div class="edit-actions">
+            <button class="choice-btn listen" id="editSaveBtn" type="button">
+              <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+              <span><span class="cb-t">Guardar cambios</span></span>
+            </button>
+            <button class="choice-only" id="editCancelBtn" type="button">Cancelar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -707,10 +778,10 @@
         try { data = JSON.parse(localStorage.getItem(SAVE_KEY) || "null"); } catch(e){}
         if (!data || !Array.isArray(data.tracks) || !data.tracks.length) return false;
         tracks = data.tracks.map(function(s){
-          return { id: s.id, type: s.type, kind: s.kind || null, videoId: s.videoId || null, playlistId: s.playlistId || null,
+          return applyMetaOverrides({ id: s.id, type: s.type, kind: s.kind || null, videoId: s.videoId || null, playlistId: s.playlistId || null,
             url: s.url, title: s.title, artist: s.artist, album: s.album || "", artUrl: s.artUrl || null, artRaw: s.artRaw || null,
             duration: s.duration || 0, downloaded: !!s.downloaded, dlState: s.downloaded ? "done" : null, savedName: s.savedName || null,
-            nativePath: s.nativePath || null, scanned: !!s.scanned };
+            nativePath: s.nativePath || null, scanned: !!s.scanned });
         });
         tracks.forEach(function(t){ if (typeof t.id === "number" && t.id >= uid) uid = t.id + 1; });
         var idx = (typeof data.current === "number") ? data.current : -1;
@@ -790,6 +861,74 @@
           return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
         });
       }
+      /* Limpieza de metadatos para mostrar: quita el ruido técnico de los
+         títulos ("[Official Video]", "(1080p)", "HD"…) sin tocar los
+         datos guardados. Lo que se ve es "Artista - Canción". */
+      function cleanTitle(s){
+        var t = String(s || "");
+        t = t.replace(/\s*[\[(][^\]\)]*\b(official|oficial|video|audio|lyrics|letra|hd|4k|8k|1080p|720p|remaster|remastered|visualizer|lyric)\b[^\]\)]*[\])]/gi, "");
+        t = t.replace(/\s*\|\s*(official|video|audio|lyrics|hd|4k|1080p|720p)[^|]*$/i, "");
+        t = t.replace(/\s{2,}/g, " ").trim();
+        return t || String(s || "");
+      }
+      /* ---------- Avisos flotantes (toasts) con Reintentar y detalle ----------
+         Los errores ya no son solo texto estático: aparecen como un aviso
+         flotante con botón de acción rápida (Reintentar) y se puede tocar
+         para expandir y leer toda la información del error. */
+      function showToast(opts){
+        opts = opts || {};
+        var wrap = $("toastWrap");
+        if (!wrap) return null;
+        var el = document.createElement("div");
+        el.className = "toast" + (opts.kind === "err" ? " err" : "");
+        var html = '<div class="toast-head"><span class="toast-title">' + esc(opts.title || "Aviso") + '</span><button class="toast-x" type="button" aria-label="Cerrar aviso">✕</button></div>';
+        if (opts.msg) html += '<div class="toast-msg">' + esc(opts.msg) + '</div>';
+        if (opts.details) html += '<div class="toast-details">' + esc(opts.details) + '</div>';
+        html += '<div class="toast-actions">';
+        if (opts.onRetry) html += '<button class="toast-retry" type="button">' + esc(opts.retryLabel || "Reintentar") + '</button>';
+        if (opts.details) html += '<button class="toast-detail-btn" type="button">Ver detalle ▾</button>';
+        html += '</div>';
+        el.innerHTML = html;
+        wrap.appendChild(el);
+        var dismissed = false;
+        function dismiss(){ if (dismissed) return; dismissed = true; if (el.parentNode) el.parentNode.removeChild(el); }
+        var timer = setTimeout(dismiss, opts.ms || 10000);
+        el.querySelector(".toast-x").addEventListener("click", function(ev){ ev.stopPropagation(); clearTimeout(timer); dismiss(); });
+        var retryBtn = el.querySelector(".toast-retry");
+        if (retryBtn) retryBtn.addEventListener("click", function(ev){ ev.stopPropagation(); clearTimeout(timer); dismiss(); try{ opts.onRetry(); }catch(e){} });
+        var detailBtn = el.querySelector(".toast-detail-btn");
+        function toggleDetails(){
+          var open = el.classList.toggle("open");
+          if (detailBtn) detailBtn.textContent = open ? "Ocultar detalle ▴" : "Ver detalle ▾";
+          if (open) clearTimeout(timer);
+        }
+        if (detailBtn) detailBtn.addEventListener("click", function(ev){ ev.stopPropagation(); toggleDetails(); });
+        el.addEventListener("click", function(){ if (opts.details) toggleDetails(); });
+        return el;
+      }
+      /* ---------- Correcciones de metadatos (editar datos / carátula) ----------
+         Se guardan por canción (videoId en YouTube, id en locales) y se
+         aplican cada vez que la canción vuelve a aparecer. */
+      var META_OV_KEY = "gurru-meta-overrides-v1";
+      var metaOverrides = {};
+      try { metaOverrides = JSON.parse(localStorage.getItem(META_OV_KEY) || "{}") || {}; } catch(e){ metaOverrides = {}; }
+      function metaKey(t){
+        if (!t) return null;
+        if (t.videoId) return "yt:" + t.videoId;
+        if (t.id != null) return "id:" + String(t.id);
+        return null;
+      }
+      function applyMetaOverrides(t){
+        var k = metaKey(t);
+        if (!k || !metaOverrides[k]) return t;
+        var o = metaOverrides[k];
+        if (o.title) t.title = o.title;
+        if (o.artist) t.artist = o.artist;
+        if (o.album != null) t.album = o.album;
+        if (o.artUrl) t.artUrl = o.artUrl;
+        return t;
+      }
+      function saveMetaOverrides(){ try{ localStorage.setItem(META_OV_KEY, JSON.stringify(metaOverrides)); }catch(e){} }
 
       /* ---------- Vistas ---------- */
       /* Sin botón Atrás: entrar a Biblioteca deja una entrada en el historial,
@@ -803,17 +942,12 @@
         $("viewDownloads").hidden = v !== "downloads";
         $("viewYouTube").hidden = v !== "youtube";
         if (v === "library"){ maybeRetryLocalScan(); }
-        /* Sin botón de regreso: se vuelve al reproductor con el gesto atrás
-           del teléfono. La barra inferior ofrece el apartado que NO estás
-           viendo: Biblioteca a la derecha y Descargas a la izquierda. */
-        var showLib = v !== "library";
-        $("skRight").style.visibility = showLib ? "visible" : "hidden";
-        $("skRight").setAttribute("aria-hidden", showLib ? "false" : "true");
-        $("skRight").tabIndex = showLib ? 0 : -1;
-        var showDl = v !== "downloads";
-        $("skLeft").style.visibility = showDl ? "visible" : "hidden";
-        $("skLeft").setAttribute("aria-hidden", showDl ? "false" : "true");
-        $("skLeft").tabIndex = showDl ? 0 : -1;
+        /* La barra inferior fija marca la sección activa (en el
+           reproductor ninguna está activa: es su propia pantalla). */
+        ["downloads", "library", "youtube"].forEach(function(k){
+          var b = $("nav" + k.charAt(0).toUpperCase() + k.slice(1));
+          if (b) b.classList.toggle("on", v === k);
+        });
         if (!skipHistory){
           if (v !== "player" && !libraryInHistory){
             libraryInHistory = true;
@@ -858,13 +992,17 @@
             if (lyricsOv && lyricsOv.classList.contains("show")){ closeLyrics(); return; }
             var overlay = $("choiceOverlay");
             if (overlay && overlay.classList.contains("show")){ closeChoice(); return; }
+            var editOv = $("editOverlay");
+            if (editOv && editOv.classList.contains("show")){ closeEdit(); return; }
             if (view !== "player"){ showView("player", true); return; }
             try { capApp.exitApp(); } catch(e){}
           });
         } catch(e){}
       })();
-      $("skRight").addEventListener("click", function(){ if (view !== "library") showView("library"); });
-      $("skLeft").addEventListener("click", function(){ if (view !== "downloads") showView("downloads"); });
+      /* Barra inferior fija: Descargas / Biblioteca / YouTube. */
+      document.querySelectorAll(".nav-btn").forEach(function(b){
+        b.addEventListener("click", function(){ showView(b.getAttribute("data-view")); });
+      });
 
       /* ---------- Cola: mostrar / ocultar ---------- */
       var queueCollapsed = false;
@@ -1011,7 +1149,9 @@
       }
       /* Estado de la Biblioteca: filtro, orden y sección de agregar. */
       var libFilter = "all"; /* all | local | youtube | downloaded */
-      var libSort = "added"; /* added | title | artist */
+      var libSort = "added"; /* added | title | artist | album */
+      var libView = "list"; /* list | grid */
+      try { var _lv = localStorage.getItem("gurru-lib-view"); if (_lv === "grid" || _lv === "list") libView = _lv; } catch(e){}
       var addSectionOpen = true, addSectionTouched = false;
       /* En el APK la sección es la música del teléfono (búsqueda
          automática); en la web es agregar carpeta o archivos a mano. */
@@ -1056,6 +1196,7 @@
         if (isYt && !t.downloaded){
           items.push({ label: t.dlState === "downloading" ? "⬇  Descargando…" : "⬇  Descargar al teléfono", fn: function(){ queueDownload(t, true); } });
         }
+        items.push({ label: "✎  Editar datos / carátula", fn: function(){ openEdit(t); } });
         items.push({ label: "✕  Quitar de la lista", danger: true, fn: function(){ removeTrack(i); } });
         openLibMenu(anchor, items);
       }
@@ -1074,6 +1215,7 @@
         });
         if (libSort === "title") items.sort(function(a, b){ return (a.t.title || "").localeCompare(b.t.title || "", "es"); });
         else if (libSort === "artist") items.sort(function(a, b){ return (a.t.artist || "").localeCompare(b.t.artist || "", "es"); });
+        else if (libSort === "album") items.sort(function(a, b){ return ((a.t.album || "") + (a.t.title || "")).localeCompare((b.t.album || "") + (b.t.title || ""), "es"); });
         var visible = items.length;
         items.forEach(function(item){
           var t = item.t, i = item.i;
@@ -1089,7 +1231,7 @@
             : '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#22d3ee" d="M8 5v14l11-7z"/></svg>';
           li.innerHTML =
             '<span class="thumb"><img src="' + esc(art) + '" alt="" onerror="this.onerror=null;this.src=\'logo.png\';" /></span>' +
-            '<span class="meta"><span class="pt">' + esc(t.title) + dlBadge + '</span><span class="pa">' + esc(t.artist) + '</span></span>' +
+            '<span class="meta"><span class="pt">' + esc(cleanTitle(t.title)) + dlBadge + '</span><span class="pa">' + esc(t.artist) + '</span></span>' +
             '<button class="row-play" title="Escuchar" aria-label="Escuchar ' + esc(t.title) + '">' + playIcon + '</button>' +
             '<button class="kebab" title="Opciones" aria-label="Opciones de ' + esc(t.title) + '">⋮</button>';
           li.addEventListener("click", function(){ playTrack(i); showView("player"); });
@@ -1099,7 +1241,7 @@
         });
         $("emptyState").style.display = tracks.length ? "none" : "block";
         $("noResults").style.display = (tracks.length && !visible) ? "block" : "none";
-        $("clearBtn").disabled = tracks.length === 0;
+        $("playlist").classList.toggle("grid", libView === "grid");
         if (!addSectionTouched){ addSectionOpen = tracks.length === 0; syncAddSection(); }
         updateScreenMeta();
         renderQueue();
@@ -1130,7 +1272,38 @@
         saveState();
       }
 
-      /* ---------- Cola: anterior, actual y siguientes ---------- */
+      /* ---------- Cola: anterior, actual y siguientes ----------
+         La cola es POR ORIGEN: si suena YouTube, solo aparecen las de
+         YouTube; si suena la Biblioteca, solo las locales (las
+         descargadas ya son locales). Cada fila lleva su número en la
+         cola (1/12…) y botones ↑ ↓ para reordenarla con un toque. */
+      function queueIndices(){
+        if (current < 0 || !tracks[current]) return [];
+        var cur = tracks[current];
+        var yt = cur.type === "youtube" || cur.type === "ytaudio";
+        var out = [];
+        for (var i = 0; i < tracks.length; i++){
+          var t = tracks[i];
+          var isYt = t.type === "youtube" || t.type === "ytaudio";
+          if (isYt === yt) out.push(i);
+        }
+        return out;
+      }
+      function moveQueue(realIdx, dir){
+        var q = queueIndices();
+        var pos = q.indexOf(realIdx);
+        if (pos < 0) return;
+        var np = pos + dir;
+        if (np < 0 || np >= q.length) return;
+        var other = q[np];
+        var tmp = tracks[realIdx];
+        tracks[realIdx] = tracks[other];
+        tracks[other] = tmp;
+        if (current === realIdx) current = other;
+        else if (current === other) current = realIdx;
+        renderPlaylist();
+        saveState();
+      }
       function renderQueue(){
         var list = $("queueList");
         var empty = $("queueEmpty");
@@ -1142,30 +1315,34 @@
           return;
         }
         empty.style.display = "none";
-        /* Toda la lista, en orden: se puede deslizar por todas las
-           canciones, no solo por las 7 cercanas a la actual. */
-        var items = [];
-        for (var i = 0; i < tracks.length; i++){
+        var q = queueIndices();
+        var pos = q.indexOf(current);
+        var nextCount = q.length - pos - 1;
+        $("queueCount").textContent = (pos + 1) + "/" + q.length + (shuffle ? " · aleatorio" : "") + (nextCount ? " · " + nextCount + " sigue" + (nextCount === 1 ? "" : "n") : "");
+        q.forEach(function(realIdx, qi){
+          var t = tracks[realIdx];
           var label, kind;
-          if (i < current){ kind = "prev"; label = (i === current - 1) ? "Anterior" : "Antes"; }
-          else if (i === current){ kind = "current"; label = "Sonando"; }
-          else { kind = "next"; label = (i === current + 1) ? "Siguiente" : "Después"; }
-          items.push({ i: i, kind: kind, label: label });
-        }
-        var nextCount = tracks.length - current - 1;
-        $("queueCount").textContent = (current + 1) + "/" + tracks.length + (shuffle ? " · aleatorio" : "") + (nextCount ? " · " + nextCount + " sigue" + (nextCount === 1 ? "" : "n") : "");
-        items.forEach(function(item){
-          var t = tracks[item.i];
+          if (qi < pos){ kind = "prev"; label = (qi === pos - 1) ? "Anterior" : "Antes"; }
+          else if (qi === pos){ kind = "current"; label = "Sonando"; }
+          else { kind = "next"; label = (qi === pos + 1) ? "Siguiente" : "Después"; }
           var li = document.createElement("li");
-          li.className = item.kind === "current" ? "is-current" : (item.kind === "prev" ? "is-prev" : "is-next");
+          li.className = kind === "current" ? "is-current" : (kind === "prev" ? "is-prev" : "is-next");
           var badge = (t.type === "youtube" || t.type === "ytaudio") ? '<span class="src-badge">YouTube</span>' : (t.downloaded ? '<span class="src-badge saved">MP3</span>' : "");
           li.innerHTML =
-            '<span class="q-tag">' + esc(item.label) + '</span>' +
-            '<span class="q-t">' + esc(t.title) + badge + ' <span class="q-a">&middot; ' + esc(t.artist) + '</span></span>' +
-            '<span class="q-dur">' + (t.duration ? fmtShort(t.duration) : (t.type === "youtube" ? (t.kind === "playlist" ? "Lista" : "Audio") : "--:--")) + '</span>';
-          if (item.kind !== "current"){
-            (function(idx){ li.addEventListener("click", function(){ playTrack(idx); }); })(item.i);
+            '<span class="q-first"><span class="q-num">' + (qi + 1) + '</span><span class="q-tag">' + esc(label) + '</span></span>' +
+            '<span class="q-t">' + esc(cleanTitle(t.title)) + badge + ' <span class="q-a">&middot; ' + esc(t.artist) + '</span></span>' +
+            '<span class="q-dur">' + (t.duration ? fmtShort(t.duration) : (t.type === "youtube" ? (t.kind === "playlist" ? "Lista" : "Audio") : "--:--")) + '</span>' +
+            '<span class="q-move"><button type="button" data-mv="-1" ' + (qi === 0 ? "disabled" : "") + ' title="Subir en la cola" aria-label="Subir en la cola">↑</button>' +
+            '<button type="button" data-mv="1" ' + (qi === q.length - 1 ? "disabled" : "") + ' title="Bajar en la cola" aria-label="Bajar en la cola">↓</button></span>';
+          if (kind !== "current"){
+            (function(idx){ li.addEventListener("click", function(){ playTrack(idx); }); })(realIdx);
           }
+          li.querySelectorAll(".q-move button").forEach(function(b){
+            b.addEventListener("click", function(ev){
+              ev.stopPropagation();
+              moveQueue(realIdx, Number(b.getAttribute("data-mv")));
+            });
+          });
           list.appendChild(li);
         });
         var curEl = list.querySelector(".is-current");
@@ -1181,14 +1358,17 @@
         if (diff > 4){ el.style.setProperty("--sx", -diff + "px"); el.classList.add("scrolling"); }
       }
       function updateScreenMeta(){
-        var label = tracks.length ? (current + 1) + "/" + tracks.length : "0/0";
+        /* El contador es la posición dentro de la cola actual (por origen),
+           no de toda la biblioteca mezclada. */
+        var q = queueIndices();
+        var pos = q.indexOf(current);
+        var label = q.length ? (pos + 1) + "/" + q.length : "0/0";
         $("tPos").textContent = label;
-        $("tPosSoft").textContent = tracks.length ? (current + 1) + " / " + tracks.length : "0 / 0";
       }
       function showTrackOnScreen(){
         var t = tracks[current];
         if (!t) return;
-        $("tTitle").textContent = t.title;
+        $("tTitle").textContent = cleanTitle(t.title);
         $("tArtist").textContent = t.artist;
         $("tAlbum").textContent = t.album || "\u00a0";
         var artBox = $("artBox");
@@ -1204,8 +1384,8 @@
         requestAnimationFrame(function(){ setMarquee($("mTitle")); setMarquee($("mArtist")); });
         if ("mediaSession" in navigator){
           try{
-            var md = { title: t.title, artist: t.artist, album: t.album || "" };
-            if (t.artUrl) md.artwork = [{ src: t.artUrl, sizes: "512x512" }];
+            var md = { title: cleanTitle(t.title), artist: t.artist, album: t.album || "" };
+            md.artwork = [{ src: t.artUrl || "logo.png", sizes: "512x512" }];
             navigator.mediaSession.metadata = new MediaMetadata(md);
           }catch(e){}
         }
@@ -1451,7 +1631,9 @@
               ? "yt-dlp ya está al día (" + (r.version || "") + ")."
               : "yt-dlp actualizado (" + ((r && r.version) || "") + ").";
           }).catch(function(err){
-            if (msg) msg.textContent = "No se pudo actualizar yt-dlp: " + (err && err.message ? err.message : "error de red");
+            var m = (err && err.message) ? err.message : "error de red";
+            if (msg) msg.textContent = "No se pudo actualizar yt-dlp: " + m;
+            showToast({ kind: "err", title: "No se pudo actualizar yt-dlp", msg: "Toca para ver el motivo completo.", details: m, retryLabel: "Reintentar", onRetry: function(){ var b = $("dlUpdateBtn"); if (b) b.click(); } });
           });
         });
       })();
@@ -1512,11 +1694,12 @@
         var actions = "";
         if (e.status === "error" || e.status === "cancelled") actions = '<div class="di-actions"><button class="di-btn go" data-retry="' + e.id + '">Reintentar descarga</button></div>';
         else if (e.status === "done") actions = '<div class="di-actions"><button class="di-btn go" data-play="' + e.id + '">▶ Escuchar</button></div>';
+        var errAttr = (e.status === "error") ? ' data-errid="' + e.id + '"' : "";
         return '<li class="dl-item">' +
           '<div class="dl-item-top"><span class="di-t">' + esc(t.title) + '</span><span class="di-pct">' + pctTxt + '</span></div>' +
           '<div class="di-sub">' + esc(t.artist) + ' · MP3 · Máxima calidad</div>' +
           '<div class="' + barCls + '"><i style="width:' + barW + '%"></i></div>' +
-          '<div class="' + stCls + '">' + esc(dlStatusText(e)) + '</div>' + actions + '</li>';
+          '<div class="' + stCls + '"' + errAttr + '>' + esc(dlStatusText(e)) + '</div>' + actions + '</li>';
       }
       function renderDownloads(){
         var list = $("dlList");
@@ -1549,6 +1732,14 @@
           b.addEventListener("click", function(){
             var e = dlEntries.find(function(x){ return x.id === Number(b.getAttribute("data-play")); });
             if (e){ var t = dlTrackFor(e); if (t){ var idx = tracks.indexOf(t); if (idx < 0){ tracks.push(t); idx = tracks.length - 1; renderPlaylist(); saveState(); } showView("player"); loadTrack(idx, true); } }
+          });
+        });
+        /* Tocar un error de descarga muestra el motivo completo. */
+        list.querySelectorAll("[data-errid]").forEach(function(el){
+          el.style.cursor = "pointer";
+          el.addEventListener("click", function(){
+            var e = dlEntries.find(function(x){ return x.id === Number(el.getAttribute("data-errid")); });
+            if (e) showToast({ kind: "err", title: "Error de descarga", msg: "«" + cleanTitle(e.track.title || "") + "» no se pudo descargar.", details: e.error || "Sin más detalles.", retryLabel: "Reintentar descarga", onRetry: function(){ var t = dlTrackFor(e); if (t){ e.status = "queued"; e.progress = null; e.error = ""; queueDownload(t, false, e.groupId); } } });
           });
         });
       }
@@ -1691,8 +1882,11 @@
             var e2 = dlEntryFor(t);
             e2.status = dlCancelFlag ? "cancelled" : "error";
             if (dlCancelFlag){ e2.error = ""; }
-            else if (!e2.error){ e2.error = (err && err.message && err.message !== "apk-only") ? String(err.message).slice(0, 280) : "yt-dlp no pudo descargar esta canción"; }
+            else if (!e2.error){ e2.error = (err && err.message && err.message !== "apk-only") ? String(err.message).slice(0, 1000) : "yt-dlp no pudo descargar esta canción"; }
             renderPlaylist(); renderDownloads();
+            if (!dlCancelFlag){
+              showToast({ kind: "err", title: "No se pudo descargar", msg: "«" + cleanTitle(t.title) + "» quedó en solo-audio por internet. Toca para ver el motivo completo.", details: e2.error, retryLabel: "Reintentar descarga", onRetry: function(){ queueDownload(t, false); } });
+            }
           }).then(function(){ return dlSleep(500); }).then(step);
         })();
       }
@@ -1822,6 +2016,7 @@
              en vez de dejar la canción en silencio. El motivo queda en el
              aviso (para revisarlo) y la música sigue sonando. */
           dlSetStatus("Audio directo falló (" + ((err && err.message) ? err.message : "sin motivo") + "); suena con el reproductor de YouTube.", true);
+          showToast({ kind: "err", title: "Audio directo falló", msg: "Suena con el reproductor de YouTube (se pausa al salir de la app). Toca para ver el motivo completo.", details: (err && err.message) ? String(err.message) : "sin motivo", retryLabel: "Reintentar audio directo", onRetry: function(){ var t2 = ytHiddenTrack || track; if (t2){ t2.streamUrl = null; playHiddenYouTube(t2, true); } } });
           playYtIframe(track, autoplay);
         });
       }
@@ -1917,7 +2112,7 @@
       }
       function pauseAllAudio(){ try{ audio.pause(); }catch(e){} try{ ytAudioEl.pause(); }catch(e){} }
       function makeYtTrack(v){
-        return { id: ++uid, type: "youtube", kind: "video", videoId: v.videoId, playlistId: null, url: null, title: v.title || "Canción de YouTube", artist: v.artist || "YouTube", album: "YouTube · Solo audio · Máxima calidad", artUrl: v.artUrl || ("https://i.ytimg.com/vi/" + v.videoId + "/hqdefault.jpg"), duration: v.duration || 0, downloaded: false, dlState: null };
+        return applyMetaOverrides({ id: ++uid, type: "youtube", kind: "video", videoId: v.videoId, playlistId: null, url: null, title: v.title || "Canción de YouTube", artist: v.artist || "YouTube", album: "YouTube · Solo audio · Máxima calidad", artUrl: v.artUrl || ("https://i.ytimg.com/vi/" + v.videoId + "/hqdefault.jpg"), duration: v.duration || 0, downloaded: false, dlState: null });
       }
       /* ----- Al tocar un resultado de la búsqueda: el usuario ELIGE, nada empieza solo -----
          Se abre esta ventana: Escuchar (suena en el reproductor principal)
@@ -2027,6 +2222,81 @@
       }
       function closeLyrics(){ $("lyricsOverlay").classList.remove("show"); lyricsLines = []; lyricsActiveIdx = -1; }
       function refreshLyricsForCurrent(){ var ov = $("lyricsOverlay"); if (ov && ov.classList.contains("show")) openLyrics(); }
+      /* ---------- Editar datos de una canción y buscar su carátula ----------
+         Corrige el nombre, el artista o el álbum de una canción (por
+         ejemplo, los nombres feos con los que se descarga). Los cambios
+         se guardan como corrección en el teléfono y se aplican cada vez
+         que la canción vuelve a aparecer (escaneo, restauración o nueva
+         búsqueda); el archivo original no se modifica. La carátula se
+         busca en iTunes (gratis, sin clave) por artista + título. */
+      var editCtx = null, editArtUrl = null;
+      function openEdit(t){
+        if (!t) return;
+        editCtx = t; editArtUrl = t.artUrl || null;
+        $("editTitleInput").value = t.title || "";
+        $("editArtistInput").value = t.artist || "";
+        $("editAlbumInput").value = t.album || "";
+        $("coverMsg").textContent = "";
+        $("coverResults").innerHTML = "";
+        var pv = $("coverPreview");
+        if (editArtUrl){ pv.src = editArtUrl; pv.style.display = "block"; } else pv.style.display = "none";
+        $("editOverlay").classList.add("show");
+      }
+      function closeEdit(){ $("editOverlay").classList.remove("show"); editCtx = null; editArtUrl = null; }
+      function saveEdit(){
+        var t = editCtx;
+        if (!t){ closeEdit(); return; }
+        var nt = $("editTitleInput").value.trim();
+        var na = $("editArtistInput").value.trim();
+        var nal = $("editAlbumInput").value.trim();
+        if (nt) t.title = nt;
+        if (na) t.artist = na;
+        t.album = nal;
+        if (editArtUrl) t.artUrl = editArtUrl;
+        var k = metaKey(t);
+        if (k){ metaOverrides[k] = { title: t.title, artist: t.artist, album: t.album, artUrl: t.artUrl || null }; saveMetaOverrides(); }
+        closeEdit();
+        renderPlaylist();
+        if (tracks[current] === t) showTrackOnScreen();
+        saveState();
+      }
+      $("editSaveBtn").addEventListener("click", saveEdit);
+      $("editCancelBtn").addEventListener("click", closeEdit);
+      $("coverSearchBtn").addEventListener("click", function(){
+        var t = editCtx;
+        if (!t) return;
+        var artist = $("editArtistInput").value.trim(), title = $("editTitleInput").value.trim();
+        var q = (artist + " " + title).trim();
+        if (!q){ $("coverMsg").textContent = "Escribe artista y título para buscar."; return; }
+        $("coverMsg").textContent = "Buscando carátula…";
+        $("coverResults").innerHTML = "";
+        fetch("https://itunes.apple.com/search?term=" + encodeURIComponent(q) + "&entity=song&limit=6")
+          .then(function(r){ if (!r.ok) throw new Error("http " + r.status); return r.json(); })
+          .then(function(d){
+            var list = (d && d.results) || [];
+            if (!list.length){ $("coverMsg").textContent = "No encontré carátula para eso."; return; }
+            $("coverMsg").textContent = "Toca una carátula para elegirla.";
+            list.forEach(function(x){
+              var url = (x.artworkUrl100 || "").replace("100x100bb.jpg", "600x600bb.jpg");
+              if (!url) return;
+              var b = document.createElement("button");
+              b.type = "button"; b.className = "cover-pick";
+              var im = document.createElement("img");
+              im.src = url; im.alt = (x.trackName || "") + " · " + (x.artistName || "");
+              b.appendChild(im);
+              b.addEventListener("click", function(){
+                editArtUrl = url;
+                var pv = $("coverPreview");
+                pv.src = url; pv.style.display = "block";
+                var all = $("coverResults").querySelectorAll(".cover-pick");
+                all.forEach(function(n){ n.classList.remove("on"); });
+                b.classList.add("on");
+              });
+              $("coverResults").appendChild(b);
+            });
+          })
+          .catch(function(){ $("coverMsg").textContent = "No se pudo buscar la carátula. Revisa tu conexión e inténtalo de nuevo."; });
+      });
       $("choiceListenBtn").addEventListener("click", function(){
         if (!choiceCtx) return;
         var firstIdx = choiceCtx.indices[0];
@@ -2081,6 +2351,7 @@
           var m = (err && err.message) ? err.message : String(err || "");
           msg.textContent = "No se pudo buscar: " + (m || "inténtalo de nuevo") + ". Si sigue fallando, actualiza yt-dlp en Descargas.";
           msg.className = "yt-msg";
+          showToast({ kind: "err", title: "No se pudo buscar", msg: "La búsqueda en YouTube falló. Toca para ver el motivo completo.", details: m || "sin motivo", retryLabel: "Reintentar búsqueda", onRetry: searchYouTube });
         });
       }
       function renderYtSearchResults(list){
@@ -2093,12 +2364,12 @@
           var img = document.createElement("img");
           img.src = r.thumbnail || ("https://i.ytimg.com/vi/" + r.id + "/hqdefault.jpg");
           img.alt = "";
-          img.onerror = function(){ this.style.visibility = "hidden"; };
+          img.onerror = function(){ this.onerror = null; this.src = "logo.png"; };
           var meta = document.createElement("span");
           meta.className = "yr-meta";
           var t = document.createElement("span");
           t.className = "yr-t";
-          t.textContent = r.title || "Canción de YouTube";
+          t.textContent = cleanTitle(r.title || "Canción de YouTube");
           var c = document.createElement("span");
           c.className = "yr-c";
           c.textContent = (r.channel || "YouTube") + (r.duration ? " · " + fmt(r.duration) : "");
@@ -2143,9 +2414,9 @@
       }
       function makeLocalTrack(s){
         var conv = (window.Capacitor && window.Capacitor.convertFileSrc) ? window.Capacitor.convertFileSrc : function(u){ return u; };
-        return { id: "local-" + s.id, type: "local", url: conv(s.uri), title: s.title || s.fileName || "Canción",
+        return applyMetaOverrides({ id: "local-" + s.id, type: "local", url: conv(s.uri), title: s.title || s.fileName || "Canción",
           artist: s.artist || "Artista desconocido", album: s.album || "",
-          artUrl: s.albumArt ? conv(s.albumArt) : null, artRaw: s.albumArt || null, duration: s.duration || 0, scanned: true };
+          artUrl: s.albumArt ? conv(s.albumArt) : null, artRaw: s.albumArt || null, duration: s.duration || 0, scanned: true });
       }
       function scanLocalMusic(manual){
         var p = getLocalMusic();
@@ -2363,25 +2634,28 @@
       function nextTrack(auto){
         if (!tracks.length) return;
         if (auto && repeatMode === 2){ if (isHiddenYouTube()){ playHiddenYouTube(tracks[current], true); return; } try{ curAudio().currentTime = 0; }catch(e){} startPlayback(); return; }
+        /* Siguiente DENTRO de la cola actual (por origen): la música de
+           YouTube no salta a la local ni al revés. */
+        var q = queueIndices();
+        if (!q.length) return;
+        var pos = q.indexOf(current);
         var n;
-        if (shuffle && tracks.length > 1){ do { n = Math.floor(Math.random() * tracks.length); } while (n === current); }
+        if (shuffle && q.length > 1){ var p; do { p = Math.floor(Math.random() * q.length); } while (p === pos); n = q[p]; }
+        else if (pos >= 0 && pos + 1 < q.length){ n = q[pos + 1]; }
         else {
-          n = current + 1;
-          if (n >= tracks.length){
-            if (auto && repeatMode === 0){
-              var cur = tracks[current];
-              if (cur && (cur.type === "youtube" || cur.type === "ytaudio")){
-                /* Fin de la cola con un tema online: la radio sigue con
-                   música sugerida de YouTube; si no hay sugeridos, para. */
-                playNextSuggestion(cur).then(function(ok){
-                  if (!ok){ pauseAllAudio(); if (ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } }
-                });
-                return;
-              }
-              pauseAllAudio(); if (ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } return;
+          if (auto && repeatMode === 0){
+            var cur = tracks[current];
+            if (cur && (cur.type === "youtube" || cur.type === "ytaudio")){
+              /* Fin de la cola con un tema online: la radio sigue con
+                 música sugerida de YouTube; si no hay sugeridos, para. */
+              playNextSuggestion(cur).then(function(ok){
+                if (!ok){ pauseAllAudio(); if (ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } }
+              });
+              return;
             }
-            n = 0;
+            pauseAllAudio(); if (ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } return;
           }
+          n = q[0];
         }
         loadTrack(n, true);
       }
@@ -2390,8 +2664,11 @@
         if (isHiddenYouTube()){
           if (ytCurrentTime() > 3){ if (ytApiPlayer && ytApiPlayer.seekTo){ try{ ytApiPlayer.seekTo(0, true); }catch(e){} } else { try{ ytAudioEl.currentTime = 0; }catch(e){} } return; }
         } else if (curAudio().currentTime > 3){ curAudio().currentTime = 0; return; }
-        var n = current - 1;
-        if (n < 0) n = tracks.length - 1;
+        /* Anterior DENTRO de la cola actual (por origen). */
+        var q = queueIndices();
+        if (!q.length) return;
+        var pos = q.indexOf(current);
+        var n = (pos > 0) ? q[pos - 1] : q[q.length - 1];
         loadTrack(n, true);
       }
       function setPlayIcons(playing){
@@ -2423,7 +2700,7 @@
           $("seek").style.setProperty("--fill", ((ytAudioEl.currentTime / d) * 100) + "%");
         }
       });
-      audio.addEventListener("play", function(){ setPlayIcons(true); bgAudioSync(); });
+      audio.addEventListener("play", function(){ setPlayIcons(true); bgAudioSync(); try{ if (vizCtx && vizCtx.state === "suspended") vizCtx.resume(); }catch(e){} });
       audio.addEventListener("pause", function(){ setPlayIcons(false); bgAudioSync(); saveState(); });
       audio.addEventListener("ended", function(){ nextTrack(true); });
       /* El audio de YouTube suena en este <audio> (ya no en el iframe):
@@ -2495,8 +2772,6 @@
         br.classList.toggle("on", repeatMode > 0);
         br.setAttribute("aria-pressed", repeatMode > 0 ? "true" : "false");
         $("repBadge").textContent = repeatMode === 2 ? "1" : "\u221e";
-        $("dotShuffle").classList.toggle("on", shuffle);
-        $("dotRepeat").classList.toggle("on", repeatMode > 0);
         renderQueue();
       }
       $("btnShuffle").addEventListener("click", function(){ shuffle = !shuffle; syncModes(); });
@@ -2512,7 +2787,9 @@
         try{
           var AC = window.AudioContext || window.webkitAudioContext;
           if (!AC) return;
-          vizCtx = new AC();
+          /* latencyHint "playback": menos tirones al salir y volver a la
+             app (el contexto se suspende y se reanuda con el sistema). */
+          vizCtx = new AC({ latencyHint: "playback" });
           var src = vizCtx.createMediaElementSource(audio);
           analyser = vizCtx.createAnalyser();
           analyser.fftSize = 64;
@@ -2576,15 +2853,10 @@
       $("btnPlay").addEventListener("click", togglePlay);
       $("btnNext").addEventListener("click", function(){ nextTrack(false); });
       $("btnPrev").addEventListener("click", prevTrack);
-      $("clearBtn").addEventListener("click", clearAll);
       $("searchInput").addEventListener("input", renderPlaylist);
 
-      /* Pestañas Descargas / Biblioteca y sección de agregar música. */
-      /* Pestañas Descargas / Biblioteca / YouTube (hay una fila en cada
-         vista; todas cambian de vista con el mismo mecanismo). */
-      document.querySelectorAll(".lib-tab").forEach(function(b){
-        b.addEventListener("click", function(){ showView(b.getAttribute("data-view")); });
-      });
+      /* La navegación ya es la barra inferior fija (nav-btn); las
+         pestañas de arriba se quitaron para no tener dos navegaciones. */
       $("addToggle").addEventListener("click", function(){ addSectionTouched = true; addSectionOpen = !addSectionOpen; syncAddSection(); });
       $("scanRefreshBtn").addEventListener("click", function(){ scanLocalMusic(true); });
       /* Respaldo: si el escaneo automático no encuentra tu música, la
@@ -2597,7 +2869,8 @@
           { label: "Todas las canciones", on: libFilter === "all", fn: function(){ libFilter = "all"; syncLibToolState(); renderPlaylist(); } },
           { label: "Solo MP3 locales", on: libFilter === "local", fn: function(){ libFilter = "local"; syncLibToolState(); renderPlaylist(); } },
           { label: "Solo YouTube", on: libFilter === "youtube", fn: function(){ libFilter = "youtube"; syncLibToolState(); renderPlaylist(); } },
-          { label: "Solo descargadas", on: libFilter === "downloaded", fn: function(){ libFilter = "downloaded"; syncLibToolState(); renderPlaylist(); } }
+          { label: "Solo descargadas", on: libFilter === "downloaded", fn: function(){ libFilter = "downloaded"; syncLibToolState(); renderPlaylist(); } },
+          { label: "✕  Vaciar biblioteca", danger: true, fn: function(){ clearAll(); } }
         ]);
       });
       $("sortBtn").addEventListener("click", function(){
@@ -2605,9 +2878,19 @@
         openLibMenu(self, [
           { label: "Orden en que se agregaron", on: libSort === "added", fn: function(){ libSort = "added"; syncLibToolState(); renderPlaylist(); } },
           { label: "Título (A–Z)", on: libSort === "title", fn: function(){ libSort = "title"; syncLibToolState(); renderPlaylist(); } },
-          { label: "Artista (A–Z)", on: libSort === "artist", fn: function(){ libSort = "artist"; syncLibToolState(); renderPlaylist(); } }
+          { label: "Artista (A–Z)", on: libSort === "artist", fn: function(){ libSort = "artist"; syncLibToolState(); renderPlaylist(); } },
+          { label: "Álbum (A–Z)", on: libSort === "album", fn: function(){ libSort = "album"; syncLibToolState(); renderPlaylist(); } }
         ]);
       });
+      /* Vista de Biblioteca: lista o cuadrícula (Grid View). */
+      function syncViewBtn(){ var b = $("viewBtn"); if (b) b.classList.toggle("on", libView === "grid"); }
+      $("viewBtn").addEventListener("click", function(){
+        libView = libView === "grid" ? "list" : "grid";
+        try { localStorage.setItem("gurru-lib-view", libView); } catch(e){}
+        syncViewBtn();
+        renderPlaylist();
+      });
+      syncViewBtn();
       document.addEventListener("click", function(e){
         var m = $("libMenu");
         if (m && m.classList.contains("show") && !m.contains(e.target) && e.target !== libMenuAnchor && !(libMenuAnchor && libMenuAnchor.contains(e.target))) closeLibMenu();
@@ -2634,7 +2917,7 @@
       document.addEventListener("keydown", function(ev){
         var tag = (ev.target && ev.target.tagName) || "";
         if (tag === "INPUT" || tag === "TEXTAREA") return;
-        if (ev.key === "Escape"){ var lo = $("lyricsOverlay"); if (lo && lo.classList.contains("show")){ closeLyrics(); return; } if (view !== "player") showView("player"); return; }
+        if (ev.key === "Escape"){ var eo = $("editOverlay"); if (eo && eo.classList.contains("show")){ closeEdit(); return; } var lo = $("lyricsOverlay"); if (lo && lo.classList.contains("show")){ closeLyrics(); return; } if (view !== "player") showView("player"); return; }
         if (ev.code === "Space"){ ev.preventDefault(); togglePlay(); }
         else if (ev.key === "ArrowRight"){ seekBySeconds(5); }
         else if (ev.key === "ArrowLeft"){ seekBySeconds(-5); }
@@ -2653,7 +2936,14 @@
       if (restored && current >= 0 && tracks[current]){ loadTrack(current, false); }
       /* Guarda la posición al salir de la app y cada 10 s mientras suena,
          para que al reabrir siga donde quedó. */
-      document.addEventListener("visibilitychange", function(){ if (document.hidden) saveState(); });
+      document.addEventListener("visibilitychange", function(){
+        if (document.hidden){ saveState(); return; }
+        /* Al volver a la app, si el contexto de audio quedó suspendido
+           por el sistema, el sonido se distorsiona hasta que se reanuda:
+           se reanuda aquí para que vuelva a sonar limpio. */
+        try { if (vizCtx && vizCtx.state === "suspended" && activeIsPlaying()) vizCtx.resume(); } catch(e){}
+        bgAudioSync();
+      });
       window.addEventListener("beforeunload", saveState);
       setInterval(function(){ try { if (current >= 0 && activeIsPlaying()){ bgAudioSync(); saveState(); } } catch(e){} }, 10000);
       /* Al abrir la app, en el APK, busca sola la música del teléfono. */

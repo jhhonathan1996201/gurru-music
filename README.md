@@ -261,11 +261,11 @@ mano.
 
 ## Pestaña YouTube
 
-La búsqueda de YouTube vive en su propia pestaña, junto a Descargas y
-Biblioteca (la misma fila de pestañas está en las tres vistas). Ahí la
-lista de resultados tiene todo el espacio y se puede deslizar por ella.
-Tocar un resultado lo agrega a la Biblioteca y abre la ventana para
-elegir Escuchar, Descargar o Solo agregar, como antes.
+La búsqueda de YouTube vive en su propia sección, junto a Descargas y
+Biblioteca, en la barra inferior fija. Ahí la lista de resultados tiene
+todo el espacio y se puede deslizar por ella. Tocar un resultado lo
+agrega a la Biblioteca y abre la ventana para elegir Escuchar, Descargar
+o Solo agregar, como antes.
 
 ## Radio: seguir con sugeridos de YouTube
 
@@ -276,3 +276,66 @@ al terminar ese, el siguiente, y así. YouTube no entrega su lista de
 "A continuación" a yt-dlp, así que la radio se arma con la búsqueda de
 YouTube del artista. La música local se detiene al final de su cola como
 siempre; el modo repetir tampoco cambia.
+
+## NUEVO7 — Rediseño UX/UI (2026-11-09)
+
+Jonathan dio el diseño y levantó el hold el 2026-11-09 ~20:16 CST.
+Todo se aplicó sobre NUEVO6, solo en `www/index.html` (sin cambios en
+los plugins). Decisiones que él no contestó y se tomaron con criterio:
+la barra inferior **reemplaza** las pestañas de arriba (no hay dos
+navegaciones); las tarjetas de la cuadrícula muestran portada + título
++ artista, 2 columnas (3 en tablet); reordenar la cola es con botones
+↑ ↓ por fila (un toque por movimiento, sin gestos que choquen con el
+scroll).
+
+- **Barra inferior fija:** Descargas / Biblioteca / YouTube siempre
+  visibles, para el pulgar; la sección activa se marca en cian. Las
+  pestañas de arriba se quitaron. El botón "Vaciar" pasó al menú de
+  filtro (⋮ filtro → "Vaciar biblioteca").
+- **Toasts (avisos flotantes):** los errores de descarga, búsqueda,
+  audio directo y actualización de yt-dlp ya no son solo texto
+  estático: aparece un aviso flotante con botón **Reintentar** y se
+  puede **tocar para expandir** y leer el motivo completo. El error
+  de una descarga también se puede tocar en el apartado Descargas
+  para ver el motivo completo.
+- **Controles 48 dp:** los botones de transporte miden mínimo 48×48
+  px y el pulgar de la barra de progreso es de 26 px (antes 18 px).
+  Los textos secundarios subieron de tamaño (9.5–11.5 px → 11–13 px);
+  el contraste ya pasaba WCAG AA (13.35:1), el problema era el tamaño.
+- **Cola por origen:** "A continuación" ya no mezcla YouTube con la
+  Biblioteca: si suena YouTube, solo salen las de YouTube; si suena
+  la Biblioteca, solo las locales. Siguiente/Anterior y aleatorio
+  también se mueven solo dentro de la cola actual. El contador
+  (12/305) y el de arriba son la posición dentro de esa cola.
+- **Cola con número y reorden:** cada fila lleva su número (1, 2, 3…)
+  y botones ↑ ↓ para subirla o bajarla con un toque.
+- **Biblioteca:** ordenar por **álbum** (nuevo) y **vista de
+  cuadrícula** (botón nuevo junto a filtro y orden): tarjetas con
+  portada, título y artista; se recuerda la vista elegida.
+- **Limpieza de metadatos:** los títulos se muestran sin el ruido
+  técnico ("[Official Video]", "(1080p)", "HD"…); los datos guardados
+  no se tocan.
+- **Botón Letra visible:** salió del grupo de transporte (ahí quedaba
+  escondido) y ahora es un botón centrado "♪ Letra" debajo de los
+  controles, de 44 px de alto.
+- **Carátulas:** la canción sin portada muestra el logo de Gurru Music
+  (la patita con GM) en el reproductor, en las filas y en los
+  resultados de búsqueda, en vez de un hueco vacío.
+- **Editar datos:** en el menú ⋮ de cada canción, "Editar datos /
+  carátula" abre un diálogo para corregir título, artista y álbum, y
+  un botón "Buscar carátula" que busca la portada en iTunes (gratis,
+  sin clave) por artista + título. Los cambios se guardan en el
+  teléfono y se aplican cada vez que la canción vuelve a aparecer
+  (escaneo, restauración o nueva búsqueda); el archivo original no se
+  modifica.
+- **Distorsión al salir/entrar (mitigación):** el visualizador crea
+  el contexto de audio con `latencyHint: "playback"` y al volver a la
+  app, si el contexto quedó suspendido por el sistema, se reanuda
+  (también al darle play). Es una mitigación: si la distorsión sigue,
+  hay que saber si pasa con música local, con YouTube o con las dos.
+
+Validado: JS `node --check` OK (2 bloques), todos los ids
+referenciados existen, lógica de cola y de limpieza probada en Node
+(8/8 casos de títulos; cola YouTube [1,3,5] y local [0,2,4] con 6
+canciones mezcladas; subir una canción en la cola la intercambia bien),
+`npx cap sync` OK, md5 de `www/index.html` == copia en assets.
