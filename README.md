@@ -617,3 +617,27 @@ falta javac). Lógica probada en Node con las funciones reales:
 abrir ytC en una cola mixta deja solo [locales + ytC] con current
 correcto y gen subido; abrir un tema local no toca nada; abrir ytA
 quita las sugerencias viejas sembradas.
+
+## Ronda NUEVO12 (2026-11-10)
+
+Jonathan reportó (12:53 CST) 4 cosas, todas aplicadas:
+
+### 1) La música local sí sigue en segundo plano; solo se para la de YouTube (causa raíz encontrada)
+- Dato clave de Jonathan: la música local **siempre** siguió funcionando en segundo plano; solo la de YouTube se paraba al salir (se preparaba bien, pero al salir se pausaba y solo volvía al regresar a la app). Eso descarta que ColorOS mate el proceso (si lo matara, la local también se cortaría) y apunta al archivo de audio en sí.
+- Causa raíz, verificada con yt-dlp real (2026.10.26): el caché descarga `-f bestaudio/best`, y en estos videos de YouTube Music el único formato con audio es el **18** (360p MP4, `avc1.42001E mp4a.40.2`): un archivo con pista de **video** además de audio. El WebView pausa el audio cuando la página se oculta si el archivo trae video (por eso el MP3 local, solo-audio, seguía sonando).
+- Arreglo: `cacheAudio` ahora usa `--extract-audio --audio-format m4a` (solo audio, sin video). Verificado con yt-dlp real: el M4A resultante (1.31 MB para "Baila Mi Corazón") **no tiene pista de video** (`vide` ausente, `soun` presente). Para audio AAC (formato 18, itag 140) es solo un reempaquetado rápido; la preparación tarda un poco más por la conversión. El caché se limpia al arrancar, así que no quedan archivos .mp4 viejos con video. La ruta de Descargas (permanente) ya usaba `--extract-audio`, sin cambio.
+
+### 2) Sugerencias por el ARTISTA REAL, leído de la metadata del video
+- El buscador solo trae el canal que subió el video (a veces el sello o "BelanovaVEVO"), y el parseo del título no siempre acierta. Ahora el plugin tiene `getVideoInfo({url})` (`--dump-json`, mismo patrón que `getAudioUrl`) que devuelve `artist`/`track`/`album` reales. Verificado con yt-dlp real: "Baila Mi Corazón" → artist **Belanova**, track "Baila Mi Corazón", album **Fantasía Pop**; "Por Esta Vez" → artist **Belanova**.
+- En JS, `resolveArtist(t)` pide esa metadata una sola vez por canción (se guarda la promesa en `t._metaPromise` para no repetirla), corrige `t.artist` (y `t.album`) en la canción, refresca la lista y la letra, y devuelve el artista real. `fetchSuggestions` ahora espera primero a `resolveArtist` y busca canciones de **ese** artista; si la metadata falla o no trae artista, cae al parseo del título (lo de antes). Al abrir una canción online también se llama `resolveArtist` (en la rama online y en la de caché), así el artista que se ve es el real y la letra se busca con él. Validado en Node con plugin simulado: canal "BelanovaVEVO" → "Belanova" (y corrige el artista en la canción); si `getVideoInfo` falla → fallback al parseo; canal ya correcto → "Belanova".
+
+### 3) Vista de cuadrícula en Biblioteca: las tarjetas se estiraban y se veían vacías
+- Causa: la cuadrícula (`.playlist.grid`) es `display:grid` dentro de un contenedor con altura fija; por defecto `align-content` estira las filas para llenar el contenedor, así cada tarjeta se estiraba a la altura de la fila. Reproducido en el navegador con el CSS y la estructura exactos de la app: las tarjetas medían ~161×458 px con ~230 px de espacio vacío dentro (solo cabían 3 por pantalla).
+- Arreglo: `.playlist.grid{ align-content:start; grid-auto-rows:max-content; }` y `.playlist.grid li{ align-self:start; }`. Verificado en el navegador con el mismo repro: las tarjetas ahora miden ~162×219 px (la portada 161×161 + título/artista + ~14 px de relleno), caben las 4 canciones en la primera pantalla. (Las portadas se veían como imagen rota solo en esa vista previa porque el archivo local no se servía; en la app real `logo.png` sí está.)
+
+### 4) Configuración: color de la app + créditos
+- Nueva vista **Ajustes** (4º botón en la barra inferior, engranaje). El sistema de temas ya existía en el CSS (`html[data-accent]` con azul/rojo/naranja) pero no había forma de cambiarlo.
+- Colores para elegir (todos neón, conforme al estilo de la app): **Azul neón** (el de siempre), Verde neón, Rosa neón, Violeta, Rojo, Naranja y Dorado. El color se aplica a toda la app (título, barra de progreso, botones activos, navegación) y se guarda en `localStorage` (`gurru-accent`); un script chico en `<head>` lo restaura antes de pintar para que no parpadee el azul al abrir.
+- Créditos en Ajustes: "App diseñada con el poder de Muse" y "Desarrollador: Jonathan Aguilar Lopez".
+
+Validado: JS `node --check` OK (los 3 bloques, el 3º es el script de restauración del tema en `<head>`), todos los `$("...")` existen (97 ids, nuevo `viewSettings`), `npx cap sync` OK, md5 de `www/index.html` == copia en assets. Java: `javac` OK (5 archivos, con los stubs de `hidden_files/capstubs/`; el primer intento falló porque `cp` sin `-r` no copió los directorios de stubs).

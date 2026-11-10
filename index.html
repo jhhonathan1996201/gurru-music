@@ -14,6 +14,10 @@
       html[data-accent="azul"]{ --accent:#22d3ee; --accent2:#0284c7; --glow:rgba(34,211,238,.85); --soft:#bae6fd; }
       html[data-accent="rojo"]{ --accent:#fb4d6d; --accent2:#be123c; --glow:rgba(251,77,109,.85); --soft:#fecdd3; }
       html[data-accent="naranja"]{ --accent:#fb923c; --accent2:#ea580c; --glow:rgba(251,146,60,.85); --soft:#fed7aa; }
+      html[data-accent="verde"]{ --accent:#34d399; --accent2:#059669; --glow:rgba(52,211,153,.85); --soft:#a7f3d0; }
+      html[data-accent="rosa"]{ --accent:#f472b6; --accent2:#db2777; --glow:rgba(244,114,182,.85); --soft:#fbcfe8; }
+      html[data-accent="violeta"]{ --accent:#a78bfa; --accent2:#7c3aed; --glow:rgba(167,139,250,.85); --soft:#ddd6fe; }
+      html[data-accent="dorado"]{ --accent:#fbbf24; --accent2:#d97706; --glow:rgba(251,191,36,.85); --soft:#fde68a; }
       *{ box-sizing:border-box; }
       html,body{ margin:0; padding:0; }
       body{
@@ -100,11 +104,11 @@
          falta espacio y su lista rueda por dentro. La barra inferior
          (Biblioteca) va en su propia capa, siempre visible. */
       .queue{ flex:0 1 auto; min-height:0; display:flex; flex-direction:column; margin-top:2px; border-top:1px solid rgba(125,211,252,.28); padding-top:5px; }
-      .queue-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 2px 4px; }
-      .queue-head .q-title{ font-size:12.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); text-shadow:0 0 6px var(--glow); }
-      .queue-head .q-right{ display:flex; align-items:center; gap:8px; }
-      .queue-head .q-count{ font-family:"Share Tech Mono",monospace; font-size:12.5px; color:var(--soft); white-space:nowrap; }
-      .q-toggle{ border:1px solid rgba(125,211,252,.55); background:rgba(255,255,255,.08); color:#fff; border-radius:999px; padding:4px 10px; font-size:11.5px; font-weight:800; }
+      .queue-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 2px 4px; flex-wrap:wrap; }
+      .queue-head .q-title{ font-size:12.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); text-shadow:0 0 6px var(--glow); flex-shrink:0; }
+      .queue-head .q-right{ display:flex; align-items:center; gap:8px; min-width:0; flex:1 1 auto; justify-content:flex-end; }
+      .queue-head .q-count{ font-family:"Share Tech Mono",monospace; font-size:12.5px; color:var(--soft); white-space:nowrap; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+      .q-toggle{ border:1px solid rgba(125,211,252,.55); background:rgba(255,255,255,.08); color:#fff; border-radius:999px; padding:4px 10px; font-size:11.5px; font-weight:800; flex-shrink:0; }
       .queue-body{ display:flex; flex-direction:column; min-height:0; overflow:hidden; }
       .queue.collapsed .queue-body{ display:none; }
       .queue-list{ list-style:none; margin:0; padding:0; max-height:min(320px,46dvh); min-height:0; overflow:auto; overscroll-behavior:contain; }
@@ -209,7 +213,14 @@
       .dl-status .dl-txt{ flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .dl-status .dl-cancel{ flex:0 0 auto; border:1px solid rgba(167,243,208,.6); background:transparent; color:#fff; border-radius:999px; padding:3px 9px; font-size:11px; font-weight:800; }
       .dl-status.err{ border-color:rgba(254,205,211,.5); background:rgba(127,29,29,.35); color:#ffe4e6; }
+      /* NUEVO8: la barra roja se puede tocar (vuelve a mostrar el error
+         completo con su detalle y su Reintentar) y se cierra con la ✕. */
+      .dl-status.err{ cursor:pointer; }
+      .dl-status .dl-x{ flex:0 0 auto; display:none; border:1px solid rgba(255,255,255,.5); background:transparent; color:#fff; border-radius:999px; width:22px; height:22px; font-size:11px; font-weight:800; line-height:1; }
+      .dl-status.show .dl-x{ display:block; }
       .src-badge.saved{ background:#059669; }
+      /* NUEVO8: marca de sugerencia en la cola de YouTube. */
+      .src-badge.sugg{ background:#6d28d9; }
       .playlist .dl{ border:0; background:transparent; color:#a7f3d0; font-size:15px; line-height:1; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; }
       .playlist .dl:disabled{ opacity:.55; }
       .playlist li{ grid-template-columns:28px 1fr auto auto auto; }
@@ -264,6 +275,7 @@
       .lyrics-title{ font-size:17px; font-weight:800; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .lyrics-artist{ font-size:13px; color:#7dd3fc; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .lyrics-body{ overflow-y:auto; overflow-x:hidden; padding:4px 16px 16px; font-size:15px; line-height:1.65; color:#dbeafe; text-align:left; }
+      .lyrics-src{ font-size:11px; color:var(--soft); text-align:center; padding:0 16px 10px; }
       .lyrics-line{ padding:3px 0; opacity:.6; transition:opacity .2s; text-align:left; }
       .lyrics-line.active{ opacity:1; color:#7df9ff; font-weight:700; }
       .lyrics-plain{ white-space:pre-wrap; }
@@ -399,8 +411,8 @@
       .queue-list .q-move button:disabled{ opacity:.3; cursor:default; }
       .queue-list .q-move button:active{ background:rgba(2,132,199,.4); }
       /* Biblioteca en cuadrícula: tarjetas con portada, título y artista. */
-      .playlist.grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
-      .playlist.grid li{ display:flex; flex-direction:column; align-items:stretch; gap:0; padding:0; border:1px solid rgba(125,211,252,.25); border-bottom:1px solid rgba(125,211,252,.25); border-radius:12px; overflow:hidden; background:rgba(255,255,255,.05); position:relative; }
+      .playlist.grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; align-content:start; grid-auto-rows:max-content; }
+      .playlist.grid li{ display:flex; flex-direction:column; align-items:stretch; align-self:start; gap:0; padding:0; border:1px solid rgba(125,211,252,.25); border-bottom:1px solid rgba(125,211,252,.25); border-radius:12px; overflow:hidden; background:rgba(255,255,255,.05); position:relative; }
       .playlist.grid .thumb{ width:100%; height:auto; aspect-ratio:1; border-radius:0; }
       .playlist.grid .thumb img{ width:100%; height:100%; }
       .playlist.grid .meta{ padding:8px 10px 10px; }
@@ -408,6 +420,19 @@
       .playlist.grid .kebab{ position:absolute; top:4px; right:4px; background:rgba(1,10,36,.65); border-radius:50%; }
       .playlist.grid li.playing .thumb{ box-shadow:inset 0 0 0 2px var(--accent); }
       @media (min-width:700px){ .playlist.grid{ grid-template-columns:repeat(3,1fr); } }
+      /* ===== Configuración: color de la app y créditos. ===== */
+      .set-wrap{ flex:1; min-height:0; overflow:auto; padding:16px 18px 24px; }
+      .set-title{ font-size:22px; font-weight:800; color:var(--accent); text-shadow:0 0 8px var(--glow); margin:2px 0 4px; }
+      .set-sub{ font-size:13.5px; color:var(--soft); margin:0 0 6px; }
+      .set-h{ font-size:12.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin:20px 0 10px; }
+      .set-swatches{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+      .set-swatch{ border:2px solid transparent; border-radius:14px; padding:10px 4px 8px; background:rgba(255,255,255,.06); color:#fff; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; font-size:12px; font-weight:700; min-height:64px; }
+      .set-swatch .dot{ width:34px; height:34px; border-radius:50%; background:var(--sw,#22d3ee); box-shadow:0 0 12px var(--sw,#22d3ee); }
+      .set-swatch.on{ border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), 0 0 14px var(--glow); }
+      .set-credits{ border:1px solid rgba(125,211,252,.25); background:rgba(255,255,255,.05); border-radius:14px; padding:16px; text-align:center; }
+      .set-credits .cr-big{ font-size:16px; font-weight:800; color:#fff; }
+      .set-credits .cr-sub{ font-size:13px; color:var(--soft); margin-top:6px; }
+      .set-credits .cr-dev{ font-size:13.5px; color:#fff; margin-top:10px; font-weight:700; }
       /* Avisos flotantes (toasts): errores con Reintentar y detalle que se expande al tocar. */
       #toastWrap{ position:absolute; left:12px; right:12px; bottom:76px; z-index:25; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
       .toast{ pointer-events:auto; background:#0a2247; border:1.5px solid rgba(125,211,252,.55); border-radius:12px; padding:10px 12px; box-shadow:0 12px 30px rgba(0,0,0,.55); cursor:pointer; }
@@ -445,6 +470,9 @@
          la página no puede usar ningún plugin nativo (búsqueda y descargas de
          YouTube, audio en segundo plano, botón atrás). Se carga después del
          script inyectado y antes del código de la app. -->
+    <!-- Restaura el color elegido en Configuración antes de pintar, para
+         que la app no parpadee en azul al abrir. -->
+    <script>try{var _a=localStorage.getItem("gurru-accent");if(_a&&["azul","verde","rosa","violeta","rojo","naranja","dorado"].indexOf(_a)>=0)document.documentElement.setAttribute("data-accent",_a);}catch(e){}</script>
     <script src="capacitor.js"></script>
   </head>
   <body>
@@ -522,6 +550,7 @@
 
             <div class="dl-status" id="dlStatus" role="status">
               <span class="dl-txt" id="dlStatusTxt"></span>
+              <button class="dl-x" id="dlStatusX" type="button" title="Cerrar este aviso" aria-label="Cerrar este aviso">✕</button>
               <button class="dl-cancel" id="dlCancelBtn">Detener</button>
             </div>
 
@@ -626,6 +655,30 @@
             </div>
           </div>
         </section>
+
+        <!-- ============ CONFIGURACIÓN ============ -->
+        <section class="view" id="viewSettings" aria-label="Configuración" hidden>
+          <div class="set-wrap">
+            <div class="set-title">Configuración</div>
+            <p class="set-sub">Cambia el color de la aplicación y conoce los créditos.</p>
+            <div class="set-h">Color de la aplicación</div>
+            <div class="set-swatches" id="accentSwatches">
+              <button class="set-swatch" data-accent="azul" type="button"><span class="dot" style="--sw:#22d3ee"></span>Azul neón</button>
+              <button class="set-swatch" data-accent="verde" type="button"><span class="dot" style="--sw:#34d399"></span>Verde neón</button>
+              <button class="set-swatch" data-accent="rosa" type="button"><span class="dot" style="--sw:#f472b6"></span>Rosa neón</button>
+              <button class="set-swatch" data-accent="violeta" type="button"><span class="dot" style="--sw:#a78bfa"></span>Violeta</button>
+              <button class="set-swatch" data-accent="rojo" type="button"><span class="dot" style="--sw:#fb4d6d"></span>Rojo</button>
+              <button class="set-swatch" data-accent="naranja" type="button"><span class="dot" style="--sw:#fb923c"></span>Naranja</button>
+              <button class="set-swatch" data-accent="dorado" type="button"><span class="dot" style="--sw:#fbbf24"></span>Dorado</button>
+            </div>
+            <div class="set-h">Créditos</div>
+            <div class="set-credits">
+              <div class="cr-big">App diseñada con el poder de Muse</div>
+              <div class="cr-sub">Gurru Music · Reproductor de música</div>
+              <div class="cr-dev">Desarrollador: Jonathan Aguilar Lopez</div>
+            </div>
+          </div>
+        </section>
       </main>
 
       <!-- Barra inferior fija de navegación (uso con el pulgar): Descargas,
@@ -643,6 +696,10 @@
         <button class="nav-btn yt" id="navYouTube" data-view="youtube" type="button">
           <svg viewBox="0 0 24 24"><path d="M23 12s0-3.8-.5-5.6c-.3-1-1.7-1-2-2C18.7 4 12 4 12 4s-6.7 0-8.5.4c-1 .3-1.7 1-2 2C1 8.2 1 12 1 12s0 3.8.5 5.6c.3 1 1 1.7 2 2 1.8.4 8.5.4 8.5.4s6.7 0 8.5-.4c1-.3 1.7-1 2-2 .5-1.8.5-5.6.5-5.6zM9.8 15.5v-7l6 3.5-6 3.5z"/></svg>
           <span>YouTube</span>
+        </button>
+        <button class="nav-btn" id="navSettings" data-view="settings" type="button">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.03-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.98 3.6-3.6 3.6z"/></svg>
+          <span>Ajustes</span>
         </button>
       </div>
 
@@ -674,9 +731,10 @@
           <button class="choice-only" id="choiceOnlyBtn">Solo agregarlo a la Biblioteca</button>
         </div>
       </div>
-      <!-- Letra de la canción (LRCLIB, sin clave): se abre con el botón
-           "Letra" del reproductor; si la letra trae tiempos, la línea
-           actual se resalta y se desplaza sola con la música. -->
+      <!-- Letra de la canción (LRCLIB, lyrics.ovh y some-random-api, sin
+           clave): se abre con el botón "Letra" del reproductor; si la
+           letra trae tiempos, la línea actual se resalta y se desplaza
+           sola con la música. -->
       <div class="lyrics-overlay" id="lyricsOverlay" role="dialog" aria-modal="true" aria-labelledby="lyricsTitle">
         <div class="lyrics-box">
           <div class="lyrics-head">
@@ -687,6 +745,7 @@
             <button class="icon-btn" id="lyricsClose" title="Cerrar letra" aria-label="Cerrar letra">✕</button>
           </div>
           <div class="lyrics-body" id="lyricsBody"></div>
+          <div class="lyrics-src" id="lyricsSrc"></div>
         </div>
       </div>
       <!-- Editar los datos de una canción (título, artista, álbum) y
@@ -750,7 +809,22 @@
          tienen dirección estable y se guardan. */
       var SAVE_KEY = "gurru-library-v1";
       var DL_KEY = "gurru-dlhistory-v1";
+      var YTSEARCH_KEY = "gurru-ytsearch-v1";
       var restoreSeekSec = null;
+      /* ===== Caché invisible de YouTube online =====
+         La canción de YouTube se sigue viendo como YouTube (su botón
+         rojo, su cola, sus sugerencias, su pestaña): solo cambia por
+         dentro su fuente de audio, que pasa a ser un archivo temporal
+         en la carpeta privada de la app. Así suena en segundo plano
+         como un MP3 local. cacheUrl/cachePath viven solo en memoria
+         (serializeTrack no los guarda): al cerrar la app se pierden y
+         el caché se vacía al abrir. Solo se guardan 3 canciones (LRU):
+         al preparar la cuarta, la más vieja se borra. */
+      var CACHE_MAX = 3;
+      var cacheOrder = [];
+      var cacheBusy = false;
+      var cacheToken = 0;
+      var cachePreparing = null; /* { track, token, lastPct } */
       function serializeTrack(t){
         if (!t) return null;
         /* Las de YouTube no tienen url (su identidad es el videoId), así
@@ -762,7 +836,7 @@
         return { id: t.id, type: t.type, kind: t.kind || null, videoId: t.videoId || null, playlistId: t.playlistId || null,
           url: t.url, title: t.title, artist: t.artist, album: t.album || "", artUrl: t.artUrl || null, artRaw: t.artRaw || null,
           duration: t.duration || 0, downloaded: !!t.downloaded, savedName: t.savedName || null, nativePath: t.nativePath || null,
-          scanned: !!t.scanned };
+          scanned: !!t.scanned, suggested: !!t.suggested };
       }
       function saveState(){
         try {
@@ -781,7 +855,7 @@
           return applyMetaOverrides({ id: s.id, type: s.type, kind: s.kind || null, videoId: s.videoId || null, playlistId: s.playlistId || null,
             url: s.url, title: s.title, artist: s.artist, album: s.album || "", artUrl: s.artUrl || null, artRaw: s.artRaw || null,
             duration: s.duration || 0, downloaded: !!s.downloaded, dlState: s.downloaded ? "done" : null, savedName: s.savedName || null,
-            nativePath: s.nativePath || null, scanned: !!s.scanned });
+            nativePath: s.nativePath || null, scanned: !!s.scanned, suggested: !!s.suggested });
         });
         tracks.forEach(function(t){ if (typeof t.id === "number" && t.id >= uid) uid = t.id + 1; });
         var idx = (typeof data.current === "number") ? data.current : -1;
@@ -875,8 +949,19 @@
          Los errores ya no son solo texto estático: aparecen como un aviso
          flotante con botón de acción rápida (Reintentar) y se puede tocar
          para expandir y leer toda la información del error. */
+      /* ---------- Último error (para volver a mostrarlo) ----------
+         El aviso flotante se cierra solo a los 10 s, pero la barra roja
+         queda como recordatorio: al tocarla vuelve a salir el error
+         completo con su detalle y su botón Reintentar. */
+      var lastError = null;
+      function showLastError(){
+        if (lastError){ showToast(lastError); return; }
+        var txt = $("dlStatusTxt").textContent || "";
+        if (txt.trim()) showToast({ kind: "err", title: "Aviso", msg: txt });
+      }
       function showToast(opts){
         opts = opts || {};
+        if (opts.kind === "err") lastError = opts;
         var wrap = $("toastWrap");
         if (!wrap) return null;
         var el = document.createElement("div");
@@ -941,10 +1026,15 @@
         $("viewLibrary").hidden = v !== "library";
         $("viewDownloads").hidden = v !== "downloads";
         $("viewYouTube").hidden = v !== "youtube";
+        $("viewSettings").hidden = v !== "settings";
         if (v === "library"){ maybeRetryLocalScan(); }
+        /* Al entrar a YouTube, la última búsqueda con sus resultados
+           sigue ahí (se guarda en el teléfono); si la vista se vació
+           por algún motivo, se restaura sin buscar de nuevo. */
+        if (v === "youtube" && !$("ytSearchResults").children.length) restoreLastYtSearch();
         /* La barra inferior fija marca la sección activa (en el
            reproductor ninguna está activa: es su propia pantalla). */
-        ["downloads", "library", "youtube"].forEach(function(k){
+        ["downloads", "library", "youtube", "settings"].forEach(function(k){
           var b = $("nav" + k.charAt(0).toUpperCase() + k.slice(1));
           if (b) b.classList.toggle("on", v === k);
         });
@@ -1317,8 +1407,7 @@
         empty.style.display = "none";
         var q = queueIndices();
         var pos = q.indexOf(current);
-        var nextCount = q.length - pos - 1;
-        $("queueCount").textContent = (pos + 1) + "/" + q.length + (shuffle ? " · aleatorio" : "") + (nextCount ? " · " + nextCount + " sigue" + (nextCount === 1 ? "" : "n") : "");
+        $("queueCount").textContent = (pos + 1) + "/" + q.length + (shuffle ? " · aleatorio" : "");
         q.forEach(function(realIdx, qi){
           var t = tracks[realIdx];
           var label, kind;
@@ -1327,7 +1416,7 @@
           else { kind = "next"; label = (qi === pos + 1) ? "Siguiente" : "Después"; }
           var li = document.createElement("li");
           li.className = kind === "current" ? "is-current" : (kind === "prev" ? "is-prev" : "is-next");
-          var badge = (t.type === "youtube" || t.type === "ytaudio") ? '<span class="src-badge">YouTube</span>' : (t.downloaded ? '<span class="src-badge saved">MP3</span>' : "");
+          var badge = (t.type === "youtube" || t.type === "ytaudio") ? '<span class="src-badge">YouTube</span>' + (t.suggested ? '<span class="src-badge sugg">Sugerencia</span>' : "") : (t.downloaded ? '<span class="src-badge saved">MP3</span>' : "");
           li.innerHTML =
             '<span class="q-first"><span class="q-num">' + (qi + 1) + '</span><span class="q-tag">' + esc(label) + '</span></span>' +
             '<span class="q-t">' + esc(cleanTitle(t.title)) + badge + ' <span class="q-a">&middot; ' + esc(t.artist) + '</span></span>' +
@@ -1749,8 +1838,23 @@
         $("dlStatusTxt").textContent = text;
         box.classList.add("show");
         box.classList.toggle("err", !!isErr);
+        if (isErr){
+          /* La barra guarda el error para volver a mostrarlo al tocarla.
+             Si el aviso flotante ya guardó este mismo error (con su
+             Reintentar), lo vuelve a guardar después; si no, queda el
+             texto tal cual para leerlo completo al tocar la barra. */
+          if (!lastError || lastError.msg !== text) lastError = { kind: "err", title: "Aviso", msg: text, details: text };
+        }
         $("dlCancelBtn").style.display = dlRunning ? "" : "none";
       }
+      /* Tocar la barra roja vuelve a mostrar el error completo (con su
+         detalle y su Reintentar); la ✕ la cierra. Los botones (Detener,
+         ✕) no reabren el error. */
+      $("dlStatus").addEventListener("click", function(ev){
+        if (ev.target && ev.target.closest && ev.target.closest("button")) return;
+        if (this.classList.contains("err")) showLastError();
+      });
+      $("dlStatusX").addEventListener("click", function(ev){ ev.stopPropagation(); dlSetStatus("", false); });
       function dlSleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
       function dlSafeName(name){
         var s = String(name || "cancion").replace(/[\\/:*?"<>|#%&{}$!'@+=`~]/g, " ").replace(/\s+/g, " ").trim();
@@ -1983,6 +2087,117 @@
          sesión del sistema lo controla. La URL del audio caduca en unas
          horas, así que no se guarda: se vuelve a pedir cada vez que
          suena la canción. */
+      /* Pide la URL directa del audio con un cliente de YouTube (android
+         o ios). El cliente cambia qué formatos devuelve yt-dlp: si un
+         cliente no trae la dirección del audio, el otro puede traerla. */
+      function requestAudioUrl(track, client){
+        var p = getNativeDl();
+        if (!p || !p.getAudioUrl) return Promise.reject(new Error("sin plugin"));
+        var watch = "https://www.youtube.com/watch?v=" + encodeURIComponent(track.videoId);
+        return p.getAudioUrl({ url: watch, client: client || "android" });
+      }
+      /* ---------- Caché invisible de YouTube online ----------
+         En vez de pedir la URL del audio (que a veces falla con
+         "Requested format is not available" y con el reproductor oficial
+         se pausa al salir de la app), la canción se descarga en silencio
+         a la carpeta privada de la app y suena en el <audio> local, como
+         un MP3: sigue en segundo plano, se adelanta con la barra y el
+         ecualizador usa el audio real. La canción sigue siendo YouTube
+         en todo lo visible (botón rojo, cola, sugerencias, pestaña):
+         solo su fuente cambia por dentro. Si el caché falla, suena por
+         el camino de siempre (audio directo o reproductor oficial). El
+         botón Descargar sigue siendo aparte: ese sí guarda para siempre
+         en Música/Gurru Music. */
+      function toCacheSrc(path){
+        try {
+          if (window.Capacitor && window.Capacitor.convertFileSrc) return window.Capacitor.convertFileSrc("file://" + path);
+        } catch(e){}
+        return "file://" + path;
+      }
+      function registerCache(track){
+        if (!track || !track.videoId) return;
+        var i = cacheOrder.indexOf(track.videoId);
+        if (i >= 0) cacheOrder.splice(i, 1);
+        cacheOrder.push(track.videoId);
+        while (cacheOrder.length > CACHE_MAX){
+          var oldId = cacheOrder.shift();
+          for (var j = 0; j < tracks.length; j++){
+            if (tracks[j].videoId === oldId){ tracks[j].cacheUrl = null; tracks[j].cachePath = null; }
+          }
+          var p = getNativeDl();
+          if (p && p.deleteCachedAudio){ try { p.deleteCachedAudio({ videoId: oldId }); } catch(e){} }
+        }
+      }
+      var nativeDlCacheListenerOn = false;
+      function nativeDlOnCacheProgress(){
+        var p = getNativeDl();
+        if (!p || !p.addListener || nativeDlCacheListenerOn) return;
+        nativeDlCacheListenerOn = true;
+        p.addListener("cacheProgress", function(ev){
+          if (!ev || !ev.videoId) return;
+          if (!cachePreparing || cachePreparing.track.videoId !== ev.videoId) return;
+          var pct = Math.round(ev.progress || 0);
+          if (pct === cachePreparing.lastPct) return;
+          cachePreparing.lastPct = pct;
+          dlSetStatus("Preparando «" + cleanTitle(cachePreparing.track.title) + "»… " + pct + "%", false);
+        });
+      }
+      function playYouTubeOnline(track, autoplay, seekSec){
+        stopYouTube();
+        if (!autoplay){
+          /* Solo se muestra la canción; el caché se prepara al darle play. */
+          setPlayIcons(false);
+          return;
+        }
+        /* El caché es la ÚNICA forma de escuchar online (NUEVO11): el
+           audio directo y el reproductor oficial se pausan al salir de
+           la app y daban errores, así que ya no se usan como respaldo.
+           Si otra canción se estaba preparando, se cancela su
+           reproducción automática y se prepara esta. */
+        if (cacheBusy){ cacheToken++; cachePreparing = null; dlSetStatus("", false); }
+        var p = getNativeDl();
+        if (!p || !p.cacheAudio){
+          dlSetStatus("Esta versión no tiene la descarga invisible: instala el APK nuevo.", true);
+          showToast({ kind: "err", title: "Falta la descarga invisible", msg: "Esta versión de la app no trae el caché para escuchar online. Instala el APK nuevo.", details: "El método nativo cacheAudio no existe en esta versión." });
+          setPlayIcons(false);
+          return;
+        }
+        nativeDlOnCacheProgress();
+        cacheBusy = true;
+        var token = ++cacheToken;
+        cachePreparing = { track: track, token: token };
+        dlSetStatus("Preparando «" + cleanTitle(track.title) + "»…", false);
+        setPlayIcons(false);
+        var watch = "https://www.youtube.com/watch?v=" + encodeURIComponent(track.videoId);
+        p.cacheAudio({ url: watch, videoId: track.videoId }).then(function(res){
+          if (token === cacheToken) cacheBusy = false;
+          var path = res && res.path;
+          if (!path) throw new Error("sin ruta de caché");
+          track.cachePath = path;
+          track.cacheUrl = toCacheSrc(path);
+          track._cacheRetry = false;
+          registerCache(track);
+          if (cachePreparing && cachePreparing.track === track) cachePreparing = null;
+          if (token !== cacheToken || tracks[current] !== track) return;
+          dlSetStatus("", false);
+          if (seekSec != null && seekSec > 1) restoreSeekSec = seekSec;
+          loadTrack(current, true);
+        }).catch(function(err){
+          if (token === cacheToken) cacheBusy = false;
+          if (cachePreparing && cachePreparing.track === track) cachePreparing = null;
+          if (token !== cacheToken) return;
+          var detail = (err && err.message) ? String(err.message) : "sin motivo";
+          var short = "No se pudo preparar «" + cleanTitle(track.title) + "».";
+          dlSetStatus(short + " " + detail, true);
+          /* Sin respaldo: si el caché falla, la canción no suena por el
+             camino viejo (se pausa al salir); se avisa el motivo con
+             Reintentar, o actualizar yt-dlp en Descargas. */
+          if (tracks[current] === track){
+            showToast({ kind: "err", title: "No se pudo preparar la canción", msg: "El audio no se pudo descargar para escuchar en segundo plano. Reintenta, o actualiza yt-dlp en Descargas y vuelve a intentar.", details: detail, retryLabel: "Reintentar", onRetry: function(){ if (tracks[current] === track) playYouTubeOnline(track, true, seekSec); } });
+            setPlayIcons(false);
+          }
+        });
+      }
       function playHiddenYouTube(track, autoplay, seekSec, retried){
         stopYouTube();
         ytHiddenActive = true; ytHiddenTrack = track; ytHiddenPlaying = false;
@@ -2003,8 +2218,12 @@
           playYtIframe(track, autoplay);
           return;
         }
-        var watch = "https://www.youtube.com/watch?v=" + encodeURIComponent(track.videoId);
-        p.getAudioUrl({ url: watch }).then(function(res){
+        /* El audio directo se pide primero con el cliente Android y, si
+           falla (por ejemplo, si ese cliente no devuelve la dirección
+           del audio para este video), se reintenta con el cliente iOS
+           antes de caer al reproductor oficial. */
+        var firstErr = null;
+        requestAudioUrl(track, "android").catch(function(e){ firstErr = e; return requestAudioUrl(track, "ios"); }).then(function(res){
           if (seq !== ytStreamSeq || !ytHiddenActive || ytHiddenTrack !== track) return;
           var u = res && res.url;
           if (!u) throw new Error("sin url");
@@ -2015,8 +2234,10 @@
           /* El audio directo falló: que suene con el reproductor oficial
              en vez de dejar la canción en silencio. El motivo queda en el
              aviso (para revisarlo) y la música sigue sonando. */
-          dlSetStatus("Audio directo falló (" + ((err && err.message) ? err.message : "sin motivo") + "); suena con el reproductor de YouTube.", true);
-          showToast({ kind: "err", title: "Audio directo falló", msg: "Suena con el reproductor de YouTube (se pausa al salir de la app). Toca para ver el motivo completo.", details: (err && err.message) ? String(err.message) : "sin motivo", retryLabel: "Reintentar audio directo", onRetry: function(){ var t2 = ytHiddenTrack || track; if (t2){ t2.streamUrl = null; playHiddenYouTube(t2, true); } } });
+          var detail = (err && err.message) ? String(err.message) : "sin motivo";
+          if (firstErr && firstErr.message) detail = "Android: " + firstErr.message + " · iOS: " + detail;
+          dlSetStatus("Audio directo falló (" + detail + "); suena con el reproductor de YouTube.", true);
+          showToast({ kind: "err", title: "Audio directo falló", msg: "Suena con el reproductor de YouTube (se pausa al salir de la app). Toca para ver el motivo completo.", details: detail, retryLabel: "Reintentar audio directo", onRetry: function(){ var t2 = ytHiddenTrack || track; if (t2){ t2.streamUrl = null; playHiddenYouTube(t2, true); } } });
           playYtIframe(track, autoplay);
         });
       }
@@ -2135,10 +2356,13 @@
         $("choiceOverlay").classList.add("show");
       }
       function closeChoice(){ $("choiceOverlay").classList.remove("show"); choiceCtx = null; }
-      /* ---------- Letra de la canción (LRCLIB) ---------- */
-      /* Sin clave ni registro: busca por artista + título y devuelve la
-         letra en texto y, cuando existe, con tiempos (formato LRC) para
-         resaltar la línea que suena. Se guarda en memoria por canción. */
+      /* ---------- Letra de la canción (3 fuentes, sin clave) ----------
+         Se busca en cadena, sin registro: LRCLIB primero (es la única
+         que trae tiempos para resaltar la línea que suena), y si no
+         tiene la canción, lyrics.ovh y luego some-random-api (texto
+         plano). El artista se saca del título ("Belanova - Rosa
+         Pastel"), no del canal que subió el video. Se guarda en memoria
+         por canción. Abajo de la letra se ve de qué fuente salió. */
       var lyricsCache = {};
       var lyricsLines = [];
       var lyricsActiveIdx = -1;
@@ -2157,14 +2381,23 @@
         var key = lyricsKey(t);
         if (!key) return null;
         if (lyricsCache[key]) return lyricsCache[key];
-        var res = { found: false, plain: "", lines: [] };
-        var artist = (t.artist || "").trim(), title = (t.title || "").trim();
+        var res = { found: false, plain: "", lines: [], source: "" };
+        var title = (t.title || "").trim();
+        var qTitle = cleanTitle(title);
+        var qArtist = artistForSuggestions(t);
+        if (qArtist === qTitle || qArtist === title) qArtist = "";
+        if (qArtist === "YouTube" || qArtist === "Artista desconocido") qArtist = "";
+        if (!qArtist){
+          var a = (t.artist || "").trim();
+          if (a && a !== "YouTube" && a !== "Artista desconocido") qArtist = a;
+        }
+        /* 1) LRCLIB: con tiempos cuando existen. */
         try {
-          var r = await fetch("https://lrclib.net/api/get?artist_name=" + encodeURIComponent(artist) + "&track_name=" + encodeURIComponent(title));
+          var r = await fetch("https://lrclib.net/api/get?artist_name=" + encodeURIComponent(qArtist) + "&track_name=" + encodeURIComponent(qTitle));
           var data = null;
           if (r.ok) data = await r.json();
           else {
-            var r2 = await fetch("https://lrclib.net/api/search?track_name=" + encodeURIComponent(title) + "&artist_name=" + encodeURIComponent(artist));
+            var r2 = await fetch("https://lrclib.net/api/search?track_name=" + encodeURIComponent(qTitle) + "&artist_name=" + encodeURIComponent(qArtist));
             if (r2.ok){
               var arr = await r2.json();
               if (arr && arr.length) data = arr.find(function(x){ return x && (x.plainLyrics || x.syncedLyrics); }) || arr[0];
@@ -2172,10 +2405,41 @@
           }
           if (data && (data.plainLyrics || data.syncedLyrics)){
             res.found = true;
+            res.source = "LRCLIB";
             res.plain = data.plainLyrics || "";
             res.lines = parseLrc(data.syncedLyrics || "");
           }
-        } catch(e){ res.error = true; }
+        } catch(e){}
+        /* 2) lyrics.ovh: texto plano, sin tiempos (necesita artista). */
+        if (!res.found && qArtist){
+          try {
+            var r3 = await fetch("https://api.lyrics.ovh/v1/" + encodeURIComponent(qArtist) + "/" + encodeURIComponent(qTitle));
+            if (r3.ok){
+              var d3 = await r3.json();
+              if (d3 && d3.lyrics && String(d3.lyrics).trim()){
+                res.found = true;
+                res.source = "lyrics.ovh";
+                res.plain = String(d3.lyrics).trim();
+                res.lines = [];
+              }
+            }
+          } catch(e){}
+        }
+        /* 3) some-random-api: texto plano, sin tiempos (por título). */
+        if (!res.found){
+          try {
+            var r4 = await fetch("https://some-random-api.com/lyrics?title=" + encodeURIComponent(qTitle));
+            if (r4.ok){
+              var d4 = await r4.json();
+              if (d4 && d4.lyrics && String(d4.lyrics).trim()){
+                res.found = true;
+                res.source = "some-random-api";
+                res.plain = String(d4.lyrics).trim();
+                res.lines = [];
+              }
+            }
+          } catch(e){}
+        }
         lyricsCache[key] = res;
         return res;
       }
@@ -2200,6 +2464,7 @@
         $("lyricsTitle").textContent = t.title || "";
         $("lyricsArtist").textContent = t.artist || "";
         $("lyricsBody").innerHTML = '<div class="lyrics-loading">Buscando la letra…</div>';
+        $("lyricsSrc").textContent = "";
         lyricsLines = []; lyricsActiveIdx = -1;
         $("lyricsOverlay").classList.add("show");
         fetchLyrics(t).then(function(res){
@@ -2207,10 +2472,12 @@
           if (!ov || !ov.classList.contains("show")) return;
           if (!res || !res.found){
             $("lyricsBody").innerHTML = '<div class="lyrics-empty">No se encontró la letra de esta canción.</div><button class="pill-btn lyrics-retry" id="lyricsRetry">Reintentar</button>';
+            $("lyricsSrc").textContent = "";
             var rb = $("lyricsRetry");
             if (rb) rb.addEventListener("click", function(){ delete lyricsCache[lyricsKey(tracks[current])]; openLyrics(); });
             return;
           }
+          $("lyricsSrc").textContent = res.source ? ("Letra: " + res.source) : "";
           if (res.lines.length){
             lyricsLines = res.lines;
             $("lyricsBody").innerHTML = res.lines.map(function(l){ return '<div class="lyrics-line">' + esc(l.text) + '</div>'; }).join("");
@@ -2301,7 +2568,7 @@
         if (!choiceCtx) return;
         var firstIdx = choiceCtx.indices[0];
         closeChoice();
-        if (typeof firstIdx === "number" && tracks[firstIdx]){ showView("player"); loadTrack(firstIdx, true); }
+        if (typeof firstIdx === "number" && tracks[firstIdx]){ showView("player"); loadTrack(clearYtQueueExcept(firstIdx), true); }
       });
       $("choiceDownloadBtn").addEventListener("click", function(){
         if (!choiceCtx) return;
@@ -2345,7 +2612,10 @@
           }
           msg.textContent = "✓ " + list.length + " resultados. Toca uno y elige Escuchar o Descargar.";
           msg.className = "yt-msg ok";
-          renderYtSearchResults(list);
+          /* La última búsqueda con sus resultados se guarda en el
+             teléfono: al salir y entrar a YouTube sigue ahí. */
+          try { localStorage.setItem(YTSEARCH_KEY, JSON.stringify({ q: q, results: list })); } catch(e){}
+          renderYtSearchResults(list, q);
         }).catch(function(err){
           btn.disabled = false;
           var m = (err && err.message) ? err.message : String(err || "");
@@ -2354,7 +2624,7 @@
           showToast({ kind: "err", title: "No se pudo buscar", msg: "La búsqueda en YouTube falló. Toca para ver el motivo completo.", details: m || "sin motivo", retryLabel: "Reintentar búsqueda", onRetry: searchYouTube });
         });
       }
-      function renderYtSearchResults(list){
+      function renderYtSearchResults(list, query){
         var box = $("ytSearchResults");
         box.innerHTML = "";
         list.forEach(function(r){
@@ -2383,6 +2653,9 @@
           row.appendChild(go);
           row.addEventListener("click", function(){
             var track = makeYtTrack({ videoId: r.id, title: r.title || "Canción de YouTube", artist: r.channel || "YouTube", duration: r.duration || 0, artUrl: r.thumbnail });
+            /* La búsqueda con la que se encontró la canción: sirve para
+               sacar el artista real al sugerir más música de él. */
+            track.searchQuery = query || "";
             tracks.push(track);
             var idx = tracks.length - 1;
             renderPlaylist();
@@ -2390,6 +2663,21 @@
           });
           box.appendChild(row);
         });
+      }
+      /* Vuelve a poner la última búsqueda de YouTube con sus resultados
+         (sin buscar de nuevo): se usa al abrir la app y al entrar a la
+         pestaña YouTube si la vista se vació. No pisa una búsqueda a
+         medias distinta de la guardada. */
+      function restoreLastYtSearch(){
+        var data = null;
+        try { data = JSON.parse(localStorage.getItem(YTSEARCH_KEY) || "null"); } catch(e){}
+        if (!data || !data.q || !Array.isArray(data.results) || !data.results.length) return;
+        var input = $("ytSearchInput");
+        if (input.value && input.value.trim() && input.value.trim() !== data.q) return;
+        input.value = data.q;
+        $("ytMsg").textContent = "✓ " + data.results.length + " resultados. Toca uno y elige Escuchar o Descargar.";
+        $("ytMsg").className = "yt-msg ok";
+        renderYtSearchResults(data.results, data.q);
       }
       /* ---------- Música local automática (MediaStore, solo APK) ---------- */
       /* En el APK la app busca sola todas las canciones del teléfono con
@@ -2514,18 +2802,90 @@
          de YouTube; la música local se detiene al final como siempre. */
       var suggestPool = [];
       var suggestPlayed = {};
+      var suggestGen = 0; /* sube cada vez que la cola online se regenera: las búsquedas viejas de sugerencias se descartan */
       var suggestFetching = false;
-      function suggestQueryFor(t){
-        var a = (t.artist || "").trim();
-        if (a && a !== "Artista desconocido" && a !== "YouTube") return a;
-        return (t.title || "").trim();
+      /* El ARTISTA para sugerir más música: sale del TÍTULO ("Belanova
+         - Rosa Pastel"), no del canal que subió el video ("armxndo",
+         "LatinHype"…): esos canales no son el artista y buscar por ellos
+         no trae más canciones de él. Si el título no trae "Artista -
+         Canción", se usa el artista de la pista (cuando no es genérico);
+         y si la canción se encontró buscando ("rosa pastel belanova"),
+         lo que sobra de la búsqueda al quitar el título es el artista. */
+      function artistForSuggestions(t){
+        var title = (t.title || "").trim();
+        var artist = (t.artist || "").trim();
+        var genericArtist = !artist || artist === "Artista desconocido" || artist === "YouTube";
+        var parts = title.split(/\s+[-—–|]\s+/);
+        if (parts.length >= 2){
+          var pre = parts[0].trim();
+          var post = parts.slice(1).join(" - ").trim().replace(/\s*[\(\[].*$/, "").trim();
+          var genericWord = /^(official|oficial|video|audio|lyrics?|letra|hd|4k|mix|playlist|top|hits?)$/i;
+          if (!genericArtist){
+            if (pre.toLowerCase() === artist.toLowerCase()) return artist;
+            if (post && post.toLowerCase() === artist.toLowerCase()) return artist;
+          }
+          if (!genericWord.test(pre)) return pre;
+          if (post && !genericWord.test(post)) return post;
+        }
+        if (!genericArtist) return artist;
+        /* La búsqueda original: "rosa pastel belanova" + título "Rosa
+           Pastel" → sobra "belanova". */
+        if (t.searchQuery){
+          var sq = String(t.searchQuery).trim();
+          var ti = title.toLowerCase(), sqi = sq.toLowerCase();
+          var at = sqi.indexOf(ti);
+          if (at === 0 && sq.length > title.length){
+            var rest = sq.substring(title.length).trim().replace(/^[-—–|]\s*/, "").trim();
+            if (rest && rest.length >= 2 && rest.length <= 60) return rest;
+          } else if (at > 0){
+            var before = sq.substring(0, at).trim().replace(/[-—–|]\s*$/, "").trim();
+            if (before && before.length >= 2 && before.length <= 60) return before;
+          }
+        }
+        return title;
       }
+      /* El artista REAL de la canción, leído de su metadata (--dump-json):
+         el buscador solo trae el canal que subió el video (a veces el
+         sello o "BelanovaVEVO"), pero la metadata trae el artista de
+         verdad ("Belanova"). Se guarda en la canción y se comparte entre
+         la llamada que lo pide y las sugerencias que lo usan. */
+      function resolveArtist(t){
+        if (t._metaArtist) return Promise.resolve(t._metaArtist);
+        if (t._metaPromise) return t._metaPromise;
+        var p = getNativeDl();
+        if (!p || !p.getVideoInfo || !t.videoId) return Promise.resolve(artistForSuggestions(t));
+        var watch = "https://www.youtube.com/watch?v=" + encodeURIComponent(t.videoId);
+        t._metaPromise = p.getVideoInfo({ url: watch }).then(function(info){
+          var a = info && info.artist ? String(info.artist).trim() : "";
+          var generic = /^(youtube|artista desconocido|various artists|varios artistas)$/i.test(a);
+          if (a && !generic){
+            t._metaArtist = a;
+            t.artist = a;
+            if (info.album) t.album = info.album;
+            if (info.track) t._metaTrack = info.track;
+            renderPlaylist(); updateScreenMeta();
+            if (tracks[current] === t) refreshLyricsForCurrent();
+            return a;
+          }
+          return artistForSuggestions(t);
+        }).catch(function(){ return artistForSuggestions(t); });
+        return t._metaPromise;
+      }
+      function suggestQueryFor(t){ return artistForSuggestions(t); }
       function fetchSuggestions(t){
         var p = getNativeDl();
         if (!p || !p.searchYouTube) return Promise.resolve([]);
-        var q = suggestQueryFor(t);
-        if (!q) return Promise.resolve([]);
-        return p.searchYouTube({ query: q, limit: 10 }).then(function(res){
+        var gen = suggestGen;
+        /* Primero el artista real de la metadata; si no se puede leer,
+           se usa el parseo del título (lo de antes). */
+        return resolveArtist(t).then(function(artist){
+          var q = artist || suggestQueryFor(t);
+          if (!q) return [];
+          return p.searchYouTube({ query: q, limit: 10 });
+        }).then(function(res){
+          /* Si mientras tanto se abrió otra canción online, la cola se
+             regeneró y estas sugerencias ya son de otro artista. */
+          if (gen !== suggestGen) return [];
           var list = (res && res.results) || [];
           var fresh = list.filter(function(r){
             if (!r || !r.id || suggestPlayed[r.id]) return false;
@@ -2558,8 +2918,71 @@
           return true;
         });
       }
+      /* ---------- Sugerencias en "A continuación" ----------
+         Al sonar un tema de YouTube, la cola muestra sugerencias como
+         las siguientes canciones (no solo las que ya están en la lista):
+         si quedan menos de 3 por delante, se buscan más del mismo
+         artista (igual que la radio) y se agregan a la cola con la
+         marca "Sugerencia". Al terminar una, la siguiente ya está ahí;
+         si la cola se vacía, la radio sigue buscando. */
+      function ensureYtSuggestions(t){
+        if (!t || (t.type !== "youtube" && t.type !== "ytaudio")) return;
+        if (t._suggSeeded) return;
+        var q = queueIndices();
+        var pos = q.indexOf(current);
+        var upcoming = (pos >= 0) ? q.length - pos - 1 : 0;
+        if (upcoming >= 3) return;
+        t._suggSeeded = true;
+        function appendFromPool(){
+          var added = 0;
+          while (suggestPool.length && added < 5){
+            var s = suggestPool.shift();
+            suggestPlayed[s.videoId] = true;
+            s.suggested = true;
+            tracks.push(s);
+            added++;
+          }
+          if (added){ renderPlaylist(); saveState(); }
+          return added;
+        }
+        if (suggestPool.length){ appendFromPool(); return; }
+        if (suggestFetching) return;
+        suggestFetching = true;
+        fetchSuggestions(t).then(function(){
+          suggestFetching = false;
+          appendFromPool();
+        });
+      }
       $("ytSearchBtn").addEventListener("click", searchYouTube);
+      /* Tocar el mensaje de error de la búsqueda vuelve a mostrar el
+         error completo (con su detalle y su Reintentar). */
+      $("ytMsg").addEventListener("click", function(){
+        if (this.classList.contains("ok")) return;
+        if (this.textContent.trim()) showLastError();
+      });
       $("ytSearchInput").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); searchYouTube(); } });
+
+      /* Al abrir una canción nueva desde online, la cola "A continuación"
+         se borra y se genera una nueva desde esa canción (sus sugerencias
+         del mismo artista): las de YouTube anteriores salen de la cola;
+         las locales y las descargadas no se tocan. */
+      function clearYtQueueExcept(idx){
+        var keep = tracks[idx];
+        if (!keep || (keep.type !== "youtube" && keep.type !== "ytaudio")) return idx;
+        suggestGen++;
+        suggestPool = [];
+        var kept = [];
+        for (var i = 0; i < tracks.length; i++){
+          var s = tracks[i];
+          if (s.type === "youtube" || s.type === "ytaudio"){ if (i === idx) kept.push(s); }
+          else kept.push(s);
+        }
+        tracks = kept;
+        current = kept.indexOf(keep);
+        saveState();
+        renderPlaylist();
+        return current;
+      }
 
       /* ---------- Reproducción ---------- */
       function loadTrack(i, autoplay){
@@ -2568,19 +2991,21 @@
         ytLoadSeq++;
         /* Al reabrir la app, vuelve a la posición donde quedó (solo local). */
         var rs = restoreSeekSec; restoreSeekSec = null;
-        if (t.type === "youtube"){
+        if ((t.type === "youtube" || t.type === "ytaudio") && !t.cacheUrl){
           pauseAllAudio();
           showTrackOnScreen();
           renderPlaylist();
           saveState();
-          playHiddenYouTube(t, autoplay, rs);
+          playYouTubeOnline(t, autoplay, rs);
+          ensureYtSuggestions(t);
+          resolveArtist(t);
           $("tCur").textContent = "00:00:00"; $("tTot").textContent = "YouTube · Audio";
           refreshLyricsForCurrent();
           return;
         }
         stopYouTube();
         try{ ytAudioEl.pause(); ytAudioEl.removeAttribute("src"); ytAudioEl.load(); }catch(e){}
-        audio.src = t.url;
+        audio.src = t.cacheUrl || t.url;
         if (rs != null && rs > 1){
           var onMeta = function(){ try{ if (rs < (audio.duration || 0)) audio.currentTime = rs; }catch(e){} audio.removeEventListener("loadedmetadata", onMeta); };
           audio.addEventListener("loadedmetadata", onMeta);
@@ -2589,25 +3014,37 @@
         renderPlaylist();
         saveState();
         if (autoplay) startPlayback(); else setPlayIcons(false);
+        /* En caché la canción es online aunque suene por el <audio>
+           local: las sugerencias del artista también se siembran aquí. */
+        if (t.type === "youtube" || t.type === "ytaudio"){ ensureYtSuggestions(t); resolveArtist(t); }
         refreshLyricsForCurrent();
       }
       function playTrack(i){
         if (i === current && tracks.length){ togglePlay(); return; }
+        var t = tracks[i];
+        if (t && (t.type === "youtube" || t.type === "ytaudio")){
+          /* Abrir una canción online regenera la cola desde ella. */
+          loadTrack(clearYtQueueExcept(i), true);
+          return;
+        }
         loadTrack(i, true);
       }
       function startPlayback(){
         if (current < 0) return;
         var t = tracks[current];
-        if (t.type === "youtube" || t.type === "ytaudio" || isHiddenYouTube()){
+        /* En caché suena en el <audio> local, como un MP3: no pasa por
+           el audio directo ni por el reproductor oficial. */
+        if (!t.cacheUrl && (t.type === "youtube" || t.type === "ytaudio" || isHiddenYouTube())){
           if (ytApiPlayer && ytApiPlayer.playVideo){ try{ ytApiPlayer.setPlaybackQuality("highres"); ytApiPlayer.setVolume(Math.round(audio.volume * 100)); ytApiPlayer.playVideo(); }catch(e){} }
           else if (isHiddenYouTube()){
             var hasSrc = false;
             try{ hasSrc = !!ytAudioEl.getAttribute("src"); }catch(e){}
             if (hasSrc){ var pr = ytAudioEl.play(); if (pr && pr.catch) pr.catch(function(){}); }
             else playHiddenYouTube(t, true);
-          } else playHiddenYouTube(t, true);
+          } else playYouTubeOnline(t, true);
           return;
         }
+        if (isHiddenYouTube()) stopYouTube();
         ensureViz();
         if (vizCtx && vizCtx.state === "suspended") vizCtx.resume();
         var p = audio.play();
@@ -2615,6 +3052,16 @@
       }
       function togglePlay(){
         if (current < 0){ if (tracks.length) loadTrack(0, true); else showView("library"); return; }
+        /* Pausa durante "Preparando…": se cancela la reproducción
+           automática (el caché sigue preparándose y queda guardado en
+           la canción para cuando le des play). */
+        if (cachePreparing && cachePreparing.track === tracks[current]){
+          cacheToken++;
+          cachePreparing = null;
+          dlSetStatus("", false);
+          setPlayIcons(false);
+          return;
+        }
         if (isHiddenYouTube()){
           if (ytApiPlayer && ytApiPlayer.pauseVideo && ytApiPlayer.playVideo){
             try{ if (ytHiddenPlaying) ytApiPlayer.pauseVideo(); else { ytApiPlayer.setPlaybackQuality("highres"); ytApiPlayer.playVideo(); } }catch(e){}
@@ -2703,6 +3150,18 @@
       audio.addEventListener("play", function(){ setPlayIcons(true); bgAudioSync(); try{ if (vizCtx && vizCtx.state === "suspended") vizCtx.resume(); }catch(e){} });
       audio.addEventListener("pause", function(){ setPlayIcons(false); bgAudioSync(); saveState(); });
       audio.addEventListener("ended", function(){ nextTrack(true); });
+      audio.addEventListener("error", function(){
+        var t = tracks[current];
+        if (!t || !t.cacheUrl || t._cacheRetry) return;
+        /* El archivo en caché se perdió (el sistema lo borró): se
+           prepara de nuevo por el caché. Solo se reintenta una vez
+           por canción para no entrar en bucle. */
+        t._cacheRetry = true;
+        t.cacheUrl = null; t.cachePath = null;
+        var i = cacheOrder.indexOf(t.videoId);
+        if (i >= 0) cacheOrder.splice(i, 1);
+        if (tracks[current] === t) playYouTubeOnline(t, true);
+      });
       /* El audio de YouTube suena en este <audio> (ya no en el iframe):
          sus eventos mueven los iconos, la sesión del sistema y la
          siguiente canción igual que el audio local. */
@@ -2796,6 +3255,14 @@
           analyser.smoothingTimeConstant = 0.78;
           vizData = new Uint8Array(analyser.frequencyBinCount);
           src.connect(analyser);
+          /* El audio directo de YouTube suena en otro <audio> (ytAudioEl):
+             se conecta al mismo analizador para que sus barritas se muevan
+             con el audio real, igual que en local. (Cada elemento solo se
+             puede conectar una vez; ensureViz solo corre una vez.) */
+          try {
+            var srcYt = vizCtx.createMediaElementSource(ytAudioEl);
+            srcYt.connect(analyser);
+          } catch(e){}
           analyser.connect(vizCtx.destination);
           requestAnimationFrame(drawViz);
         }catch(e){ vizCtx = null; }
@@ -2806,7 +3273,8 @@
         var W = canvas.width, H = canvas.height;
         ctx.clearRect(0, 0, W, H);
         var accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#22d3ee";
-        if (analyser && !audio.paused && !isHiddenYouTube()){
+        var ytStreamPlaying = isHiddenYouTube() && !ytApiPlayer && ytAudioEl && !ytAudioEl.paused;
+        if (analyser && ((!audio.paused && !isHiddenYouTube()) || ytStreamPlaying)){
           analyser.getByteFrequencyData(vizData);
           var bars = 36, bw = W / bars;
           for (var i = 0; i < bars; i++){
@@ -2818,10 +3286,11 @@
           }
           ctx.globalAlpha = 1;
         } else if (isHiddenYouTube() && ytHiddenPlaying){
-          /* En YouTube no hay un <audio> al que conectar el analizador,
-             así que las barritas se animan con ondas (mismo dibujo y
-             misma forma que en local, solo que el movimiento es generado
-             en vez de medido del audio). En pausa quedan en la línea base. */
+          /* Solo queda para el reproductor oficial de YouTube (iframe),
+             que no se puede conectar al analizador: las barritas se
+             animan con ondas (mismo dibujo y misma forma que en local,
+             solo que el movimiento es generado en vez de medido del
+             audio). En pausa quedan en la línea base. */
           var t = performance.now() / 1000;
           var bars2 = 36, bw2 = W / bars2;
           for (var i = 0; i < bars2; i++){
@@ -2891,6 +3360,29 @@
         renderPlaylist();
       });
       syncViewBtn();
+      /* ---------- Configuración: color de la app (tema) ----------
+         El color vive en html[data-accent] (azul, rojo, naranja ya
+         existían en el CSS sin forma de cambiarlos; se agregan verde,
+         rosa, violeta y dorado, todos neón como el estilo de la app).
+         Se guarda en localStorage y se restaura al abrir (también con
+         un script chico en <head> para que no parpadee el azul). */
+      var ACCENTS = ["azul", "verde", "rosa", "violeta", "rojo", "naranja", "dorado"];
+      function setAccent(name){
+        if (ACCENTS.indexOf(name) < 0) name = "azul";
+        document.documentElement.setAttribute("data-accent", name);
+        try { localStorage.setItem("gurru-accent", name); } catch(e){}
+        syncAccentSwatches();
+      }
+      function syncAccentSwatches(){
+        var cur = document.documentElement.getAttribute("data-accent") || "azul";
+        document.querySelectorAll("#accentSwatches .set-swatch").forEach(function(b){
+          b.classList.toggle("on", b.getAttribute("data-accent") === cur);
+        });
+      }
+      document.querySelectorAll("#accentSwatches .set-swatch").forEach(function(b){
+        b.addEventListener("click", function(){ setAccent(b.getAttribute("data-accent")); });
+      });
+      syncAccentSwatches();
       document.addEventListener("click", function(e){
         var m = $("libMenu");
         if (m && m.classList.contains("show") && !m.contains(e.target) && e.target !== libMenuAnchor && !(libMenuAnchor && libMenuAnchor.contains(e.target))) closeLibMenu();
@@ -2933,6 +3425,40 @@
       var restored = loadSavedState();
       renderPlaylist();
       renderDownloads();
+      restoreLastYtSearch();
+      /* Al abrir la app se vacía el caché invisible de la sesión
+         anterior (las canciones en caché no se guardan entre sesiones)
+         y se deja listo el aviso de progreso de la preparación. */
+      try {
+        var p0 = getNativeDl();
+        if (p0 && p0.clearAudioCache) p0.clearAudioCache().catch(function(){});
+      } catch(e){}
+      nativeDlOnCacheProgress();
+      /* Al instalar la app por primera vez, yt-dlp se actualiza solo en
+         segundo plano (una sola vez): así el caché no falla por la
+         versión vieja que trae el APK. Si no hay internet, se reintenta
+         en la próxima apertura. */
+      try {
+        if (window.localStorage && !localStorage.getItem("gurru-ytdlp-auto")){
+          var up0 = getNativeDl();
+          if (up0 && up0.updateYtDlp){
+            up0.updateYtDlp({ channel: "stable" }).then(function(r){
+              try{ localStorage.setItem("gurru-ytdlp-auto", "1"); }catch(e){}
+              try{ var m = $("dlUpdateMsg"); if (m) m.textContent = (r && r.status === "ALREADY_UP_TO_DATE") ? "yt-dlp ya está al día (" + (r.version || "") + ")." : "yt-dlp actualizado (" + ((r && r.version) || "") + ")."; }catch(e){}
+            }).catch(function(){ /* se reintenta en la próxima apertura */ });
+          }
+        }
+      } catch(e){}
+      /* Aviso único sobre la batería: OPPO/ColorOS apaga las apps en
+         segundo plano aunque tengan servicio en primer plano; si la
+         música se apaga al salir, hay que poner la app en Sin
+         restricciones en Ajustes → Batería. */
+      try {
+        if (window.localStorage && !localStorage.getItem("gurru-batt-tip")){
+          localStorage.setItem("gurru-batt-tip", "1");
+          showToast({ title: "Si la música se apaga al salir de la app", msg: "En OPPO, ve a Ajustes → Batería → Gurru Music y ponla en «Sin restricciones» para que siga sonando en segundo plano.", ms: 15000 });
+        }
+      } catch(e){}
       if (restored && current >= 0 && tracks[current]){ loadTrack(current, false); }
       /* Guarda la posición al salir de la app y cada 10 s mientras suena,
          para que al reabrir siga donde quedó. */
