@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -97,18 +98,43 @@ public class FacebookAuthPlugin extends Plugin {
         }
     }
 
-    /** Cookies actuales de facebook.com según el CookieManager del WebView. */
+    /** Cookies actuales de facebook.com según el CookieManager del WebView.
+        Las cookies de .facebook.com aparecen tanto en www como en m: si se
+        concatenan tal cual, cada cookie va DOS VECES en el header Cookie y
+        Facebook puede rechazar la petición con HTTP 400 (eso pasó en la
+        búsqueda con NUEVO14). Aquí se quitan los duplicados por nombre
+        (gana el valor de m.facebook.com, que es el que usa la búsqueda).
+        De paso también se arregla el archivo fb_cookies.txt, que se
+        escribía con las cookies duplicadas. */
     private static String currentCookies() {
         try {
             CookieManager cm = CookieManager.getInstance();
             String c1 = cm.getCookie("https://www.facebook.com");
             String c2 = cm.getCookie("https://m.facebook.com");
-            if (c1 == null) return c2;
-            if (c2 == null) return c1;
-            if (c1.equals(c2)) return c1;
-            return c1 + "; " + c2;
+            Map<String, String> all = new LinkedHashMap<>();
+            putCookies(all, c1);
+            putCookies(all, c2);
+            if (all.isEmpty()) return null;
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, String> e : all.entrySet()) {
+                if (sb.length() > 0) sb.append("; ");
+                sb.append(e.getKey()).append("=").append(e.getValue());
+            }
+            return sb.toString();
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    private static void putCookies(Map<String, String> out, String raw) {
+        if (raw == null) return;
+        for (String part : raw.split(";")) {
+            String p = part.trim();
+            int eq = p.indexOf('=');
+            if (eq <= 0) continue;
+            String name = p.substring(0, eq).trim();
+            String value = p.substring(eq + 1).trim();
+            if (!name.isEmpty()) out.put(name, value);
         }
     }
 
@@ -403,6 +429,15 @@ public class FacebookAuthPlugin extends Plugin {
                     conn.setRequestProperty("User-Agent", UA_MOBILE);
                     conn.setRequestProperty("Accept-Language", "es-MX,es;q=0.9,en;q=0.5");
                     conn.setRequestProperty("Accept", "text/html,application/xhtml+xml");
+                    // Que la petición se parezca a navegar con el navegador:
+                    // sin Referer ni las cabeceras Sec-Fetch, Facebook ve
+                    // un cliente raro y puede rechazarlo con 400.
+                    conn.setRequestProperty("Referer", "https://m.facebook.com/");
+                    conn.setRequestProperty("Upgrade-Insecure-Requests", "1");
+                    conn.setRequestProperty("Sec-Fetch-Site", "same-origin");
+                    conn.setRequestProperty("Sec-Fetch-Mode", "navigate");
+                    conn.setRequestProperty("Sec-Fetch-User", "?1");
+                    conn.setRequestProperty("Sec-Fetch-Dest", "document");
                     if (cookies != null) conn.setRequestProperty("Cookie", cookies);
                     int code = conn.getResponseCode();
                     String finalUrl = conn.getURL().toString();
@@ -410,7 +445,7 @@ public class FacebookAuthPlugin extends Plugin {
                         throw new NeedsLoginException();
                     }
                     if (code < 200 || code >= 300) {
-                        throw new Exception("Facebook devolvió HTTP " + code);
+                        throw new Exception(httpErrorDetail(conn, code, finalUrl));
                     }
                     BufferedReader br = new BufferedReader(
                             new InputStreamReader(conn.getInputStream(), "UTF-8"));
@@ -457,6 +492,37 @@ public class FacebookAuthPlugin extends Plugin {
     }
 
     private static class NeedsLoginException extends Exception {}
+
+    /** Detalle corto de un error HTTP para enseñarlo en el aviso: el
+        código, la página final y lo que Facebook dice en su respuesta
+        (si es que dice algo). Sin esto el 400 era una caja negra: ahora,
+        si vuelve a fallar, el motivo completo sale al tocar el aviso y
+        dice si fue la sesión, una verificación de seguridad o la página. */
+    private static String httpErrorDetail(HttpURLConnection conn, int code, String finalUrl) {
+        String where = finalUrl;
+        try {
+            URL u = new URL(finalUrl);
+            where = u.getHost() + u.getPath();
+        } catch (Exception ignored) {}
+        String snippet = "";
+        try {
+            InputStream err = conn.getErrorStream();
+            if (err == null) err = conn.getInputStream();
+            if (err != null) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(err, "UTF-8"));
+                StringBuilder sb = new StringBuilder();
+                char[] buf = new char[2048];
+                int r;
+                while ((r = br.read(buf)) != -1 && sb.length() < 2000) sb.append(buf, 0, r);
+                br.close();
+                snippet = stripTags(sb.toString());
+                if (snippet.length() > 200) snippet = snippet.substring(0, 200) + "…";
+            }
+        } catch (Exception ignored) {}
+        String msg = "Facebook devolvió HTTP " + code + " en " + where;
+        if (!snippet.isEmpty()) msg += ": " + snippet;
+        return msg;
+    }
 
     private static String shortErr(String err) {
         if (err == null) return "";
