@@ -9,6 +9,8 @@ public class MainActivity extends BridgeActivity {
         // El plugin nativo de descargas (yt-dlp dentro del APK) debe
         // registrarse ANTES de super.onCreate, que es cuando se crea el Bridge.
         registerPlugin(YtDlpDownloaderPlugin.class);
+        // Inicio de sesión en Facebook dentro de la app (NUEVO13, prueba).
+        registerPlugin(FacebookAuthPlugin.class);
         // Búsqueda automática de la música del teléfono (MediaStore).
         registerPlugin(LocalMusicPlugin.class);
         // Servicio en primer plano para que la música siga sonando

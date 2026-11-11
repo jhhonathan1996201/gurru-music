@@ -752,6 +752,7 @@ public class YtDlpDownloaderPlugin extends Plugin {
                     // "Sign in to confirm you're not a bot" (403). Pedir el
                     // audio como cliente Android suele pasar ese bloqueo.
                     request.addOption("--extractor-args", "youtube:player_client=android");
+                    addFbCookies(request, url);
                     request.addOption("-o", tmpTemplate);
 
                     lastProgressId = null;
@@ -905,6 +906,7 @@ public class YtDlpDownloaderPlugin extends Plugin {
                         request.addOption("--no-playlist");
                         request.addOption("--no-warnings");
                         request.addOption("--extractor-args", "youtube:player_client=android");
+                        addFbCookies(request, url.trim());
                         request.addOption("-o", template);
                         YoutubeDLResponse response = YoutubeDL.getInstance().execute(
                                 request, "gurru-cache-" + nextStreamSeq(),
@@ -989,5 +991,88 @@ public class YtDlpDownloaderPlugin extends Plugin {
         JSObject ret = new JSObject();
         ret.put("deleted", deleted);
         call.resolve(ret);
+    }
+
+    /**
+     * Guarda en Música/Gurru Music la canción que YA está descargada en
+     * el caché invisible (NUEVO13): cuando suena una canción online, su
+     * audio ya está en el teléfono, así que el botón Descargar del
+     * reproductor solo mueve ese archivo a la carpeta pública en vez de
+     * bajarlo de nuevo. Resuelve: { id, filePath, fileName, format, size }.
+     * Si el caché ya se borró (al preparar otras canciones), rechaza y
+     * el frontend usa la descarga normal.
+     */
+    @PluginMethod
+    public void saveCachedAudio(final PluginCall call) {
+        final String videoId = call.getString("videoId", "");
+        final String title = call.getString("title", "");
+        if (videoId == null || videoId.trim().isEmpty()) {
+            call.reject("saveCachedAudio necesita videoId");
+            return;
+        }
+        final String vid = videoId.trim();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    File dir = cacheDir();
+                    File cached = null;
+                    File[] files = dir.listFiles();
+                    if (files != null) {
+                        for (File f : files) {
+                            if (f.getName().startsWith(vid + ".")) { cached = f; break; }
+                        }
+                    }
+                    if (cached == null || !cached.exists() || cached.length() == 0) {
+                        throw new Exception("La canción ya no está en el caché (se borró al preparar otra). Descárgala desde la lista.");
+                    }
+                    String name = cached.getName();
+                    int dot = name.lastIndexOf('.');
+                    String ext = (dot > 0) ? name.substring(dot + 1).toLowerCase() : "m4a";
+                    if (!"mp3".equals(ext) && !"m4a".equals(ext) && !"aac".equals(ext)
+                            && !"opus".equals(ext) && !"ogg".equals(ext) && !"wav".equals(ext)
+                            && !"flac".equals(ext)) ext = "m4a";
+                    String base = (title != null && !title.trim().isEmpty()) ? title : vid;
+                    String displayName = safeFileName(base, ext);
+                    String finalPath = publishToPublicMusic(cached, displayName, ext);
+                    final long size = cached.length();
+                    final String fPath = finalPath;
+                    final String fName = displayName;
+                    final String fExt = ext;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSObject ret = new JSObject();
+                            ret.put("id", vid);
+                            ret.put("filePath", fPath);
+                            ret.put("fileName", fName);
+                            ret.put("format", fExt);
+                            ret.put("size", size);
+                            call.resolve(ret);
+                        }
+                    });
+                } catch (final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            call.reject(shortError(e.getMessage(), 300));
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    /** Si la URL es de Facebook y hay sesión guardada (inicio de sesión
+        dentro de la app), yt-dlp usa sus cookies para poder bajar el
+        audio de los videos que piden login. */
+    private void addFbCookies(YoutubeDLRequest request, String url) {
+        try {
+            if (url == null || url.indexOf("facebook.com") < 0) return;
+            File f = FacebookAuthPlugin.cookiesFile(getContext());
+            if (f != null && f.exists() && f.length() > 0) {
+                request.addOption("--cookies", f.getAbsolutePath());
+            }
+        } catch (Exception ignored) {}
     }
 }

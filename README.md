@@ -641,3 +641,26 @@ Jonathan reportó (12:53 CST) 4 cosas, todas aplicadas:
 - Créditos en Ajustes: "App diseñada con el poder de Muse" y "Desarrollador: Jonathan Aguilar Lopez".
 
 Validado: JS `node --check` OK (los 3 bloques, el 3º es el script de restauración del tema en `<head>`), todos los `$("...")` existen (97 ids, nuevo `viewSettings`), `npx cap sync` OK, md5 de `www/index.html` == copia en assets. Java: `javac` OK (5 archivos, con los stubs de `hidden_files/capstubs/`; el primer intento falló porque `cp` sin `-r` no copió los directorios de stubs).
+
+## Ronda NUEVO13 (2026-11-10)
+
+Jonathan pidió probar Facebook dentro de la app (su plan trae Facebook ilimitado), con 3 cosas:
+
+### 1) Sección Facebook en la barra inferior (prueba)
+- 5º botón en la barra inferior (Descargas / Biblioteca / YouTube / **Facebook** / Ajustes), con la "f" azul de Facebook. La sección es aparte de YouTube para no revolverlas.
+- Nuevo plugin nativo `FacebookAuthPlugin` (registrado en `MainActivity`): Facebook no tiene buscador público ni API de música, y yt-dlp solo baja videos con su link (verificado: no hay extractor `facebook:search` y la URL de búsqueda da "Unsupported URL"). Por eso la búsqueda usa la sesión del usuario:
+  - `login()`: abre Facebook en una ventana WebView dentro de la app; el usuario inicia sesión (Facebook puede pedirle verificación, como en el navegador) y toca «Listo». La contraseña solo la ve Facebook. Las cookies se guardan en un archivo privado (`fb_cookies.txt`, formato Netscape) para yt-dlp.
+  - `isLoggedIn()` / `logout()`: la sesión vive en el CookieManager del WebView y persiste entre aperturas.
+  - `searchVideos({query, limit})`: pide `m.facebook.com/search/videos/?q=...` con las cookies y saca los videos del HTML (enlaces `/watch/?v=…`, `/<página>/videos/…`, `/reel/…` con título, página y duración). Devuelve `needsLogin: true` si Facebook pide iniciar sesión. El parseo es por expresiones regulares: es la parte frágil y experimental (Facebook cambia su página seguido).
+- En JS: vista `viewFacebook` con su caja de login, buscador y resultados (igual que YouTube: toca uno y elige Escuchar o Descargar). La última búsqueda se guarda (`gurru-fbsearch-v1`) y se restaura al entrar. Las canciones de Facebook son `type: "facebook"` (tercer origen: su cola no se mezcla con YouTube ni con la local; filtro "Solo Facebook" en Biblioteca; insignia azul "Facebook" en la cola y en la ventana de elección; sugerencias en "A continuación" y radio con más videos del mismo artista buscados en Facebook).
+- Escuchar una de Facebook usa el mismo camino que YouTube online: `cacheAudio` con la URL del video (yt-dlp le pasa `--cookies` cuando la URL es de facebook.com). Descargar usa `downloadAudio` con la URL del video (también con cookies).
+- Validado: `javac` OK (6 archivos); el parseo de la búsqueda se probó con HTML de muestra (3 resultados, sin duplicados, página y duración correctas). **Sin probar en el teléfono**: la búsqueda real con su sesión solo se puede verificar en su teléfono con su login (desde aquí no hay cuenta de Facebook para probar).
+
+### 2) Botón Descargar en el reproductor
+- Junto a "♪ Letra" ahora hay un botón "⬇ Descargar" (solo se ve cuando suena una canción online y aún no está descargada). Como el audio ya está en el teléfono (caché invisible), no se baja de nuevo: el nuevo método `saveCachedAudio({videoId, title})` mueve el archivo del caché a Música/Gurru Music con MediaStore (la misma publicación que usa la descarga normal) y la canción pasa a ser local (tipo "local", descargada, con su nombre guardado). Si el caché ya no tiene la canción, usa la descarga normal de yt-dlp.
+- El archivo del caché es M4A, así que se guarda como M4A (aunque el formato elegido en Descargas sea MP3: convertirlo sería bajarlo de nuevo).
+
+### 3) Mini reproductor en la parte de abajo
+- Fuera de la vista del reproductor (Biblioteca, Descargas, YouTube, Facebook, Ajustes) aparece una barra compacta sobre la barra inferior con la portada, el título, el artista y play/pausa de la canción que suena. Tocarla vuelve al reproductor principal; el botón ▶/❚❚ pausa o sigue sin salir de la vista. Solo aparece cuando hay una canción cargada.
+
+Validado: JS `node --check` OK (los 3 bloques), todos los `$("...")` existen (113 ids, nuevos `viewFacebook`, `navFacebook`, `fbSearchInput`, `fbSearchBtn`, `fbSearchResults`, `fbMsg`, `fbLoginBtn`, `fbLogoutBtn`, `fbAuthMsg`, `miniPlayer`, `miniArt`, `miniTitle`, `miniArtist`, `miniPlayBtn`, `btnDownload`, `choiceBadge`), `npx cap sync` OK, md5 de `www/index.html` == copia en assets. Java: `javac` OK (6 archivos). Lógica probada en Node con las funciones reales: colas por origen (YouTube [0,3], Facebook [2,4], local [1,5]); abrir una de Facebook desde la cola quita solo las otras de Facebook; `makeFbTrack` con los datos del video probado ("Por Ti", 216 s).
