@@ -221,7 +221,8 @@
          visibles. Reemplaza las pestañas de arriba (ya no hay dos
          navegaciones). */
       .softbar{ flex:0 0 auto; position:relative; z-index:6; display:flex; padding-bottom:env(safe-area-inset-bottom); background:linear-gradient(180deg, rgba(1,10,36,.25), rgba(1,10,36,.92) 30%); border-top:1px solid rgba(125,211,252,.22); }
-      .nav-btn{ flex:1; min-width:0; border:0; background:transparent; color:rgba(186,230,253,.75); display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 4px 10px; font-size:13px; font-weight:800; min-height:56px; cursor:pointer; }
+      .nav-btn{ flex:1; min-width:0; border:0; background:transparent; color:rgba(186,230,253,.75); display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 2px 10px; font-size:11px; font-weight:800; min-height:56px; cursor:pointer; overflow:hidden; }
+      .nav-btn span{ max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .nav-btn svg{ width:24px; height:24px; fill:currentColor; }
       .nav-btn.yt svg{ fill:#ff4d6d; }
       .nav-btn.fb svg{ fill:#1877F2; }
@@ -454,6 +455,7 @@
       .set-credits .cr-big{ font-size:16px; font-weight:800; color:#fff; }
       .set-credits .cr-sub{ font-size:13px; color:var(--soft); margin-top:6px; }
       .set-credits .cr-dev{ font-size:13.5px; color:#fff; margin-top:10px; font-weight:700; }
+      .set-credits .cr-pow{ font-size:11px; color:rgba(186,230,253,.55); margin-top:10px; }
       /* Avisos flotantes (toasts): errores con Reintentar y detalle que se expande al tocar. */
       #toastWrap{ position:absolute; left:12px; right:12px; bottom:76px; z-index:25; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
       .toast{ pointer-events:auto; background:#0a2247; border:1.5px solid rgba(125,211,252,.55); border-radius:12px; padding:10px 12px; box-shadow:0 12px 30px rgba(0,0,0,.55); cursor:pointer; }
@@ -716,9 +718,9 @@
             </div>
             <div class="set-h">Créditos</div>
             <div class="set-credits">
-              <div class="cr-big">App diseñada con el poder de Muse</div>
+              <div class="cr-big">Desarrollador: Jonathan Aguilar Lopez</div>
               <div class="cr-sub">Gurru Music · Reproductor de música</div>
-              <div class="cr-dev">Desarrollador: Jonathan Aguilar Lopez</div>
+              <div class="cr-pow">Powered by Muse</div>
             </div>
           </div>
         </section>

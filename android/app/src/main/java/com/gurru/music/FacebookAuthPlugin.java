@@ -2,7 +2,11 @@ package com.gurru.music;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.util.DisplayMetrics;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -210,24 +214,36 @@ public class FacebookAuthPlugin extends Plugin {
                     root.setLayoutParams(new ViewGroup.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT));
+                    root.setBackgroundColor(Color.parseColor("#04163C"));
 
                     TextView hint = new TextView(getActivity());
                     hint.setText("Inicia sesión con tu cuenta de Facebook y luego toca «Listo».\n"
                             + "Tu contraseña solo la ve Facebook, no se guarda en Gurru Music.");
                     hint.setPadding(24, 18, 24, 10);
                     hint.setTextSize(14);
+                    hint.setTextColor(Color.parseColor("#CFE8FF"));
+                    hint.setTypeface(android.graphics.Typeface.DEFAULT);
                     root.addView(hint);
 
                     final WebView web = new WebView(getActivity());
                     LinearLayout.LayoutParams wp = new LinearLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
                     web.setLayoutParams(wp);
+                    // Altura mínima de respaldo: si el diálogo midiera su
+                    // contenido como WRAP_CONTENT, el peso (weight=1) del
+                    // WebView se colapsa a 0 y la ventana de Facebook no
+                    // se ve (eso pasó en NUEVO13). Con esto siempre ocupa
+                    // espacio aunque el peso fallara.
+                    float density = getActivity().getResources().getDisplayMetrics().density;
+                    web.setMinimumHeight((int) (420 * density));
                     WebSettings st = web.getSettings();
                     st.setJavaScriptEnabled(true);
                     st.setDomStorageEnabled(true);
                     st.setSupportZoom(true);
                     st.setBuiltInZoomControls(true);
                     st.setDisplayZoomControls(false);
+                    st.setUseWideViewPort(true);
+                    st.setLoadWithOverviewMode(true);
                     try {
                         CookieManager cm = CookieManager.getInstance();
                         cm.setAcceptCookie(true);
@@ -252,6 +268,7 @@ public class FacebookAuthPlugin extends Plugin {
                     bp.setMargins(8, 0, 8, 0);
                     Button cancelBtn = new Button(getActivity());
                     cancelBtn.setText("Cancelar");
+                    cancelBtn.setTypeface(android.graphics.Typeface.DEFAULT);
                     cancelBtn.setLayoutParams(bp);
                     cancelBtn.setOnClickListener(new android.view.View.OnClickListener() {
                         @Override
@@ -264,6 +281,7 @@ public class FacebookAuthPlugin extends Plugin {
                     });
                     Button doneBtn = new Button(getActivity());
                     doneBtn.setText("Listo, ya entré");
+                    doneBtn.setTypeface(android.graphics.Typeface.DEFAULT);
                     doneBtn.setLayoutParams(bp);
                     doneBtn.setOnClickListener(new android.view.View.OnClickListener() {
                         @Override
@@ -294,6 +312,23 @@ public class FacebookAuthPlugin extends Plugin {
                         }
                     });
                     dialog.show();
+                    // El diálogo por defecto mide su ventana como
+                    // WRAP_CONTENT: el root MATCH_PARENT se encoge al
+                    // contenido y el WebView (altura 0 + peso 1) queda en
+                    // 0 px, así que la página de Facebook nunca se veía.
+                    // Se fija la ventana casi a pantalla completa para
+                    // que el WebView tenga altura real donde escribir la
+                    // cuenta y la contraseña.
+                    Window win = dialog.getWindow();
+                    if (win != null) {
+                        DisplayMetrics dm = getActivity().getResources().getDisplayMetrics();
+                        win.setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+                                (int) (dm.heightPixels * 0.92));
+                        try {
+                            win.setBackgroundDrawable(
+                                    new ColorDrawable(Color.parseColor("#04163C")));
+                        } catch (Exception ignored) {}
+                    }
                     web.loadUrl(FB_MOBILE);
                 } catch (final Exception e) {
                     call.reject("No se pudo abrir el inicio de sesión: " + e.getMessage());
