@@ -553,6 +553,79 @@ public class YtDlpDownloaderPlugin extends Plugin {
         });
     }
 
+    /** Metadatos reales del video (artista, canción, álbum) para las
+        sugerencias: el buscador solo trae el canal que subió el video
+        (a veces el sello o "BelanovaVEVO"), pero --dump-json devuelve
+        el artista de verdad ("Belanova"). */
+    @PluginMethod
+    public void getVideoInfo(final PluginCall call) {
+        final String url = call.getString("url", "");
+        if (url == null || url.trim().isEmpty()) {
+            call.reject("Falta la dirección del video de YouTube.");
+            return;
+        }
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ensureInitialized();
+                    YoutubeDLRequest request = new YoutubeDLRequest(url.trim());
+                    request.addOption("--dump-json");
+                    request.addOption("-f", "bestaudio/best");
+                    request.addOption("--no-playlist");
+                    request.addOption("--no-warnings");
+                    request.addOption("--extractor-args", "youtube:player_client=android");
+                    YoutubeDLResponse response = YoutubeDL.getInstance().execute(
+                            request, "gurru-info-" + nextStreamSeq(),
+                            new Function3<Float, Long, String, Unit>() {
+                                @Override
+                                public Unit invoke(Float progress, Long eta, String line) {
+                                    return Unit.INSTANCE;
+                                }
+                            });
+                    if (response == null || response.getExitCode() != 0) {
+                        throw new Exception("yt-dlp no pudo leer el video (código "
+                                + (response == null ? "?" : response.getExitCode()) + "): "
+                                + shortError(response == null ? "" : response.getErr(), 200));
+                    }
+                    String out = response == null ? null : response.getOut();
+                    if (out == null) throw new Exception("yt-dlp no devolvió información del video");
+                    int start = out.indexOf('{');
+                    if (start >= 0) out = out.substring(start);
+                    JSONObject info = new JSONObject(out.trim());
+                    final String id = info.optString("id", "");
+                    final String title = info.optString("title", "");
+                    final String artist = info.optString("artist", "");
+                    final String track = info.optString("track", "");
+                    final String album = info.optString("album", "");
+                    final String uploader = info.optString("uploader", "");
+                    final long duration = info.optLong("duration", 0);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSObject ret = new JSObject();
+                            ret.put("id", id);
+                            ret.put("title", title);
+                            ret.put("artist", artist);
+                            ret.put("track", track);
+                            ret.put("album", album);
+                            ret.put("uploader", uploader);
+                            ret.put("duration", duration);
+                            call.resolve(ret);
+                        }
+                    });
+                } catch (final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            call.reject(shortError(e.getMessage(), 300));
+                        }
+                    });
+                }
+            }
+        });
+    }
+
     /** Elige la URL del mejor formato solo-audio (sin video), por bitrate. */
     private static String pickBestAudioUrl(JSONObject info) {
         JSONArray formats = info.optJSONArray("formats");
@@ -818,9 +891,17 @@ public class YtDlpDownloaderPlugin extends Plugin {
                         String template = new File(dir, vid + ".%(ext)s").getAbsolutePath();
                         YoutubeDLRequest request = new YoutubeDLRequest(url.trim());
                         request.addOption("-f", "bestaudio/best");
-                        /* Sin --extract-audio: el archivo original (m4a o
-                           mp4 con audio) suena directo en el <audio> del
-                           WebView y la preparación es mucho más rápida. */
+                        /* Con --extract-audio a M4A (solo audio, sin video):
+                           el formato 18 (el único con audio en muchos videos
+                           de YouTube Music) es un MP4 con pista de video, y el
+                           WebView pausa el audio cuando la página se oculta si
+                           el archivo trae video (por eso la música local MP3
+                           seguía sonando en segundo plano y la de YouTube no).
+                           Con M4A solo-audio la canción sigue sonando al salir
+                           de la app, igual que un MP3 local. Para audio AAC
+                           (formato 18, itag 140) es solo un reempaquetado rápido. */
+                        request.addOption("--extract-audio");
+                        request.addOption("--audio-format", "m4a");
                         request.addOption("--no-playlist");
                         request.addOption("--no-warnings");
                         request.addOption("--extractor-args", "youtube:player_client=android");

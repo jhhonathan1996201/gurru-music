@@ -14,6 +14,10 @@
       html[data-accent="azul"]{ --accent:#22d3ee; --accent2:#0284c7; --glow:rgba(34,211,238,.85); --soft:#bae6fd; }
       html[data-accent="rojo"]{ --accent:#fb4d6d; --accent2:#be123c; --glow:rgba(251,77,109,.85); --soft:#fecdd3; }
       html[data-accent="naranja"]{ --accent:#fb923c; --accent2:#ea580c; --glow:rgba(251,146,60,.85); --soft:#fed7aa; }
+      html[data-accent="verde"]{ --accent:#34d399; --accent2:#059669; --glow:rgba(52,211,153,.85); --soft:#a7f3d0; }
+      html[data-accent="rosa"]{ --accent:#f472b6; --accent2:#db2777; --glow:rgba(244,114,182,.85); --soft:#fbcfe8; }
+      html[data-accent="violeta"]{ --accent:#a78bfa; --accent2:#7c3aed; --glow:rgba(167,139,250,.85); --soft:#ddd6fe; }
+      html[data-accent="dorado"]{ --accent:#fbbf24; --accent2:#d97706; --glow:rgba(251,191,36,.85); --soft:#fde68a; }
       *{ box-sizing:border-box; }
       html,body{ margin:0; padding:0; }
       body{
@@ -407,8 +411,8 @@
       .queue-list .q-move button:disabled{ opacity:.3; cursor:default; }
       .queue-list .q-move button:active{ background:rgba(2,132,199,.4); }
       /* Biblioteca en cuadrícula: tarjetas con portada, título y artista. */
-      .playlist.grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
-      .playlist.grid li{ display:flex; flex-direction:column; align-items:stretch; gap:0; padding:0; border:1px solid rgba(125,211,252,.25); border-bottom:1px solid rgba(125,211,252,.25); border-radius:12px; overflow:hidden; background:rgba(255,255,255,.05); position:relative; }
+      .playlist.grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; align-content:start; grid-auto-rows:max-content; }
+      .playlist.grid li{ display:flex; flex-direction:column; align-items:stretch; align-self:start; gap:0; padding:0; border:1px solid rgba(125,211,252,.25); border-bottom:1px solid rgba(125,211,252,.25); border-radius:12px; overflow:hidden; background:rgba(255,255,255,.05); position:relative; }
       .playlist.grid .thumb{ width:100%; height:auto; aspect-ratio:1; border-radius:0; }
       .playlist.grid .thumb img{ width:100%; height:100%; }
       .playlist.grid .meta{ padding:8px 10px 10px; }
@@ -416,6 +420,19 @@
       .playlist.grid .kebab{ position:absolute; top:4px; right:4px; background:rgba(1,10,36,.65); border-radius:50%; }
       .playlist.grid li.playing .thumb{ box-shadow:inset 0 0 0 2px var(--accent); }
       @media (min-width:700px){ .playlist.grid{ grid-template-columns:repeat(3,1fr); } }
+      /* ===== Configuración: color de la app y créditos. ===== */
+      .set-wrap{ flex:1; min-height:0; overflow:auto; padding:16px 18px 24px; }
+      .set-title{ font-size:22px; font-weight:800; color:var(--accent); text-shadow:0 0 8px var(--glow); margin:2px 0 4px; }
+      .set-sub{ font-size:13.5px; color:var(--soft); margin:0 0 6px; }
+      .set-h{ font-size:12.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin:20px 0 10px; }
+      .set-swatches{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+      .set-swatch{ border:2px solid transparent; border-radius:14px; padding:10px 4px 8px; background:rgba(255,255,255,.06); color:#fff; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; font-size:12px; font-weight:700; min-height:64px; }
+      .set-swatch .dot{ width:34px; height:34px; border-radius:50%; background:var(--sw,#22d3ee); box-shadow:0 0 12px var(--sw,#22d3ee); }
+      .set-swatch.on{ border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), 0 0 14px var(--glow); }
+      .set-credits{ border:1px solid rgba(125,211,252,.25); background:rgba(255,255,255,.05); border-radius:14px; padding:16px; text-align:center; }
+      .set-credits .cr-big{ font-size:16px; font-weight:800; color:#fff; }
+      .set-credits .cr-sub{ font-size:13px; color:var(--soft); margin-top:6px; }
+      .set-credits .cr-dev{ font-size:13.5px; color:#fff; margin-top:10px; font-weight:700; }
       /* Avisos flotantes (toasts): errores con Reintentar y detalle que se expande al tocar. */
       #toastWrap{ position:absolute; left:12px; right:12px; bottom:76px; z-index:25; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
       .toast{ pointer-events:auto; background:#0a2247; border:1.5px solid rgba(125,211,252,.55); border-radius:12px; padding:10px 12px; box-shadow:0 12px 30px rgba(0,0,0,.55); cursor:pointer; }
@@ -453,6 +470,9 @@
          la página no puede usar ningún plugin nativo (búsqueda y descargas de
          YouTube, audio en segundo plano, botón atrás). Se carga después del
          script inyectado y antes del código de la app. -->
+    <!-- Restaura el color elegido en Configuración antes de pintar, para
+         que la app no parpadee en azul al abrir. -->
+    <script>try{var _a=localStorage.getItem("gurru-accent");if(_a&&["azul","verde","rosa","violeta","rojo","naranja","dorado"].indexOf(_a)>=0)document.documentElement.setAttribute("data-accent",_a);}catch(e){}</script>
     <script src="capacitor.js"></script>
   </head>
   <body>
@@ -635,6 +655,30 @@
             </div>
           </div>
         </section>
+
+        <!-- ============ CONFIGURACIÓN ============ -->
+        <section class="view" id="viewSettings" aria-label="Configuración" hidden>
+          <div class="set-wrap">
+            <div class="set-title">Configuración</div>
+            <p class="set-sub">Cambia el color de la aplicación y conoce los créditos.</p>
+            <div class="set-h">Color de la aplicación</div>
+            <div class="set-swatches" id="accentSwatches">
+              <button class="set-swatch" data-accent="azul" type="button"><span class="dot" style="--sw:#22d3ee"></span>Azul neón</button>
+              <button class="set-swatch" data-accent="verde" type="button"><span class="dot" style="--sw:#34d399"></span>Verde neón</button>
+              <button class="set-swatch" data-accent="rosa" type="button"><span class="dot" style="--sw:#f472b6"></span>Rosa neón</button>
+              <button class="set-swatch" data-accent="violeta" type="button"><span class="dot" style="--sw:#a78bfa"></span>Violeta</button>
+              <button class="set-swatch" data-accent="rojo" type="button"><span class="dot" style="--sw:#fb4d6d"></span>Rojo</button>
+              <button class="set-swatch" data-accent="naranja" type="button"><span class="dot" style="--sw:#fb923c"></span>Naranja</button>
+              <button class="set-swatch" data-accent="dorado" type="button"><span class="dot" style="--sw:#fbbf24"></span>Dorado</button>
+            </div>
+            <div class="set-h">Créditos</div>
+            <div class="set-credits">
+              <div class="cr-big">App diseñada con el poder de Muse</div>
+              <div class="cr-sub">Gurru Music · Reproductor de música</div>
+              <div class="cr-dev">Desarrollador: Jonathan Aguilar Lopez</div>
+            </div>
+          </div>
+        </section>
       </main>
 
       <!-- Barra inferior fija de navegación (uso con el pulgar): Descargas,
@@ -652,6 +696,10 @@
         <button class="nav-btn yt" id="navYouTube" data-view="youtube" type="button">
           <svg viewBox="0 0 24 24"><path d="M23 12s0-3.8-.5-5.6c-.3-1-1.7-1-2-2C18.7 4 12 4 12 4s-6.7 0-8.5.4c-1 .3-1.7 1-2 2C1 8.2 1 12 1 12s0 3.8.5 5.6c.3 1 1 1.7 2 2 1.8.4 8.5.4 8.5.4s6.7 0 8.5-.4c1-.3 1.7-1 2-2 .5-1.8.5-5.6.5-5.6zM9.8 15.5v-7l6 3.5-6 3.5z"/></svg>
           <span>YouTube</span>
+        </button>
+        <button class="nav-btn" id="navSettings" data-view="settings" type="button">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.03-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.98 3.6-3.6 3.6z"/></svg>
+          <span>Ajustes</span>
         </button>
       </div>
 
@@ -978,6 +1026,7 @@
         $("viewLibrary").hidden = v !== "library";
         $("viewDownloads").hidden = v !== "downloads";
         $("viewYouTube").hidden = v !== "youtube";
+        $("viewSettings").hidden = v !== "settings";
         if (v === "library"){ maybeRetryLocalScan(); }
         /* Al entrar a YouTube, la última búsqueda con sus resultados
            sigue ahí (se guarda en el teléfono); si la vista se vació
@@ -985,7 +1034,7 @@
         if (v === "youtube" && !$("ytSearchResults").children.length) restoreLastYtSearch();
         /* La barra inferior fija marca la sección activa (en el
            reproductor ninguna está activa: es su propia pantalla). */
-        ["downloads", "library", "youtube"].forEach(function(k){
+        ["downloads", "library", "youtube", "settings"].forEach(function(k){
           var b = $("nav" + k.charAt(0).toUpperCase() + k.slice(1));
           if (b) b.classList.toggle("on", v === k);
         });
@@ -2795,14 +2844,45 @@
         }
         return title;
       }
+      /* El artista REAL de la canción, leído de su metadata (--dump-json):
+         el buscador solo trae el canal que subió el video (a veces el
+         sello o "BelanovaVEVO"), pero la metadata trae el artista de
+         verdad ("Belanova"). Se guarda en la canción y se comparte entre
+         la llamada que lo pide y las sugerencias que lo usan. */
+      function resolveArtist(t){
+        if (t._metaArtist) return Promise.resolve(t._metaArtist);
+        if (t._metaPromise) return t._metaPromise;
+        var p = getNativeDl();
+        if (!p || !p.getVideoInfo || !t.videoId) return Promise.resolve(artistForSuggestions(t));
+        var watch = "https://www.youtube.com/watch?v=" + encodeURIComponent(t.videoId);
+        t._metaPromise = p.getVideoInfo({ url: watch }).then(function(info){
+          var a = info && info.artist ? String(info.artist).trim() : "";
+          var generic = /^(youtube|artista desconocido|various artists|varios artistas)$/i.test(a);
+          if (a && !generic){
+            t._metaArtist = a;
+            t.artist = a;
+            if (info.album) t.album = info.album;
+            if (info.track) t._metaTrack = info.track;
+            renderPlaylist(); updateScreenMeta();
+            if (tracks[current] === t) refreshLyricsForCurrent();
+            return a;
+          }
+          return artistForSuggestions(t);
+        }).catch(function(){ return artistForSuggestions(t); });
+        return t._metaPromise;
+      }
       function suggestQueryFor(t){ return artistForSuggestions(t); }
       function fetchSuggestions(t){
         var p = getNativeDl();
         if (!p || !p.searchYouTube) return Promise.resolve([]);
-        var q = suggestQueryFor(t);
-        if (!q) return Promise.resolve([]);
         var gen = suggestGen;
-        return p.searchYouTube({ query: q, limit: 10 }).then(function(res){
+        /* Primero el artista real de la metadata; si no se puede leer,
+           se usa el parseo del título (lo de antes). */
+        return resolveArtist(t).then(function(artist){
+          var q = artist || suggestQueryFor(t);
+          if (!q) return [];
+          return p.searchYouTube({ query: q, limit: 10 });
+        }).then(function(res){
           /* Si mientras tanto se abrió otra canción online, la cola se
              regeneró y estas sugerencias ya son de otro artista. */
           if (gen !== suggestGen) return [];
@@ -2918,6 +2998,7 @@
           saveState();
           playYouTubeOnline(t, autoplay, rs);
           ensureYtSuggestions(t);
+          resolveArtist(t);
           $("tCur").textContent = "00:00:00"; $("tTot").textContent = "YouTube · Audio";
           refreshLyricsForCurrent();
           return;
@@ -2935,7 +3016,7 @@
         if (autoplay) startPlayback(); else setPlayIcons(false);
         /* En caché la canción es online aunque suene por el <audio>
            local: las sugerencias del artista también se siembran aquí. */
-        if (t.type === "youtube" || t.type === "ytaudio") ensureYtSuggestions(t);
+        if (t.type === "youtube" || t.type === "ytaudio"){ ensureYtSuggestions(t); resolveArtist(t); }
         refreshLyricsForCurrent();
       }
       function playTrack(i){
@@ -3279,6 +3360,29 @@
         renderPlaylist();
       });
       syncViewBtn();
+      /* ---------- Configuración: color de la app (tema) ----------
+         El color vive en html[data-accent] (azul, rojo, naranja ya
+         existían en el CSS sin forma de cambiarlos; se agregan verde,
+         rosa, violeta y dorado, todos neón como el estilo de la app).
+         Se guarda en localStorage y se restaura al abrir (también con
+         un script chico en <head> para que no parpadee el azul). */
+      var ACCENTS = ["azul", "verde", "rosa", "violeta", "rojo", "naranja", "dorado"];
+      function setAccent(name){
+        if (ACCENTS.indexOf(name) < 0) name = "azul";
+        document.documentElement.setAttribute("data-accent", name);
+        try { localStorage.setItem("gurru-accent", name); } catch(e){}
+        syncAccentSwatches();
+      }
+      function syncAccentSwatches(){
+        var cur = document.documentElement.getAttribute("data-accent") || "azul";
+        document.querySelectorAll("#accentSwatches .set-swatch").forEach(function(b){
+          b.classList.toggle("on", b.getAttribute("data-accent") === cur);
+        });
+      }
+      document.querySelectorAll("#accentSwatches .set-swatch").forEach(function(b){
+        b.addEventListener("click", function(){ setAccent(b.getAttribute("data-accent")); });
+      });
+      syncAccentSwatches();
       document.addEventListener("click", function(e){
         var m = $("libMenu");
         if (m && m.classList.contains("show") && !m.contains(e.target) && e.target !== libMenuAnchor && !(libMenuAnchor && libMenuAnchor.contains(e.target))) closeLibMenu();
