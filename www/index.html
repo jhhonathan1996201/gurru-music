@@ -180,14 +180,58 @@
       .sc-name{ position:absolute; left:0; right:0; bottom:0; padding:20px 8px 8px; background:linear-gradient(transparent, rgba(0,0,0,.85)); color:#fff; font-weight:800; font-size:13px; line-height:1.2; text-align:left; }
       /* Selección rápida (NUEVO19): título de la lista, estilo YouTube
          Music, con el botón para sonar todo lo que se ve. */
-      .quick-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:12px 2px 2px; }
-      .quick-title{ font-size:15px; font-weight:900; }
-      .quick-all{ border:1px solid rgba(125,211,252,.5); background:rgba(2,132,199,.18); color:#fff; border-radius:999px; padding:8px 14px; font-weight:800; font-size:13px; cursor:pointer; white-space:nowrap; }
-      .quick-all:disabled{ opacity:.45; }
+      /* Fila Reproducir todo (NUEVO21): como en la captura — botón
+         circular grande, título, contador de canciones y aleatorio. */
+      .quick-head{ display:flex; align-items:center; gap:12px; margin:12px 2px 2px; }
+      .quick-title{ display:block; font-size:15px; font-weight:900; }
+      .quick-count{ display:block; font-size:12.5px; color:var(--soft); }
+      .quick-meta{ flex:1; min-width:0; display:flex; flex-direction:column; }
+      .play-big{ width:52px; height:52px; border-radius:50%; border:0; background:var(--accent); color:#04163C; font-size:20px; display:grid; place-items:center; flex:0 0 auto; cursor:pointer; box-shadow:0 0 16px var(--glow); }
+      .play-big:disabled{ opacity:.45; }
+      /* Sub-pestañas de la Biblioteca (NUEVO21): Pistas, Álbumes, Listas,
+         Artistas, Carpetas — como en la captura, con el diseño neón de
+         Gurru Music (subrayado cian en la activa). */
+      .lib-subtabs{ display:flex; gap:2px; overflow-x:auto; padding:2px 0 0; margin:6px 0 0; border-bottom:1px solid rgba(125,211,252,.18); scrollbar-width:none; }
+      .lib-subtabs::-webkit-scrollbar{ display:none; }
+      .lib-subtab{ flex:0 0 auto; border:0; background:none; color:var(--soft); font:inherit; font-size:15px; font-weight:700; padding:8px 12px 9px; cursor:pointer; border-bottom:2.5px solid transparent; margin-bottom:-1px; white-space:nowrap; }
+      .lib-subtab.on{ color:#fff; border-bottom-color:var(--accent); text-shadow:0 0 8px var(--glow); }
+      #libPistas, #libGroups, #libDrill{ flex:1; min-height:0; display:flex; flex-direction:column; }
+      #libPistas[hidden], #libGroups[hidden], #libDrill[hidden]{ display:none; }
+      /* Tarjetas de grupo (álbumes) y filas de grupo (artistas, carpetas,
+         listas): la rejilla reusa la tarjeta de mezclas, las filas son
+         como las canciones pero con contador y flecha. */
+      .grp-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:6px 2px; overflow:auto; flex:1; min-height:0; align-items:start; align-content:start; }
+      .grp-card{ display:flex; flex-direction:column; gap:6px; background:rgba(255,255,255,.06); border:1px solid rgba(167,139,250,.4); color:inherit; border-radius:12px; padding:8px; font:inherit; cursor:pointer; text-align:left; }
+      .grp-card:active{ background:rgba(167,139,250,.2); }
+      .grp-rows{ display:flex; flex-direction:column; gap:2px; overflow:auto; flex:1; min-height:0; padding:2px; }
+      .grp-row{ display:flex; align-items:center; gap:10px; width:100%; background:none; border:0; border-bottom:1px solid rgba(125,211,252,.12); color:inherit; font:inherit; padding:9px 4px; cursor:pointer; text-align:left; }
+      .grp-row:active{ background:rgba(255,255,255,.06); }
+      .grp-thumb{ width:52px; height:52px; border-radius:8px; object-fit:cover; flex:0 0 auto; background:rgba(255,255,255,.08); }
+      .grp-meta{ flex:1; min-width:0; }
+      .grp-name{ display:block; font-weight:800; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .grp-sub{ display:block; font-size:12.5px; color:var(--soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .grp-chev{ color:var(--soft); font-size:18px; flex:0 0 auto; }
+      .grp-empty{ font-size:13.5px; color:var(--soft); margin:16px 4px; line-height:1.5; }
+      /* Encabezado del detalle (drill): volver, nombre, contador,
+         eliminar (solo listas) y reproducir. */
+      .drill-head{ display:flex; align-items:center; gap:10px; padding:10px 2px 6px; flex:0 0 auto; }
+      .drill-back{ flex:0 0 auto; width:38px; height:38px; border-radius:50%; border:1.5px solid rgba(125,211,252,.5); background:rgba(2,132,199,.16); color:#fff; font-size:18px; display:grid; place-items:center; cursor:pointer; }
+      .drill-title{ flex:1; min-width:0; }
+      .drill-name{ display:block; font-size:16px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .drill-count{ display:block; font-size:12.5px; color:var(--soft); }
+      .drill-del{ flex:0 0 auto; border:1px solid rgba(251,113,133,.6); background:rgba(159,18,57,.25); color:#fecdd3; border-radius:999px; padding:7px 12px; font-weight:800; font-size:12.5px; cursor:pointer; }
+      /* Crear lista: nombre + botón, arriba de la pestaña Listas. */
+      .pl-create{ display:flex; gap:8px; padding:8px 2px; flex:0 0 auto; }
+      .pl-create input{ flex:1; min-width:0; border:1.5px solid rgba(125,211,252,.5); background:rgba(2,132,199,.12); color:#fff; border-radius:999px; padding:10px 14px; font:inherit; font-size:14px; outline:none; }
+      .pl-create input::placeholder{ color:rgba(186,230,253,.6); }
       .src-badge.fb{ background:#1877F2; }
       .c-badge.fb{ background:#1877F2; }
       /* ===== Mini reproductor (NUEVO13) ===== */
-      #miniPlayer{ flex:0 0 auto; display:none; align-items:center; gap:10px; padding:8px 12px; background:linear-gradient(180deg, rgba(2,20,50,.94), rgba(1,10,36,.97)); border-top:1px solid rgba(125,211,252,.28); cursor:pointer; }
+      /* Mini reproductor flotante (NUEVO21): píldora sobre la barra, como
+         en la captura, con el diseño neón de Gurru Music. */
+      #miniPlayer{ flex:0 0 auto; display:none; align-items:center; gap:10px; padding:8px 12px; margin:0 12px 10px; border-radius:20px; border:1px solid rgba(125,211,252,.35); background:linear-gradient(180deg, rgba(2,20,50,.97), rgba(1,10,36,.98)); box-shadow:0 8px 24px rgba(0,0,0,.55); cursor:pointer; }
+      .mini-btn{ flex:0 0 auto; width:40px; height:40px; border-radius:50%; border:0; background:transparent; color:#fff; font-size:18px; display:grid; place-items:center; cursor:pointer; }
+      .mini-btn:active{ background:rgba(255,255,255,.1); }
       #miniPlayer.show{ display:flex; }
       #miniArt{ width:42px; height:42px; border-radius:8px; object-fit:cover; flex:0 0 auto; background:#0a2a5e; }
       .mini-meta{ flex:1; min-width:0; }
@@ -246,7 +290,9 @@
          secciones principales — Descargas, Biblioteca y YouTube — siempre
          visibles. Reemplaza las pestañas de arriba (ya no hay dos
          navegaciones). */
-      .softbar{ flex:0 0 auto; position:relative; z-index:6; display:flex; padding-bottom:env(safe-area-inset-bottom); background:linear-gradient(180deg, rgba(1,10,36,.25), rgba(1,10,36,.92) 30%); border-top:1px solid rgba(125,211,252,.22); }
+      /* Barra inferior flotante (NUEVO21): píldora redondeada, como en la
+         captura, con las 5 secciones de Gurru Music y su diseño neón. */
+      .softbar{ flex:0 0 auto; position:relative; z-index:6; display:flex; margin:0 12px calc(10px + env(safe-area-inset-bottom)); border-radius:24px; border:1px solid rgba(125,211,252,.3); background:linear-gradient(180deg, rgba(2,20,50,.97), rgba(1,10,36,.98)); box-shadow:0 8px 24px rgba(0,0,0,.5); }
       .nav-btn{ flex:1; min-width:0; border:0; background:transparent; color:rgba(186,230,253,.75); display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 2px 10px; font-size:11px; font-weight:800; min-height:56px; cursor:pointer; overflow:hidden; }
       .nav-btn span{ max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .nav-btn svg{ width:24px; height:24px; fill:currentColor; }
@@ -659,6 +705,17 @@
               <button class="icon-btn" id="viewBtn" type="button" title="Vista de cuadrícula o lista" aria-label="Cambiar vista de lista o cuadrícula"><svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></button>
             </div>
 
+            <!-- Sub-pestañas de la Biblioteca (NUEVO21): Pistas, Álbumes,
+                 Listas, Artistas, Carpetas — como en la captura. -->
+            <div class="lib-subtabs" role="tablist" aria-label="Ver la biblioteca por">
+              <button class="lib-subtab on" data-sub="pistas" type="button">Pistas</button>
+              <button class="lib-subtab" data-sub="albumes" type="button">Álbumes</button>
+              <button class="lib-subtab" data-sub="listas" type="button">Listas</button>
+              <button class="lib-subtab" data-sub="artistas" type="button">Artistas</button>
+              <button class="lib-subtab" data-sub="carpetas" type="button">Carpetas</button>
+            </div>
+
+            <div id="libPistas">
             <!-- Accesos directos (NUEVO19): página principal estilo
                  YouTube Music — los artistas que más escuchas, en
                  rejilla de 3 columnas. Tocar uno suena lo más de él. -->
@@ -670,8 +727,9 @@
             <!-- Selección rápida (NUEVO19): título de la lista, estilo
                  YouTube Music, con el botón para sonar todo lo que se ve. -->
             <div class="quick-head">
-              <span class="quick-title">Selección rápida</span>
-              <button class="quick-all" id="playAllBtn" type="button">Reproducir todo</button>
+              <button class="play-big" id="playAllBtn" type="button" aria-label="Reproducir todo">▶</button>
+              <span class="quick-meta"><span class="quick-title">Reproducir todo</span><span class="quick-count" id="playAllCount"></span></span>
+              <button class="icon-btn" id="shuffleAllBtn" type="button" title="Reproducir en aleatorio" aria-label="Reproducir en aleatorio"><svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></button>
             </div>
             <ul class="playlist" id="playlist"></ul>
             <div class="empty-state" id="emptyState">
@@ -680,6 +738,25 @@
               <p id="emptyStateText">Toca <b>«Elegir carpeta»</b> y selecciona la carpeta donde guardas tu música: se cargan todas de una vez.<br />Toca una canción de la lista para escucharla.</p>
             </div>
             <div class="no-results" id="noResults">Ninguna canción coincide con tu búsqueda.</div>
+            </div>
+            <div id="libGroups" hidden>
+              <div class="pl-create" id="plCreateRow" hidden>
+                <input type="text" id="plNameInput" placeholder="Nombre de la lista…" maxlength="40" aria-label="Nombre de la nueva lista" />
+                <button class="pill-btn" id="plCreateBtn" type="button">Crear</button>
+              </div>
+              <div class="grp-grid" id="groupsGrid" hidden></div>
+              <div class="grp-rows" id="groupsRows" hidden></div>
+              <div class="grp-empty" id="groupsEmpty" hidden></div>
+            </div>
+            <div id="libDrill" hidden>
+              <div class="drill-head">
+                <button class="drill-back" id="drillBackBtn" type="button" aria-label="Volver">←</button>
+                <span class="drill-title"><span class="drill-name" id="drillName"></span><span class="drill-count" id="drillCount"></span></span>
+                <button class="drill-del" id="drillDelBtn" type="button" hidden>Eliminar</button>
+                <button class="play-big drill-play" id="drillPlayBtn" type="button" aria-label="Reproducir">▶</button>
+              </div>
+              <ul class="playlist" id="drillList"></ul>
+            </div>
           </div>
         </section>
         <div class="lib-menu" id="libMenu"></div>
@@ -765,6 +842,8 @@
         <img id="miniArt" src="logo.png" alt="" />
         <span class="mini-meta"><span id="miniTitle">Sin música</span><span id="miniArtist"></span></span>
         <button id="miniPlayBtn" type="button" aria-label="Reproducir o pausar">▶</button>
+        <button class="mini-btn" id="miniNextBtn" type="button" aria-label="Siguiente">⏭</button>
+        <button class="mini-btn" id="miniQueueBtn" type="button" aria-label="Ver la cola">☰</button>
       </div>
 
       <!-- Barra inferior fija de navegación (uso con el pulgar): Descargas,
@@ -1183,6 +1262,7 @@
             if (overlay && overlay.classList.contains("show")){ closeChoice(); return; }
             var editOv = $("editOverlay");
             if (editOv && editOv.classList.contains("show")){ closeEdit(); return; }
+            if (view === "library" && libDrill){ closeDrill(); return; }
             if (view !== "library"){ showView("library", true); return; }
             /* En la pantalla principal (Biblioteca) no se cierra la app:
                se minimiza para que la música siga sonando. Si el plugin
@@ -1382,25 +1462,48 @@
         m.style.left = left + "px"; m.style.top = top + "px";
         libMenuAnchor = anchor;
       }
-      function openRowMenu(anchor, t, i){
+      function openRowMenu(anchor, t, i, drill){
         var isYt = t.type === "youtube" || t.type === "ytaudio";
         var isOnlineDl = isOnlineType(t);
         var items = [{ label: "▶  Escuchar", fn: function(){ playTrack(i); showView("player"); } }];
         if (isOnlineDl && !t.downloaded){
           items.push({ label: t.dlState === "downloading" ? "⬇  Descargando…" : "⬇  Descargar al teléfono", fn: function(){ queueDownload(t, true); } });
         }
+        items.push({ label: "＋  Agregar a lista…", fn: function(){ openAddToPlaylistMenu(anchor, t); } });
+        if (drill && drill.kind === "playlist"){
+          items.push({ label: "✕  Quitar de esta lista", danger: true, fn: function(){ removeFromPlaylist(drill.key, t.id); } });
+        }
         items.push({ label: "✎  Editar datos / carátula", fn: function(){ openEdit(t); } });
         items.push({ label: "✕  Quitar de la lista", danger: true, fn: function(){ removeTrack(i); } });
         openLibMenu(anchor, items);
       }
-      function renderPlaylist(){
+      function openAddToPlaylistMenu(anchor, t){
+        if (!playlists.length){
+          showToast({ title: "Aún no tienes listas", msg: "Crea tu primera lista en la pestaña Listas de la Biblioteca.", retryLabel: "Ir a Listas", onRetry: function(){ setLibSubTab("listas"); } });
+          return;
+        }
+        var items = playlists.map(function(pl){
+          var has = pl.ids.map(String).indexOf(String(t.id)) >= 0;
+          return { label: (has ? "✓ " : "") + pl.name + " (" + pl.ids.length + ")", fn: function(){ addToPlaylist(pl.id, t.id); } };
+        });
+        items.push({ label: "＋  Nueva lista…", fn: function(){ setLibSubTab("listas"); var inp = $("plNameInput"); if (inp) inp.focus(); } });
+        openLibMenu(anchor, items);
+      }
+      function rowDlBadge(t, isYt){
+        if ((isYt || t.type === "facebook") && !t.downloaded && t.dlState === "downloading") return '<span class="dl-badge">' + (typeof t.dlProgress === "number" ? Math.floor(t.dlProgress) + "%" : "…") + '</span>';
+        if (t.downloaded) return '<span class="dl-badge">MP3</span>';
+        return "";
+      }
+      function rowPlayIcon(t, isYt){
+        if (isYt) return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ff0033" d="M23 12s0-3.8-.5-5.6c-.3-1-1-1.7-2-2C18.7 4 12 4 12 4s-6.7 0-8.5.4c-1 .3-1.7 1-2 2C1 8.2 1 12 1 12s0 3.8.5 5.6c.3 1 1 1.7 2 2 1.8.4 8.5.4 8.5.4s6.7 0 8.5-.4c1-.3 1.7-1 2-2 .5-1.8.5-5.6.5-5.6zM9.8 15.5v-7l6 3.5-6 3.5z"/></svg>';
+        if (t.type === "facebook") return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>';
+        return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#22d3ee" d="M8 5v14l11-7z"/></svg>';
+      }
+      /* Canciones visibles en la Biblioteca (búsqueda + filtro, sin
+         ordenar): la usan la lista de Pistas y los grupos de
+         Álbumes/Artistas/Carpetas, para que todos vean lo mismo. */
+      function visibleItems(){
         var q = $("searchInput").value.trim().toLowerCase();
-        var ul = $("playlist");
-        closeLibMenu();
-        /* NUEVO20: al reconstruir la lista se vuelve arriba, así que
-           los accesos directos vuelven a verse. */
-        var sw = $("shortcutsWrap"); if (sw) sw.classList.remove("sc-hidden");
-        ul.innerHTML = "";
         var items = [];
         tracks.forEach(function(t, i){
           if (q && (t.title + " " + t.artist + " " + t.album).toLowerCase().indexOf(q) === -1) return;
@@ -1409,6 +1512,322 @@
           if (libFilter === "downloaded" && !t.downloaded) return;
           items.push({ t: t, i: i });
         });
+        return items;
+      }
+      /* ---------- Sub-pestañas de la Biblioteca (NUEVO21) ----------
+         Pistas / Álbumes / Listas / Artistas / Carpetas, como en la captura
+         que mandó Jonathan, con el diseño neón de Gurru Music. Pistas es
+         la lista de siempre; las demás agrupan la música y al tocar un
+         grupo se entra a sus canciones (drill) con su propio Reproducir
+         todo. La cola de un drill sigue al grupo (reusa activeMix, como
+         las mezclas). */
+      var LIB_SUB_KEY = "gurru-lib-subtab";
+      var libSubTab = "pistas";
+      try { var _st = localStorage.getItem(LIB_SUB_KEY); if (_st) libSubTab = _st; } catch(e){}
+      var libDrill = null; /* { kind: "album"|"artist"|"folder"|"playlist", key, name } */
+      var groupsSig = "";
+      var playlistsVersion = 0;
+      function folderOf(t){
+        if (!t) return "Otras";
+        if (t.folder) return t.folder;
+        if (t.downloaded) return "Gurru Music";
+        if (t.type === "youtube" || t.type === "ytaudio") return "YouTube";
+        if (t.type === "facebook") return "Facebook";
+        return "Otras";
+      }
+      function setLibSubTab(tab){
+        libSubTab = tab;
+        try { localStorage.setItem(LIB_SUB_KEY, tab); } catch(e){}
+        libDrill = null;
+        document.querySelectorAll(".lib-subtab").forEach(function(b){
+          b.classList.toggle("on", b.getAttribute("data-sub") === tab);
+        });
+        syncLibPanes();
+        if (tab === "pistas") renderPlaylist();
+        else renderGroups();
+      }
+      function syncLibPanes(){
+        var pistas = $("libPistas"), groups = $("libGroups"), drill = $("libDrill");
+        var inDrill = !!libDrill;
+        if (pistas) pistas.hidden = inDrill || libSubTab !== "pistas";
+        if (groups) groups.hidden = inDrill || libSubTab === "pistas";
+        if (drill) drill.hidden = !inDrill;
+      }
+      function groupBy(items, keyFn){
+        var map = {}, order = [];
+        items.forEach(function(item){
+          var k = keyFn(item.t);
+          if (!map[k]){ map[k] = { key: k, name: k, indices: [], art: null, artists: {} }; order.push(k); }
+          map[k].indices.push(item.i);
+          if (!map[k].art && item.t.artUrl) map[k].art = item.t.artUrl;
+          if (item.t.artist) map[k].artists[item.t.artist] = true;
+        });
+        return order.map(function(k){ return map[k]; });
+      }
+      function renderGroups(){
+        var grid = $("groupsGrid"), rows = $("groupsRows"), empty = $("groupsEmpty"), create = $("plCreateRow");
+        if (!grid || !rows) return;
+        var q = $("searchInput").value.trim().toLowerCase();
+        var items = visibleItems();
+        var sig = libSubTab + "|" + q + "|" + items.map(function(x){ return x.i; }).join(",") + "|" + playlistsVersion + "|" + tracks.length;
+        if (sig === groupsSig) return;
+        groupsSig = sig;
+        if (create) create.hidden = libSubTab !== "listas";
+        grid.innerHTML = ""; rows.innerHTML = "";
+        var groups = [];
+        if (libSubTab === "albumes"){
+          groups = groupBy(items, function(t){ return (t.album || "Sin álbum"); });
+          groups.sort(function(a, b){ return a.name.localeCompare(b.name, "es"); });
+        } else if (libSubTab === "artistas"){
+          groups = groupBy(items, function(t){ return t.artist || "Artista desconocido"; });
+          groups.sort(function(a, b){ return a.name.localeCompare(b.name, "es"); });
+        } else if (libSubTab === "carpetas"){
+          groups = groupBy(items, function(t){ return folderOf(t); });
+          groups.sort(function(a, b){ return a.name.localeCompare(b.name, "es"); });
+        } else if (libSubTab === "listas"){
+          groups = playlists.map(function(pl){
+            var idxs = playlistIndices(pl);
+            var art = null;
+            for (var i = 0; i < idxs.length; i++){ if (tracks[idxs[i]] && tracks[idxs[i]].artUrl){ art = tracks[idxs[i]].artUrl; break; } }
+            return { key: pl.id, name: pl.name, indices: idxs, art: art, playlist: true };
+          });
+        }
+        if (q){
+          groups = groups.filter(function(g){ return g.name.toLowerCase().indexOf(q) >= 0; });
+        }
+        var isGrid = libSubTab === "albumes";
+        grid.hidden = !isGrid;
+        rows.hidden = isGrid;
+        if (empty){
+          empty.hidden = groups.length > 0;
+          empty.textContent = !groups.length ? (libSubTab === "listas" ? "Aún no tienes listas. Crea una arriba y agrega canciones desde el menú ⋮ de cada canción." : libSubTab === "albumes" ? "No hay álbumes con lo que se ve ahora." : libSubTab === "artistas" ? "No hay artistas con lo que se ve ahora." : "No hay carpetas con lo que se ve ahora.") : "";
+        }
+        groups.forEach(function(g){
+          if (isGrid){
+            var b = document.createElement("button");
+            b.type = "button"; b.className = "grp-card";
+            var cover = document.createElement("span"); cover.className = "mix-cover";
+            var img = document.createElement("img"); img.src = g.art || "logo.png"; img.alt = ""; img.loading = "lazy";
+            img.onerror = function(){ this.onerror = null; this.src = "logo.png"; };
+            cover.appendChild(img);
+            var t1 = document.createElement("span"); t1.className = "mix-t"; t1.textContent = g.name;
+            var t2 = document.createElement("span"); t2.className = "mix-s";
+            var artists = Object.keys(g.artists || {});
+            t2.textContent = (artists.length ? artists[0] + " · " : "") + g.indices.length + (g.indices.length === 1 ? " canción" : " canciones");
+            b.appendChild(cover); b.appendChild(t1); b.appendChild(t2);
+            b.addEventListener("click", function(){ openDrill({ kind: "album", key: g.key, name: g.name }); });
+            grid.appendChild(b);
+          } else {
+            var r = document.createElement("button");
+            r.type = "button"; r.className = "grp-row";
+            var th = document.createElement("img"); th.className = "grp-thumb"; th.src = g.art || "logo.png"; th.alt = ""; th.loading = "lazy";
+            th.onerror = function(){ this.onerror = null; this.src = "logo.png"; };
+            var meta = document.createElement("span"); meta.className = "grp-meta";
+            var nm = document.createElement("span"); nm.className = "grp-name"; nm.textContent = g.name;
+            var sb = document.createElement("span"); sb.className = "grp-sub";
+            if (libSubTab === "artistas"){
+              var albums = {};
+              g.indices.forEach(function(ix){ var tr = tracks[ix]; if (tr && tr.album) albums[tr.album] = true; });
+              var nAlb = Object.keys(albums).length;
+              sb.textContent = g.indices.length + (g.indices.length === 1 ? " canción" : " canciones") + " · " + nAlb + (nAlb === 1 ? " álbum" : " álbumes");
+            } else {
+              sb.textContent = g.indices.length + (g.indices.length === 1 ? " canción" : " canciones");
+            }
+            meta.appendChild(nm); meta.appendChild(sb);
+            var ch = document.createElement("span"); ch.className = "grp-chev"; ch.textContent = "›";
+            r.appendChild(th); r.appendChild(meta); r.appendChild(ch);
+            var kind = libSubTab === "artistas" ? "artist" : libSubTab === "carpetas" ? "folder" : "playlist";
+            (function(gg, kk){ r.addEventListener("click", function(){ openDrill({ kind: kk, key: gg.key, name: gg.name }); }); })(g, kind);
+            rows.appendChild(r);
+          }
+        });
+      }
+      function drillIndices(d){
+        if (!d) return [];
+        if (d.kind === "playlist"){
+          var pl = playlists.filter(function(p){ return String(p.id) === String(d.key); })[0];
+          return pl ? playlistIndices(pl) : [];
+        }
+        var items = visibleItems();
+        var out = [];
+        items.forEach(function(item){
+          var t = item.t;
+          if (d.kind === "album" && (t.album || "Sin álbum") === d.key) out.push(item.i);
+          else if (d.kind === "artist" && (t.artist || "Artista desconocido") === d.key) out.push(item.i);
+          else if (d.kind === "folder" && folderOf(t) === d.key) out.push(item.i);
+        });
+        return out;
+      }
+      function openDrill(d){
+        libDrill = d;
+        syncLibPanes();
+        renderDrillList();
+      }
+      function closeDrill(){
+        libDrill = null;
+        syncLibPanes();
+        if (libSubTab === "pistas") renderPlaylist(); else renderGroups();
+      }
+      function renderDrillList(){
+        var d = libDrill;
+        var ul = $("drillList");
+        if (!d || !ul) return;
+        var idxs = drillIndices(d);
+        var nameEl = $("drillName"), countEl = $("drillCount"), delBtn = $("drillDelBtn");
+        if (nameEl) nameEl.textContent = d.name;
+        if (countEl) countEl.textContent = idxs.length + (idxs.length === 1 ? " canción" : " canciones");
+        if (delBtn) delBtn.hidden = d.kind !== "playlist";
+        ul.innerHTML = "";
+        idxs.forEach(function(i){
+          var t = tracks[i];
+          if (!t) return;
+          var li = document.createElement("li");
+          if (i === current) li.className = "active" + (activeIsPlaying() ? " playing" : "");
+          var isYt = t.type === "youtube" || t.type === "ytaudio";
+          var art = t.artUrl || "logo.png";
+          li.innerHTML =
+            '<span class="thumb"><img loading="lazy" src="' + esc(art) + '" alt="" onerror="this.onerror=null;this.src=\'logo.png\';" /></span>' +
+            '<span class="meta"><span class="pt">' + esc(cleanTitle(t.title)) + rowDlBadge(t, isYt) + '</span><span class="pa">' + esc(t.artist) + '</span></span>' +
+            '<button class="row-play" title="Escuchar" aria-label="Escuchar ' + esc(t.title) + '">' + rowPlayIcon(t, isYt) + '</button>' +
+            '<button class="kebab" title="Opciones" aria-label="Opciones de ' + esc(t.title) + '">⋮</button>';
+          li.addEventListener("click", function(){ playFromDrill(i); });
+          li.querySelector(".row-play").addEventListener("click", function(ev){ ev.stopPropagation(); playFromDrill(i); });
+          li.querySelector(".kebab").addEventListener("click", function(ev){ ev.stopPropagation(); openRowMenu(this, t, i, d); });
+          ul.appendChild(li);
+        });
+      }
+      function playFromDrill(i){
+        var d = libDrill;
+        var t = tracks[i];
+        if (!t) return;
+        noteLeavingTrack();
+        if (isOnlineType(t)){
+          /* Una canción online regenera su propia cola (como siempre);
+             la mezcla del drill no aplica ahí. */
+          activeMix = null;
+          showView("player");
+          loadTrack(clearOnlineQueueExcept(i), true);
+          return;
+        }
+        var idxs = d ? drillIndices(d) : [];
+        if (!idxs.length || idxs.indexOf(i) < 0) idxs = [i];
+        activeMix = { name: d ? d.name : "Lista", indices: idxs };
+        showView("player");
+        loadTrack(i, true);
+      }
+      /* ---------- Listas de reproducción (NUEVO21) ----------
+         Listas creadas por Jonathan, guardadas en el teléfono. Una lista
+         guarda los ids de sus canciones (no copias): si una canción se
+         quita de la Biblioteca, desaparece de la lista sola. */
+      var PL_KEY = "gurru-playlists-v1";
+      var playlists = [];
+      function loadPlaylists(){
+        try {
+          var data = JSON.parse(localStorage.getItem(PL_KEY) || "null");
+          if (Array.isArray(data)) playlists = data.filter(function(p){ return p && p.id != null && typeof p.name === "string" && Array.isArray(p.ids); });
+        } catch(e){ playlists = []; }
+      }
+      function savePlaylists(){
+        try { localStorage.setItem(PL_KEY, JSON.stringify(playlists)); } catch(e){}
+      }
+      function playlistIndices(pl){
+        var out = [];
+        pl.ids.forEach(function(id){
+          for (var i = 0; i < tracks.length; i++){ if (String(tracks[i].id) === String(id)){ out.push(i); break; } }
+        });
+        return out;
+      }
+      function createPlaylist(name){
+        name = (name || "").trim();
+        if (!name) return null;
+        var pl = { id: "pl-" + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36), name: name, ids: [] };
+        playlists.push(pl);
+        playlistsVersion++;
+        savePlaylists();
+        return pl;
+      }
+      function addToPlaylist(plId, trackId){
+        var pl = playlists.filter(function(p){ return String(p.id) === String(plId); })[0];
+        if (!pl) return;
+        var at = pl.ids.map(String).indexOf(String(trackId));
+        if (at >= 0){
+          pl.ids.splice(at, 1);
+          savePlaylists(); playlistsVersion++;
+          showToast({ title: "Quitada de la lista", msg: "La canción ya no está en «" + pl.name + "»." });
+        } else {
+          pl.ids.push(trackId);
+          savePlaylists(); playlistsVersion++;
+          showToast({ title: "Agregada a la lista", msg: "La canción quedó en «" + pl.name + "»." });
+        }
+        groupsSig = "";
+        renderGroups();
+      }
+      function removeFromPlaylist(plId, trackId){
+        var pl = playlists.filter(function(p){ return String(p.id) === String(plId); })[0];
+        if (!pl) return;
+        pl.ids = pl.ids.filter(function(id){ return String(id) !== String(trackId); });
+        savePlaylists(); playlistsVersion++;
+        groupsSig = "";
+        renderDrillList();
+      }
+      loadPlaylists();
+      document.querySelectorAll(".lib-subtab").forEach(function(b){
+        b.addEventListener("click", function(){ setLibSubTab(b.getAttribute("data-sub")); });
+        b.classList.toggle("on", b.getAttribute("data-sub") === libSubTab);
+      });
+      syncLibPanes();
+      $("drillBackBtn").addEventListener("click", function(){ closeDrill(); });
+      $("drillPlayBtn").addEventListener("click", function(){
+        var idxs = drillIndices(libDrill);
+        if (!idxs.length) return;
+        if (idxs[0] === current && tracks.length){ startPlayback(); showView("player"); return; }
+        playFromDrill(idxs[0]);
+      });
+      $("drillDelBtn").addEventListener("click", function(){
+        var d = libDrill;
+        if (!d || d.kind !== "playlist") return;
+        var pl = playlists.filter(function(p){ return String(p.id) === String(d.key); })[0];
+        if (!pl) return;
+        var copy = JSON.parse(JSON.stringify(pl));
+        playlists = playlists.filter(function(p){ return String(p.id) !== String(d.key); });
+        playlistsVersion++;
+        savePlaylists();
+        closeDrill();
+        setLibSubTab("listas");
+        showToast({ title: "Lista eliminada", msg: "«" + copy.name + "» se eliminó de tus listas.", retryLabel: "Deshacer", onRetry: function(){
+          playlists.push(copy); playlistsVersion++; savePlaylists(); groupsSig = ""; renderGroups();
+        } });
+      });
+      $("plCreateBtn").addEventListener("click", function(){
+        var inp = $("plNameInput");
+        var pl = createPlaylist(inp ? inp.value : "");
+        if (!pl){ if (inp) inp.focus(); return; }
+        if (inp) inp.value = "";
+        groupsSig = "";
+        renderGroups();
+        openDrill({ kind: "playlist", key: pl.id, name: pl.name });
+      });
+      $("plNameInput").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); $("plCreateBtn").click(); } });
+      $("shuffleAllBtn").addEventListener("click", function(){
+        var list = lastShownItems && lastShownItems.length ? lastShownItems : null;
+        if (!list) return;
+        var pick = list[Math.floor(Math.random() * list.length)];
+        noteLeavingTrack();
+        activeMix = null;
+        shuffle = true; syncModes();
+        showView("player");
+        if (pick.i === current && tracks.length){ startPlayback(); return; }
+        playTrack(pick.i);
+      });
+      function renderPlaylist(){
+        var q = $("searchInput").value.trim().toLowerCase();
+        var ul = $("playlist");
+        closeLibMenu();
+        /* NUEVO20: al reconstruir la lista se vuelve arriba, así que
+           los accesos directos vuelven a verse. */
+        var sw = $("shortcutsWrap"); if (sw) sw.classList.remove("sc-hidden");
+        ul.innerHTML = "";
+        var items = visibleItems();
         if (libSort === "title") items.sort(function(a, b){ return (a.t.title || "").localeCompare(b.t.title || "", "es"); });
         else if (libSort === "artist") items.sort(function(a, b){ return (a.t.artist || "").localeCompare(b.t.artist || "", "es"); });
         else if (libSort === "album") items.sort(function(a, b){ return ((a.t.album || "") + (a.t.title || "")).localeCompare((b.t.album || "") + (b.t.title || ""), "es"); });
@@ -1416,20 +1835,16 @@
         lastShownItems = items;
         var pab = $("playAllBtn");
         if (pab) pab.disabled = !items.length;
+        var pac = $("playAllCount");
+        if (pac) pac.textContent = visible ? visible + (visible === 1 ? " canción" : " canciones") : "";
         items.forEach(function(item){
           var t = item.t, i = item.i;
           var li = document.createElement("li");
           if (i === current) li.className = "active" + (activeIsPlaying() ? " playing" : "");
           var isYt = t.type === "youtube" || t.type === "ytaudio";
           var art = t.artUrl || "logo.png";
-          var dlBadge = "";
-          if ((isYt || t.type === "facebook") && !t.downloaded && t.dlState === "downloading") dlBadge = '<span class="dl-badge">' + (typeof t.dlProgress === "number" ? Math.floor(t.dlProgress) + "%" : "…") + '</span>';
-          else if (t.downloaded) dlBadge = '<span class="dl-badge">MP3</span>';
-          var playIcon = isYt
-            ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ff0033" d="M23 12s0-3.8-.5-5.6c-.3-1-1-1.7-2-2C18.7 4 12 4 12 4s-6.7 0-8.5.4c-1 .3-1.7 1-2 2C1 8.2 1 12 1 12s0 3.8.5 5.6c.3 1 1 1.7 2 2 1.8.4 8.5.4 8.5.4s6.7 0 8.5-.4c1-.3 1.7-1 2-2 .5-1.8.5-5.6.5-5.6zM9.8 15.5v-7l6 3.5-6 3.5z"/></svg>'
-            : (t.type === "facebook"
-            ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>'
-            : '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#22d3ee" d="M8 5v14l11-7z"/></svg>');
+          var dlBadge = rowDlBadge(t, isYt);
+          var playIcon = rowPlayIcon(t, isYt);
           li.innerHTML =
             '<span class="thumb"><img loading="lazy" src="' + esc(art) + '" alt="" onerror="this.onerror=null;this.src=\'logo.png\';" /></span>' +
             '<span class="meta"><span class="pt">' + esc(cleanTitle(t.title)) + dlBadge + '</span><span class="pa">' + esc(t.artist) + '</span></span>' +
@@ -1448,6 +1863,8 @@
         renderQueue();
         renderMixesGrid();
         renderShortcuts(q);
+        if (libDrill) renderDrillList();
+        else if (libSubTab !== "pistas") renderGroups();
       }
       function removeTrack(i){
         var t = tracks[i];
@@ -3116,7 +3533,7 @@
       function makeLocalTrack(s){
         var conv = (window.Capacitor && window.Capacitor.convertFileSrc) ? window.Capacitor.convertFileSrc : function(u){ return u; };
         return applyMetaOverrides({ id: "local-" + s.id, type: "local", url: conv(s.uri), title: s.title || s.fileName || "Canción",
-          artist: s.artist || "Artista desconocido", album: s.album || "",
+          artist: s.artist || "Artista desconocido", album: s.album || "", folder: s.folder || "Música",
           artUrl: s.albumArt ? conv(s.albumArt) : null, artRaw: s.albumArt || null, duration: s.duration || 0, scanned: true });
       }
       function scanLocalMusic(manual){
@@ -3932,6 +4349,8 @@
         if (btn) btn.textContent = activeIsPlaying() ? "❚❚" : "▶";
       }
       $("miniPlayer").addEventListener("click", function(){ showView("player"); });
+      $("miniNextBtn").addEventListener("click", function(ev){ ev.stopPropagation(); nextTrack(false); });
+      $("miniQueueBtn").addEventListener("click", function(ev){ ev.stopPropagation(); showView("player"); var qp = $("queuePanel"); if (qp) qp.scrollIntoView({ block: "start" }); });
       $("miniPlayer").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); showView("player"); } });
       $("miniPlayBtn").addEventListener("click", function(ev){ ev.stopPropagation(); togglePlay(); });
       $("lyricsClose").addEventListener("click", function(){ closeLyrics(); });
@@ -4144,7 +4563,7 @@
       document.addEventListener("keydown", function(ev){
         var tag = (ev.target && ev.target.tagName) || "";
         if (tag === "INPUT" || tag === "TEXTAREA") return;
-        if (ev.key === "Escape"){ var eo = $("editOverlay"); if (eo && eo.classList.contains("show")){ closeEdit(); return; } var lo = $("lyricsOverlay"); if (lo && lo.classList.contains("show")){ closeLyrics(); return; } if (view !== "library") showView("library"); return; }
+        if (ev.key === "Escape"){ var eo = $("editOverlay"); if (eo && eo.classList.contains("show")){ closeEdit(); return; } var lo = $("lyricsOverlay"); if (lo && lo.classList.contains("show")){ closeLyrics(); return; } if (view === "library" && libDrill){ closeDrill(); return; } if (view !== "library") showView("library"); return; }
         if (ev.code === "Space"){ ev.preventDefault(); togglePlay(); }
         else if (ev.key === "ArrowRight"){ seekBySeconds(5); }
         else if (ev.key === "ArrowLeft"){ seekBySeconds(-5); }

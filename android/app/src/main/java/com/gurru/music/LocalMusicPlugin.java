@@ -148,6 +148,20 @@ public class LocalMusicPlugin extends Plugin {
                             if (artist == null || artist.trim().isEmpty() || "<unknown>".equals(artist)) {
                                 artist = "Artista desconocido";
                             }
+                            /* Carpeta (NUEVO21): el nombre de la carpeta que
+                               contiene el archivo, para la pestaña Carpetas
+                               de la Biblioteca (ej. "Espinoza Paz", "Music",
+                               "Download"). Sin ruta, "Música". */
+                            String folder = "Música";
+                            if (path != null) {
+                                int lastSlash = path.lastIndexOf('/');
+                                if (lastSlash > 0) {
+                                    String parent = path.substring(0, lastSlash);
+                                    int prevSlash = parent.lastIndexOf('/');
+                                    folder = prevSlash >= 0 ? parent.substring(prevSlash + 1) : parent;
+                                    if (folder == null || folder.isEmpty()) folder = "Música";
+                                }
+                            }
                             String album = iAlbum >= 0 ? cursor.getString(iAlbum) : null;
                             if (album == null) album = "";
                             long albumId = iAlbumId >= 0 ? cursor.getLong(iAlbumId) : -1;
@@ -164,6 +178,7 @@ public class LocalMusicPlugin extends Plugin {
                                         Uri.parse("content://media/external/audio/albumart"), albumId).toString());
                             }
                             if (name != null) s.put("fileName", name);
+                            s.put("folder", folder);
                             songs.put(s);
                         }
                         cursor.close();
