@@ -19,11 +19,15 @@ import com.yausername.youtubedl_android.YoutubeDLException;
 import com.yausername.youtubedl_android.YoutubeDLRequest;
 import com.yausername.youtubedl_android.YoutubeDLResponse;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -456,6 +460,154 @@ public class YtDlpDownloaderPlugin extends Plugin {
             }
         }
         return results;
+    }
+
+    /** GET JSON por HTTP directo (sin CORS: esto corre en Java, no en
+        el WebView). Usado por la API pública de Deezer. */
+    private JSONObject fetchJson(String urlStr) throws Exception {
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(urlStr);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setConnectTimeout(10000);
+            conn.setReadTimeout(10000);
+            conn.setRequestProperty("User-Agent", "GurruMusic/1.0 (Android)");
+            conn.setRequestProperty("Accept", "application/json");
+            int code = conn.getResponseCode();
+            if (code < 200 || code >= 300) throw new Exception("Deezer respondió HTTP " + code);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) sb.append(line);
+            reader.close();
+            JSONObject root = new JSONObject(sb.toString().trim());
+            if (root.has("error")) {
+                JSONObject err = root.optJSONObject("error");
+                throw new Exception("Deezer: " + (err != null ? err.optString("message", "error") : "error"));
+            }
+            return root;
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+    }
+
+    /**
+     * Busca canciones en Deezer con su API pública (sin clave):
+     * GET https://api.deezer.com/search?q=...&limit=...
+     * La búsqueda se hace en Java (HTTP directo) y NO en el WebView:
+     * la API no manda Access-Control-Allow-Origin y el fetch del
+     * WebView lo bloquearía por CORS. Devuelve { results: [{ id,
+     * title, artist, album, duration, cover, preview }] }.
+     * preview es la vista previa de 30 s (MP3 directo, con firma que
+     * caduca en ~1 día): la canción completa NO está disponible sin
+     * cuenta de Deezer con sesión.
+     */
+    @PluginMethod
+    public void deezerSearch(final PluginCall call) {
+        final String query = call.getString("query", "");
+        final int limit = call.getInt("limit", 10);
+        if (query == null || query.trim().isEmpty()) {
+            call.reject("Escribe el nombre de una canción o artista para buscar.");
+            return;
+        }
+        final int n = Math.max(1, Math.min(20, limit));
+        final String q = query.trim();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String encQ;
+                    try { encQ = URLEncoder.encode(q, "UTF-8"); }
+                    catch (Exception ue) { encQ = q.replace(" ", "%20"); }
+                    JSONObject root = fetchJson("https://api.deezer.com/search?q=" + encQ + "&limit=" + n);
+                    JSONArray data = root.optJSONArray("data");
+                    JSONArray results = new JSONArray();
+                    if (data != null) {
+                        for (int i = 0; i < data.length(); i++) {
+                            if (results.length() >= n) break;
+                            JSONObject e = data.optJSONObject(i);
+                            if (e == null) continue;
+                            String preview = e.optString("preview", "");
+                            if (preview.isEmpty()) continue;
+                            JSONObject r = new JSONObject();
+                            r.put("id", e.optLong("id", 0));
+                            r.put("title", e.optString("title", ""));
+                            JSONObject artist = e.optJSONObject("artist");
+                            r.put("artist", artist != null ? artist.optString("name", "Deezer") : "Deezer");
+                            JSONObject album = e.optJSONObject("album");
+                            r.put("album", album != null ? album.optString("title", "") : "");
+                            r.put("cover", album != null ? album.optString("cover_medium", "") : "");
+                            r.put("duration", e.optDouble("duration", 0));
+                            r.put("preview", preview);
+                            results.put(r);
+                        }
+                    }
+                    final JSONArray resArr = results;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSObject ret = new JSObject();
+                            ret.put("results", resArr);
+                            call.resolve(ret);
+                        }
+                    });
+                } catch (final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            call.reject(shortError(e.getMessage(), 300));
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    /**
+     * Una canción de Deezer por su id: GET https://api.deezer.com/track/{id}.
+     * Devuelve la vista previa FRESCA (el link guardado caduca en ~1
+     * día): { id, title, artist, album, duration, cover, preview }.
+     * Se usa al reabrir una canción de Deezer guardada, antes de sonar
+     * o de descargar.
+     */
+    @PluginMethod
+    public void deezerTrack(final PluginCall call) {
+        final String id = call.getString("id", "");
+        if (id == null || id.trim().isEmpty()) {
+            call.reject("Falta el id de Deezer.");
+            return;
+        }
+        final String tid = id.trim();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JSONObject e = fetchJson("https://api.deezer.com/track/" + URLEncoder.encode(tid, "UTF-8"));
+                    final JSObject ret = new JSObject();
+                    ret.put("id", e.optLong("id", 0));
+                    ret.put("title", e.optString("title", ""));
+                    JSONObject artist = e.optJSONObject("artist");
+                    ret.put("artist", artist != null ? artist.optString("name", "Deezer") : "Deezer");
+                    JSONObject album = e.optJSONObject("album");
+                    ret.put("album", album != null ? album.optString("title", "") : "");
+                    ret.put("cover", album != null ? album.optString("cover_medium", "") : "");
+                    ret.put("duration", e.optDouble("duration", 0));
+                    ret.put("preview", e.optString("preview", ""));
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() { call.resolve(ret); }
+                    });
+                } catch (final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            call.reject(shortError(e.getMessage(), 300));
+                        }
+                    });
+                }
+            }
+        });
     }
 
     /**

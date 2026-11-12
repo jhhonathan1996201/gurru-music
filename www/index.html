@@ -149,33 +149,54 @@
          para elegir Escuchar o Descargar. */
       .yt-results{ margin-top:10px; display:flex; flex-direction:column; gap:8px; overflow:auto; min-height:0; }
 
-      /* ===== Apartado FACEBOOK (NUEVO13, prueba) ===== */
-      .fb-box{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; margin-top:12px; border:1.5px solid rgba(24,119,242,.6); background:rgba(24,119,242,.12); border-radius:12px; padding:12px; }
-      .fb-box .yt-h .fb-badge{ background:#1877F2; color:#fff; font-size:11px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:.04em; }
+      /* ===== Apartado DEEZER (NUEVO19) =====
+         La API pública de Deezer no manda Access-Control-Allow-Origin,
+         así que el WebView bloquearía el fetch: la búsqueda la hace el
+         plugin nativo (HTTP en Java, sin CORS). Deezer solo da vistas
+         previas de 30 s sin cuenta: se escuchan y se descargan como
+         muestra, no la canción completa. */
+      .dz-box{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; margin-top:12px; border:1.5px solid rgba(168,85,247,.6); background:rgba(168,85,247,.12); border-radius:12px; padding:12px; }
+      .dz-box .yt-h .dz-badge{ background:#a855f7; color:#fff; font-size:11px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:.04em; }
+      .dz-add{ border:0; background:#a855f7; color:#fff; border-radius:9px; padding:10px 14px; font-weight:800; font-size:13.5px; white-space:nowrap; }
       /* Mezclas para ti (NUEVO18): estante horizontal con portada,
          estilo Spotify, plegable — integrado a la lista en vez de una
          tarjeta grande encima de ella. Plegado solo queda una línea. */
-      .mixes-card{ border:1.5px solid rgba(167,139,250,.5); background:rgba(167,139,250,.08); border-radius:12px; padding:10px 12px 12px; margin:12px 0; }
+      .mixes-card{ flex:0 0 auto; border:1.5px solid rgba(167,139,250,.5); background:rgba(167,139,250,.08); border-radius:12px; padding:10px 12px 12px; margin:12px 0; }
       .mixes-head{ display:flex; align-items:center; gap:8px; width:100%; background:none; border:0; color:inherit; font:inherit; padding:2px 0; cursor:pointer; text-align:left; }
       .mixes-title{ font-size:15px; font-weight:900; }
       .mixes-count{ font-size:11.5px; color:var(--soft); font-weight:700; }
       .mixes-chev{ margin-left:auto; font-size:15px; color:var(--soft); }
       .mixes-sub{ margin:2px 0 10px; font-size:12px; color:var(--soft); }
-      .mixes-shelf{ display:flex; gap:10px; overflow-x:auto; padding:2px 2px 6px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; }
-      .mix-card{ flex:0 0 128px; scroll-snap-align:start; display:flex; flex-direction:column; gap:6px; background:rgba(255,255,255,.06); border:1px solid rgba(167,139,250,.4); color:inherit; border-radius:12px; padding:8px; font:inherit; cursor:pointer; text-align:left; }
+      /* NUEVO19: el estiramiento de la captura se arregla aquí — el
+         estante no se estira (align-items:flex-start + flex:0 0 auto)
+         y la portada tiene altura fija en vez de aspect-ratio, así la
+         tarjeta mide solo su contenido (~200 px) y la lista queda a la
+         vista. */
+      .mixes-shelf{ display:flex; gap:10px; overflow-x:auto; padding:2px 2px 6px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; align-items:flex-start; flex:0 0 auto; }
+      .mix-card{ flex:0 0 128px; align-self:flex-start; scroll-snap-align:start; display:flex; flex-direction:column; gap:6px; background:rgba(255,255,255,.06); border:1px solid rgba(167,139,250,.4); color:inherit; border-radius:12px; padding:8px; font:inherit; cursor:pointer; text-align:left; }
       .mix-card:active{ background:rgba(167,139,250,.2); }
-      .mix-cover{ display:block; width:100%; aspect-ratio:1; border-radius:8px; overflow:hidden; background:rgba(255,255,255,.08); }
+      .mix-cover{ display:block; width:100%; height:128px; flex:0 0 auto; border-radius:8px; overflow:hidden; background:rgba(255,255,255,.08); }
       .mix-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
       .mix-t{ font-weight:800; font-size:13px; line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
       .mix-s{ font-size:11.5px; color:var(--soft); }
-      .fb-add{ border:0; background:#1877F2; color:#fff; border-radius:9px; padding:10px 14px; font-weight:800; font-size:13.5px; white-space:nowrap; }
-      .fb-auth{ display:flex; flex-direction:column; gap:8px; margin:2px 0 10px; padding:10px; border:1px solid rgba(125,211,252,.3); border-radius:10px; background:rgba(2,132,199,.1); }
-      .fb-auth-msg{ font-size:13px; color:#fff; line-height:1.45; }
-      .fb-auth-msg small{ display:block; color:var(--soft); font-size:12px; margin-top:2px; }
-      .fb-btn{ border:1.5px solid #1877F2; background:#1877F2; color:#fff; border-radius:10px; padding:10px 14px; font-size:14px; font-weight:800; font-family:inherit; }
-      .fb-btn.ghost{ background:transparent; color:#fff; }
+      /* Accesos directos (NUEVO19): página principal estilo YouTube
+         Music — rejilla de 3 columnas con la portada y el nombre del
+         artista encima, abajo. Tocar uno suena lo más de ese artista. */
+      .sc-title{ font-size:15px; font-weight:900; margin:12px 2px 0; }
+      .sc-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:8px 0 4px; }
+      .sc-card{ position:relative; aspect-ratio:1; border:0; border-radius:12px; overflow:hidden; padding:0; cursor:pointer; background:rgba(255,255,255,.08); }
+      .sc-card img{ width:100%; height:100%; object-fit:cover; display:block; }
+      .sc-name{ position:absolute; left:0; right:0; bottom:0; padding:20px 8px 8px; background:linear-gradient(transparent, rgba(0,0,0,.85)); color:#fff; font-weight:800; font-size:13px; line-height:1.2; text-align:left; }
+      /* Selección rápida (NUEVO19): título de la lista, estilo YouTube
+         Music, con el botón para sonar todo lo que se ve. */
+      .quick-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:12px 2px 2px; }
+      .quick-title{ font-size:15px; font-weight:900; }
+      .quick-all{ border:1px solid rgba(125,211,252,.5); background:rgba(2,132,199,.18); color:#fff; border-radius:999px; padding:8px 14px; font-weight:800; font-size:13px; cursor:pointer; white-space:nowrap; }
+      .quick-all:disabled{ opacity:.45; }
       .src-badge.fb{ background:#1877F2; }
+      .src-badge.dz{ background:#a855f7; }
       .c-badge.fb{ background:#1877F2; }
+      .c-badge.dz{ background:#a855f7; }
       /* ===== Mini reproductor (NUEVO13) ===== */
       #miniPlayer{ flex:0 0 auto; display:none; align-items:center; gap:10px; padding:8px 12px; background:linear-gradient(180deg, rgba(2,20,50,.94), rgba(1,10,36,.97)); border-top:1px solid rgba(125,211,252,.28); cursor:pointer; }
       #miniPlayer.show{ display:flex; }
@@ -241,7 +262,7 @@
       .nav-btn span{ max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .nav-btn svg{ width:24px; height:24px; fill:currentColor; }
       .nav-btn.yt svg{ fill:#ff4d6d; }
-      .nav-btn.fb svg{ fill:#1877F2; }
+      .nav-btn.dz svg{ fill:#c084fc; }
       .nav-btn.on{ color:var(--accent); text-shadow:0 0 8px var(--glow); box-shadow:inset 0 2px 0 var(--accent); }
       .nav-btn:active{ opacity:.75; }
 
@@ -650,6 +671,14 @@
               <button class="icon-btn" id="viewBtn" type="button" title="Vista de cuadrícula o lista" aria-label="Cambiar vista de lista o cuadrícula"><svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></button>
             </div>
 
+            <!-- Accesos directos (NUEVO19): página principal estilo
+                 YouTube Music — los artistas que más escuchas, en
+                 rejilla de 3 columnas. Tocar uno suena lo más de él. -->
+            <div id="shortcutsWrap" hidden>
+              <div class="sc-title">Accesos directos</div>
+              <div class="sc-grid" id="shortcutsGrid"></div>
+            </div>
+
             <div class="mixes-card" id="mixesCard" hidden>
               <button class="mixes-head" id="mixesHead" type="button" aria-expanded="true">
                 <span class="mixes-title">Mezclas para ti</span>
@@ -660,6 +689,12 @@
               <div class="mixes-shelf" id="mixesList"></div>
             </div>
 
+            <!-- Selección rápida (NUEVO19): título de la lista, estilo
+                 YouTube Music, con el botón para sonar todo lo que se ve. -->
+            <div class="quick-head">
+              <span class="quick-title">Selección rápida</span>
+              <button class="quick-all" id="playAllBtn" type="button">Reproducir todo</button>
+            </div>
             <ul class="playlist" id="playlist"></ul>
             <div class="empty-state" id="emptyState">
               <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
@@ -707,18 +742,18 @@
           </div>
         </section>
 
-        <!-- ============ FACEBOOK (solo por links, NUEVO17) ============ -->
-        <section class="view" id="viewFacebook" aria-label="Facebook" hidden>
+        <!-- ============ DEEZER (NUEVO19) ============ -->
+        <section class="view" id="viewDeezer" aria-label="Deezer" hidden>
           <div class="lib">
-            <div class="fb-box">
-              <div class="yt-h"><span class="fb-badge">Facebook</span><span>Pegar link</span></div>
-              <p>Pega el link de un video <b>público</b> de Facebook y escúchalo o descárgalo como cualquier canción online. Los videos privados o solo para amigos no funcionan sin sesión, y la app ya no inicia sesión en Facebook.</p>
+            <div class="dz-box">
+              <div class="yt-h"><span class="dz-badge">Deezer</span><span>Buscar música</span></div>
+              <p>Escribe el nombre de una canción o un artista y toca <b>Buscar</b>. Deezer solo da <b>vistas previas de 30 segundos</b> sin cuenta: se escuchan y se descargan como muestra, no la canción completa.</p>
               <div class="yt-row">
-                <input type="url" id="fbLinkInput" placeholder="https://www.facebook.com/…/videos/…" aria-label="Link del video de Facebook" />
-                <button class="fb-add" id="fbAddBtn">Agregar</button>
+                <input type="search" id="dzSearchInput" placeholder="Canción o artista…" aria-label="Buscar en Deezer" />
+                <button class="dz-add" id="dzSearchBtn">Buscar</button>
               </div>
-              <div class="yt-msg" id="fbMsg" role="status"></div>
-              <div class="yt-results" id="fbLinkResults" aria-label="Videos de Facebook agregados"></div>
+              <div class="yt-msg" id="dzMsg" role="status"></div>
+              <div class="yt-results" id="dzSearchResults" aria-label="Resultados de Deezer"></div>
             </div>
           </div>
         </section>
@@ -773,9 +808,9 @@
           <svg viewBox="0 0 24 24"><path d="M23 12s0-3.8-.5-5.6c-.3-1-1.7-1-2-2C18.7 4 12 4 12 4s-6.7 0-8.5.4c-1 .3-1.7 1-2 2C1 8.2 1 12 1 12s0 3.8.5 5.6c.3 1 1 1.7 2 2 1.8.4 8.5.4 8.5.4s6.7 0 8.5-.4c1-.3 1.7-1 2-2 .5-1.8.5-5.6.5-5.6zM9.8 15.5v-7l6 3.5-6 3.5z"/></svg>
           <span>YouTube</span>
         </button>
-        <button class="nav-btn fb" id="navFacebook" data-view="facebook" type="button">
-          <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-          <span>Facebook</span>
+        <button class="nav-btn dz" id="navDeezer" data-view="deezer" type="button">
+          <svg viewBox="0 0 24 24"><path d="M4 20V10h3v10H4zm5.5 0V4h3v16h-3zM15 20v-7h3v7h-3z"/></svg>
+          <span>Deezer</span>
         </button>
         <button class="nav-btn" id="navSettings" data-view="settings" type="button">
           <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.03-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.98 3.6-3.6 3.6z"/></svg>
@@ -800,7 +835,7 @@
           </button>
           <button class="choice-btn download" id="choiceDownloadBtn">
             <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-            <span><span class="cb-t">Descargar</span><span class="cb-s">Se guarda en el teléfono con yt-dlp (dentro del APK), en el formato elegido y en la máxima calidad. El avance se ve en Descargas, canción por canción.</span></span>
+            <span><span class="cb-t">Descargar</span><span class="cb-s" id="choiceDownloadSub">Se guarda en el teléfono con yt-dlp (dentro del APK), en el formato elegido y en la máxima calidad. El avance se ve en Descargas, canción por canción.</span></span>
           </button>
           <div class="fmt-row" id="fmtRow" role="group" aria-label="Formato de descarga">
             <span class="fmt-label">Formato:</span>
@@ -913,7 +948,7 @@
         if (t.type === "youtube" || t.type === "ytaudio"){
           if (!t.videoId) return null;
         } else if (!t.url || (typeof t.url === "string" && t.url.indexOf("blob:") === 0)) return null;
-        return { id: t.id, type: t.type, kind: t.kind || null, videoId: t.videoId || null, playlistId: t.playlistId || null,
+        return { id: t.id, type: t.type, kind: t.kind || null, videoId: t.videoId || null, deezerId: t.deezerId || null, playlistId: t.playlistId || null,
           url: t.url, title: t.title, artist: t.artist, album: t.album || "", artUrl: t.artUrl || null, artRaw: t.artRaw || null,
           duration: t.duration || 0, downloaded: !!t.downloaded, savedName: t.savedName || null, nativePath: t.nativePath || null,
           scanned: !!t.scanned, suggested: !!t.suggested, recommended: !!t.recommended };
@@ -932,7 +967,7 @@
         try { data = JSON.parse(localStorage.getItem(SAVE_KEY) || "null"); } catch(e){}
         if (!data || !Array.isArray(data.tracks) || !data.tracks.length) return false;
         tracks = data.tracks.map(function(s){
-          return applyMetaOverrides({ id: s.id, type: s.type, kind: s.kind || null, videoId: s.videoId || null, playlistId: s.playlistId || null,
+          return applyMetaOverrides({ id: s.id, type: s.type, kind: s.kind || null, videoId: s.videoId || null, deezerId: s.deezerId || null, playlistId: s.playlistId || null,
             url: s.url, title: s.title, artist: s.artist, album: s.album || "", artUrl: s.artUrl || null, artRaw: s.artRaw || null,
             duration: s.duration || 0, downloaded: !!s.downloaded, dlState: s.downloaded ? "done" : null, savedName: s.savedName || null,
             nativePath: s.nativePath || null, scanned: !!s.scanned, suggested: !!s.suggested, recommended: !!s.recommended });
@@ -1108,18 +1143,18 @@
         $("viewLibrary").hidden = v !== "library";
         $("viewDownloads").hidden = v !== "downloads";
         $("viewYouTube").hidden = v !== "youtube";
-        $("viewFacebook").hidden = v !== "facebook";
+        $("viewDeezer").hidden = v !== "deezer";
         $("viewSettings").hidden = v !== "settings";
         if (v === "library"){ maybeRetryLocalScan(); }
         /* Al entrar a YouTube, la última búsqueda con sus resultados
            sigue ahí (se guarda en el teléfono); si la vista se vació
            por algún motivo, se restaura sin buscar de nuevo. */
         if (v === "youtube" && !$("ytSearchResults").children.length) restoreLastYtSearch();
-        /* NUEVO17: Facebook es solo por links; al entrar se listan los videos ya agregados. */
-        if (v === "facebook"){ renderFbLinks(); }
+        /* NUEVO19: lo mismo en Deezer — la última búsqueda sigue ahí. */
+        if (v === "deezer" && !$("dzSearchResults").children.length) restoreLastDzSearch();
         /* La barra inferior fija marca la sección activa (en el
            reproductor ninguna está activa: es su propia pantalla). */
-        ["downloads", "library", "youtube", "facebook", "settings"].forEach(function(k){
+        ["downloads", "library", "youtube", "deezer", "settings"].forEach(function(k){
           var b = $("nav" + k.charAt(0).toUpperCase() + k.slice(1));
           if (b) b.classList.toggle("on", v === k);
         });
@@ -1330,7 +1365,7 @@
         catch(e){ return false; }
       }
       /* Estado de la Biblioteca: filtro, orden y sección de agregar. */
-      var libFilter = "all"; /* all | local | youtube | downloaded */
+      var libFilter = "all"; /* all | local | youtube | deezer | downloaded */
       var libSort = "added"; /* added | title | artist | album */
       var libView = "list"; /* list | grid */
       try { var _lv = localStorage.getItem("gurru-lib-view"); if (_lv === "grid" || _lv === "list") libView = _lv; } catch(e){}
@@ -1374,7 +1409,9 @@
       }
       function openRowMenu(anchor, t, i){
         var isYt = t.type === "youtube" || t.type === "ytaudio";
-        var isOnlineDl = isOnlineType(t);
+        /* NUEVO19: las de Deezer también se pueden descargar (su vista
+           previa); no están en isOnlineType porque suenan directo. */
+        var isOnlineDl = isOnlineType(t) || t.type === "deezer";
         var items = [{ label: "▶  Escuchar", fn: function(){ playTrack(i); showView("player"); } }];
         if (isOnlineDl && !t.downloaded){
           items.push({ label: t.dlState === "downloading" ? "⬇  Descargando…" : "⬇  Descargar al teléfono", fn: function(){ queueDownload(t, true); } });
@@ -1393,7 +1430,7 @@
           if (q && (t.title + " " + t.artist + " " + t.album).toLowerCase().indexOf(q) === -1) return;
           if (libFilter === "local" && t.type !== "local") return;
           if (libFilter === "youtube" && !(t.type === "youtube" || t.type === "ytaudio")) return;
-          if (libFilter === "facebook" && t.type !== "facebook") return;
+          if (libFilter === "deezer" && t.type !== "deezer") return;
           if (libFilter === "downloaded" && !t.downloaded) return;
           items.push({ t: t, i: i });
         });
@@ -1401,6 +1438,9 @@
         else if (libSort === "artist") items.sort(function(a, b){ return (a.t.artist || "").localeCompare(b.t.artist || "", "es"); });
         else if (libSort === "album") items.sort(function(a, b){ return ((a.t.album || "") + (a.t.title || "")).localeCompare((b.t.album || "") + (b.t.title || ""), "es"); });
         var visible = items.length;
+        lastShownItems = items;
+        var pab = $("playAllBtn");
+        if (pab) pab.disabled = !items.length;
         items.forEach(function(item){
           var t = item.t, i = item.i;
           var li = document.createElement("li");
@@ -1408,13 +1448,15 @@
           var isYt = t.type === "youtube" || t.type === "ytaudio";
           var art = t.artUrl || "logo.png";
           var dlBadge = "";
-          if ((isYt || t.type === "facebook") && !t.downloaded && t.dlState === "downloading") dlBadge = '<span class="dl-badge">' + (typeof t.dlProgress === "number" ? Math.floor(t.dlProgress) + "%" : "…") + '</span>';
+          if ((isYt || t.type === "facebook" || t.type === "deezer") && !t.downloaded && t.dlState === "downloading") dlBadge = '<span class="dl-badge">' + (typeof t.dlProgress === "number" ? Math.floor(t.dlProgress) + "%" : "…") + '</span>';
           else if (t.downloaded) dlBadge = '<span class="dl-badge">MP3</span>';
           var playIcon = isYt
             ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ff0033" d="M23 12s0-3.8-.5-5.6c-.3-1-1-1.7-2-2C18.7 4 12 4 12 4s-6.7 0-8.5.4c-1 .3-1.7 1-2 2C1 8.2 1 12 1 12s0 3.8.5 5.6c.3 1 1 1.7 2 2 1.8.4 8.5.4 8.5.4s6.7 0 8.5-.4c1-.3 1.7-1 2-2 .5-1.8.5-5.6.5-5.6zM9.8 15.5v-7l6 3.5-6 3.5z"/></svg>'
             : (t.type === "facebook"
             ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>'
-            : '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#22d3ee" d="M8 5v14l11-7z"/></svg>');
+            : (t.type === "deezer"
+            ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#a855f7" d="M4 20V10h3v10H4zm5.5 0V4h3v16h-3zM15 20v-7h3v7h-3z"/></svg>'
+            : '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#22d3ee" d="M8 5v14l11-7z"/></svg>'));
           li.innerHTML =
             '<span class="thumb"><img src="' + esc(art) + '" alt="" onerror="this.onerror=null;this.src=\'logo.png\';" /></span>' +
             '<span class="meta"><span class="pt">' + esc(cleanTitle(t.title)) + dlBadge + '</span><span class="pa">' + esc(t.artist) + '</span></span>' +
@@ -1432,6 +1474,7 @@
         updateScreenMeta();
         renderQueue();
         renderMixes();
+        renderShortcuts(q);
       }
       function removeTrack(i){
         var t = tracks[i];
@@ -1652,6 +1695,79 @@
         loadTrack(idxs[0], true);
         renderPlaylist();
       }
+      /* ---------- Accesos directos (NUEVO19) ----------
+         Página principal estilo YouTube Music: los 6 artistas locales
+         que más escucha, en rejilla de 3 columnas con su portada y el
+         nombre encima. Tocar uno suena lo más de ese artista (reusa
+         la mezcla: misma cola, mismo reproductor). Al buscar o filtrar,
+         los accesos se esconden para que los resultados tengan todo el
+         espacio. */
+      var shortcutsSig = "";
+      function buildShortcuts(){
+        var counts = loadPlayCounts();
+        var idxs = localTrackIndices();
+        if (idxs.length < 2) return [];
+        var byArtist = {};
+        idxs.forEach(function(i){
+          var t = tracks[i];
+          var a = (t.artist || "Artista desconocido").trim();
+          var k = a.toLowerCase();
+          if (!byArtist[k]) byArtist[k] = { name: a, indices: [], score: 0 };
+          byArtist[k].indices.push(i);
+          byArtist[k].score += counts[playKey(t)] || 0;
+        });
+        function byPlays(list){
+          return list.slice().sort(function(a, b){ return (counts[playKey(tracks[b])] || 0) - (counts[playKey(tracks[a])] || 0); });
+        }
+        var arr = Object.keys(byArtist).map(function(k){ return byArtist[k]; });
+        arr.sort(function(x, y){ return (y.score - x.score) || (y.indices.length - x.indices.length); });
+        return arr.slice(0, 6).map(function(g){
+          var ordered = byPlays(g.indices);
+          var art = null;
+          for (var i = 0; i < ordered.length; i++){ var t = tracks[ordered[i]]; if (t && t.artUrl){ art = t.artUrl; break; } }
+          return { name: g.name, art: art, indices: ordered };
+        });
+      }
+      function renderShortcuts(q){
+        var wrap = $("shortcutsWrap"), grid = $("shortcutsGrid");
+        if (!wrap || !grid) return;
+        if ((q && q.trim()) || libFilter !== "all"){ wrap.hidden = true; return; }
+        var sig = localTrackIndices().map(function(i){ return tracks[i].id; }).join(",") + "|" + JSON.stringify(loadPlayCounts());
+        if (sig === shortcutsSig && !wrap.hidden) return;
+        shortcutsSig = sig;
+        var list = buildShortcuts();
+        grid.innerHTML = "";
+        if (!list.length){ wrap.hidden = true; return; }
+        wrap.hidden = false;
+        list.forEach(function(s){
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "sc-card";
+          var img = document.createElement("img");
+          img.src = s.art || "logo.png";
+          img.alt = "";
+          img.onerror = function(){ this.onerror = null; this.src = "logo.png"; };
+          var nm = document.createElement("span");
+          nm.className = "sc-name";
+          nm.textContent = s.name;
+          b.appendChild(img);
+          b.appendChild(nm);
+          b.addEventListener("click", function(){ startMix({ name: "Lo más de " + s.name, indices: s.indices }); });
+          grid.appendChild(b);
+        });
+      }
+      /* "Reproducir todo": suena la lista que se está viendo, desde
+         la primera canción (respeta el orden y el filtro actuales). */
+      var lastShownItems = [];
+      $("playAllBtn").addEventListener("click", function(){
+        var first = lastShownItems && lastShownItems.length ? lastShownItems[0] : null;
+        if (!first) return;
+        noteLeavingTrack();
+        activeMix = null;
+        showView("player");
+        if (first.i === current && tracks.length){ startPlayback(); return; }
+        playTrack(first.i);
+      });
       /* ---------- Cola: anterior, actual y siguientes ----------
          La cola es POR ORIGEN: si suena YouTube, solo aparecen las de
          YouTube; si suena la Biblioteca, solo las locales (las
@@ -1664,6 +1780,10 @@
         if (!t) return "local";
         if (t.type === "youtube" || t.type === "ytaudio") return "yt";
         if (t.type === "facebook") return "fb";
+        /* NUEVO19: Deezer es un cuarto origen (sus vistas previas solo
+           se mezclan con las de Deezer). No es "online" para
+           isOnlineType: su MP3 suena directo, sin caché invisible. */
+        if (t.type === "deezer") return "dz";
         return "local";
       }
       function queueIndices(){
@@ -1725,7 +1845,7 @@
           else { kind = "next"; label = (qi === pos + 1) ? "Siguiente" : "Después"; }
           var li = document.createElement("li");
           li.className = kind === "current" ? "is-current" : (kind === "prev" ? "is-prev" : "is-next");
-          var badge = (t.type === "youtube" || t.type === "ytaudio") ? '<span class="src-badge">YouTube</span>' + (t.suggested ? '<span class="src-badge sugg">Sugerencia</span>' : "") + (t.recommended ? '<span class="src-badge rec">Recomendación</span>' : "") : (t.type === "facebook" ? '<span class="src-badge fb">Facebook</span>' + (t.suggested ? '<span class="src-badge sugg">Sugerencia</span>' : "") + (t.recommended ? '<span class="src-badge rec">Recomendación</span>' : "") : (t.downloaded ? '<span class="src-badge saved">MP3</span>' : ""));
+          var badge = (t.type === "youtube" || t.type === "ytaudio") ? '<span class="src-badge">YouTube</span>' + (t.suggested ? '<span class="src-badge sugg">Sugerencia</span>' : "") + (t.recommended ? '<span class="src-badge rec">Recomendación</span>' : "") : (t.type === "facebook" ? '<span class="src-badge fb">Facebook</span>' + (t.suggested ? '<span class="src-badge sugg">Sugerencia</span>' : "") + (t.recommended ? '<span class="src-badge rec">Recomendación</span>' : "") : (t.type === "deezer" ? '<span class="src-badge dz">Deezer · 30 s</span>' : (t.downloaded ? '<span class="src-badge saved">MP3</span>' : "")));
           li.innerHTML =
             '<span class="q-first"><span class="q-num">' + (qi + 1) + '</span><span class="q-tag">' + esc(label) + '</span></span>' +
             '<span class="q-t">' + esc(cleanTitle(t.title)) + badge + ' <span class="q-a">&middot; ' + esc(t.artist) + '</span></span>' +
@@ -2200,7 +2320,7 @@
       function downloadTrackNative(track, entry, retried){
         nativeDlOnProgress();
         var p = getNativeDl();
-        var watch = (track.type === "facebook" && track.url)
+        var watch = ((track.type === "facebook" || track.type === "deezer") && track.url)
           ? track.url
           : "https://www.youtube.com/watch?v=" + encodeURIComponent(track.videoId);
         var base = (track.artist && track.artist !== "YouTube" && track.artist !== "Facebook" ? track.artist + " - " : "") + track.title;
@@ -2245,7 +2365,9 @@
       }
       function queueDownload(track, announce, groupId){
         if (!track || track.downloaded || track.dlState === "downloading") return;
-        if (track.kind === "playlist" || !track.videoId){
+        /* NUEVO19: las de Deezer no tienen videoId, tienen deezerId;
+           sin ese cambio el botón Descargar no haría nada con ellas. */
+        if (track.kind === "playlist" || !(track.videoId || track.deezerId)){
           if (announce) dlSetStatus("Esa es la lista completa: sus canciones se descargan una por una; el avance está en Descargas.", true);
           return;
         }
@@ -2455,9 +2577,8 @@
           dlSetStatus("Preparando «" + cleanTitle(cachePreparing.track.title) + "»… " + pct + "%", false);
         });
       }
-      /* NUEVO13: también prepara las de Facebook (su URL ya viene en
-         la canción); el caché es el mismo y yt-dlp usa las cookies de
-         la sesión cuando la URL es de facebook.com. */
+      /* NUEVO13: también prepara las de Facebook que ya están guardadas
+         (su URL ya viene en la canción); el caché es el mismo. */
       function playYouTubeOnline(track, autoplay, seekSec){
         stopYouTube();
         if (!autoplay){
@@ -2661,11 +2782,22 @@
         choiceCtx = ctx;
         var n = ctx.indices.length;
         var first = tracks[ctx.indices[0]];
-        /* La ventana dice de dónde salió la canción (YouTube o Facebook). */
+        /* La ventana dice de dónde salió la canción (YouTube, Deezer o
+           Facebook, para las de Facebook ya guardadas). */
         var fbBadge = $("choiceBadge");
         if (fbBadge){
+          fbBadge.classList.remove("fb"); fbBadge.classList.remove("dz");
           if (first && first.type === "facebook"){ fbBadge.textContent = "Facebook"; fbBadge.classList.add("fb"); }
-          else { fbBadge.textContent = "YouTube"; fbBadge.classList.remove("fb"); }
+          else if (first && first.type === "deezer"){ fbBadge.textContent = "Deezer · 30 s"; fbBadge.classList.add("dz"); }
+          else { fbBadge.textContent = "YouTube"; }
+        }
+        /* En Deezer se avisa que solo es la vista previa de 30 s. */
+        if (first && first.type === "deezer"){
+          $("choiceListenSub").textContent = "Suena la vista previa de 30 segundos en el reproductor principal.";
+          $("choiceDownloadSub").textContent = "Se guarda solo la vista previa de 30 segundos (MP3 de muestra) en el teléfono. La canción completa no está disponible sin cuenta de Deezer.";
+        } else {
+          $("choiceListenSub").textContent = "Suena en el reproductor principal, solo audio, sin video.";
+          $("choiceDownloadSub").textContent = "Se guarda en el teléfono con yt-dlp (dentro del APK), en el formato elegido y en la máxima calidad. El avance se ve en Descargas, canción por canción.";
         }
         if (ctx.groupTitle){
           $("choiceTitle").textContent = "Playlist agregada: " + n + (n === 1 ? " canción" : " canciones");
@@ -2674,7 +2806,8 @@
         } else {
           $("choiceTitle").textContent = "Canción agregada";
           $("choiceSub").textContent = (first ? "«" + first.title + "»" : "La canción") + " ya está en tu Biblioteca. Nada está sonando ni descargándose todavía: tú eliges.";
-          $("choiceListenSub").textContent = "Suena en el reproductor principal, solo audio, sin video.";
+          /* El subtítulo de Escuchar/Descargar ya se puso arriba (en
+             Deezer avisa que es solo la vista previa de 30 s). */
         }
         $("choiceDownloadBtn").disabled = !ctx.canDownload;
         $("choiceOverlay").classList.add("show");
@@ -2899,8 +3032,12 @@
         var ctx = choiceCtx;
         var list = ctx.indices.map(function(i){ return tracks[i]; }).filter(Boolean);
         closeChoice();
-        queueDownloadSet(list, ctx.groupTitle);
-        showView("downloads");
+        /* NUEVO19: la vista previa de Deezer caduca; si la canción
+           viene de una búsqueda vieja, se refresca antes de bajarla. */
+        var dz = list.filter(function(t){ return t.type === "deezer" && !t._previewFresh; });
+        if (!dz.length){ queueDownloadSet(list, ctx.groupTitle); showView("downloads"); return; }
+        var left = dz.length;
+        dz.forEach(function(t){ refreshDeezerPreview(t, function(){ if (--left === 0){ queueDownloadSet(list, ctx.groupTitle); showView("downloads"); } }); });
       });
       $("choiceOnlyBtn").addEventListener("click", function(){ closeChoice(); });
       /* ----- Buscador de YouTube (ya no se usa el link) -----
@@ -3003,126 +3140,140 @@
         $("ytMsg").className = "yt-msg ok";
         renderYtSearchResults(data.results, data.q);
       }
-      /* ----- Facebook por links (NUEVO17) -----
-         La búsqueda de Facebook se abandonó (NUEVO15: cero resultados
-         en el teléfono) y el login se quitó por completo: Facebook
-         queda solo pegando el link de un video PÚBLICO. yt-dlp lee
-         título/duración/página con getVideoInfo y la canción se escucha
-         (caché invisible) y se descarga igual que una de YouTube. Los
-         videos privados o de amigos no funcionan sin sesión. */
-      function fbLinkIdFromUrl(u){
-        if (!u) return "";
-        var m = u.match(/\/videos\/(\d+)/) || u.match(/[?&]v=(\d+)/) || u.match(/\/reel\/(\d+)/) || u.match(/\/watch\/\?v=(\d+)/);
-        return m ? m[1] : "";
-      }
-      /* NUEVO18: makeFbTrack faltaba — en NUEVO17 se borró sin querer
-         junto con el bloque viejo de Facebook y pegar un link rompía
-         con "makeFbTrack is not defined". Misma forma que makeYtTrack:
-         id interno numérico, videoId = el id numérico de Facebook. */
+      /* ----- Facebook se quitó por completo (NUEVO19) -----
+         Nunca despegó: la búsqueda dio cero resultados y el login se
+         quitó en NUEVO17. En su lugar va Deezer (abajo). Las canciones
+         de Facebook que Jonathan ya tenía en su Biblioteca SIGUEN
+         sonando: su tipo ("facebook") y su caché se conservan, solo se
+         quitó la forma de agregar más (botón, vista y pegar links). */
+      /* makeFbTrack se conserva para reconstruir esas canciones de
+         Facebook ya guardadas (la usa dlTrackFor). Misma forma que
+         makeYtTrack: id interno numérico, videoId = el id de Facebook. */
       function makeFbTrack(v){
         return applyMetaOverrides({ id: ++uid, type: "facebook", kind: "video", videoId: v.id, playlistId: null, url: v.url || null, title: v.title || "Video de Facebook", artist: v.page || "Facebook", album: "Facebook · Solo audio", artUrl: v.thumbnail || "logo.png", duration: v.duration || 0, downloaded: false, dlState: null });
       }
-      function addFacebookLink(){
-        var input = $("fbLinkInput"), msg = $("fbMsg"), btn = $("fbAddBtn");
-        var u = (input.value || "").trim();
-        if (!u || (u.indexOf("facebook.com") < 0 && u.indexOf("fb.watch") < 0)){
-          msg.textContent = "Pega el link de un video de Facebook (de facebook.com o fb.watch).";
+      /* ----- Deezer (NUEVO19) -----
+         La API pública de Deezer (sin clave) da búsqueda, portada,
+         duración y una VISTA PREVIA de 30 segundos por canción. La
+         canción completa NO se puede escuchar ni bajar sin una cuenta
+         de Deezer con sesión: eso se dice en la vista y en la ventana
+         de elegir. La búsqueda la hace el plugin nativo (HTTP en Java)
+         porque la API no manda Access-Control-Allow-Origin y el
+         WebView bloquearía el fetch. La vista previa es un MP3 directo:
+         suena por el <audio> local, sin caché invisible. Su link lleva
+         una firma con vencimiento (~1 día): al reabrir una canción
+         guardada se refresca con deezerTrack por su id. */
+      var DZSEARCH_KEY = "gurru-dzsearch-v1";
+      function makeDzTrack(v){
+        return applyMetaOverrides({ id: ++uid, type: "deezer", kind: "track", deezerId: v.id, playlistId: null, url: v.preview || null, title: v.title || "Canción de Deezer", artist: v.artist || "Deezer", album: v.album || "Deezer", artUrl: v.cover || "logo.png", duration: v.duration || 0, downloaded: false, dlState: null, _previewFresh: true });
+      }
+      /* Refresca el link de la vista previa por su id de Deezer. done(ok)
+         recibe true si quedó un link usable (fresco o el guardado). */
+      function refreshDeezerPreview(t, done){
+        var p = getNativeDl();
+        if (!p || !p.deezerTrack || !t.deezerId){ t._previewFresh = true; done(!!t.url); return; }
+        p.deezerTrack({ id: t.deezerId }).then(function(res){
+          if (res && res.preview){ t.url = res.preview; saveState(); }
+          t._previewFresh = true;
+          done(!!t.url);
+        }).catch(function(){ t._previewFresh = true; done(!!t.url); });
+      }
+      function searchDeezer(){
+        var input = $("dzSearchInput"), msg = $("dzMsg"), btn = $("dzSearchBtn"), box = $("dzSearchResults");
+        var q = (input.value || "").trim();
+        if (!q){
+          msg.textContent = "Escribe el nombre de una canción o un artista para buscar.";
           msg.className = "yt-msg";
           return;
         }
         var p = getNativeDl();
-        if (!p || !p.getVideoInfo){
-          msg.textContent = "Leer links de Facebook solo funciona dentro del APK instalado (icono de la patita).";
+        if (!p || !p.deezerSearch){
+          msg.textContent = "La búsqueda de Deezer solo funciona dentro del APK instalado (icono de la patita), no abriendo la página en el navegador." + (nativeDlLastError ? " " + nativeDlLastError : "");
           msg.className = "yt-msg";
           return;
         }
         btn.disabled = true;
-        msg.textContent = "Leyendo el video…";
+        msg.textContent = "Buscando «" + q + "» en Deezer…";
         msg.className = "yt-msg";
-        p.getVideoInfo({ url: u }).then(function(info){
+        box.innerHTML = "";
+        p.deezerSearch({ query: q, limit: 20 }).then(function(res){
           btn.disabled = false;
-          /* yt-dlp trae el título con el prefijo de Facebook ("121K
-             views · 1.3K reactions | …"): se quita para que se lea la
-             canción, no el contador de la publicación. */
-          var rawTitle = (info && info.title) ? info.title : "Video de Facebook";
-          var title = rawTitle.replace(/^\s*[\d.,KM]+\s*views?\s*·\s*[\d.,KM]+\s*reactions?\s*\|\s*/i, "");
-          var dur = (info && info.duration) ? info.duration : 0;
-          var page = (info && (info.uploader || info.artist)) ? (info.uploader || info.artist) : "Facebook";
-          var vid = fbLinkIdFromUrl(u) || ((info && info.id) ? String(info.id) : "");
-          if (!vid){
-            msg.textContent = "No pude sacar el identificador del video de ese link.";
+          var list = (res && res.results) || [];
+          if (!list.length){
+            msg.textContent = "No encontré nada para «" + q + "». Prueba con otro nombre.";
             msg.className = "yt-msg";
             return;
           }
-          for (var i = 0; i < tracks.length; i++){
-            if (tracks[i].type === "facebook" && tracks[i].videoId === vid){
-              msg.textContent = "Ese video ya está en tu biblioteca.";
-              msg.className = "yt-msg ok";
-              openChoice({ indices: [i], groupTitle: null, canDownload: true });
-              return;
-            }
-          }
-          var track = makeFbTrack({ id: vid, url: u, title: title, page: page, duration: dur, thumbnail: null });
-          tracks.push(track);
-          var idx = tracks.length - 1;
-          renderPlaylist();
-          saveState();
-          renderFbLinks();
-          msg.textContent = "✓ " + cleanTitle(title) + " agregado.";
+          msg.textContent = "✓ " + list.length + " resultados (vistas previas de 30 s). Toca uno y elige Escuchar o Descargar.";
           msg.className = "yt-msg ok";
-          try { input.value = ""; } catch(e){}
-          openChoice({ indices: [idx], groupTitle: null, canDownload: true });
+          /* La última búsqueda con sus resultados se guarda en el
+             teléfono: al salir y entrar a Deezer sigue ahí. */
+          try { localStorage.setItem(DZSEARCH_KEY, JSON.stringify({ q: q, results: list })); } catch(e){}
+          renderDzSearchResults(list, q);
         }).catch(function(err){
           btn.disabled = false;
           var m = (err && err.message) ? err.message : String(err || "");
-          msg.textContent = "No se pudo leer ese link: " + (m || "revisa que el video sea público") + ".";
+          msg.textContent = "No se pudo buscar: " + (m || "inténtalo de nuevo") + ".";
           msg.className = "yt-msg";
-          showToast({ kind: "err", title: "No se pudo leer el link de Facebook", msg: "Toca para ver el motivo completo.", details: m || "sin motivo", retryLabel: "Reintentar", onRetry: addFacebookLink });
+          showToast({ kind: "err", title: "No se pudo buscar en Deezer", msg: "La búsqueda en Deezer falló. Toca para ver el motivo completo.", details: m || "sin motivo", retryLabel: "Reintentar búsqueda", onRetry: searchDeezer });
         });
       }
-      /* Lista de los videos de Facebook que ya agregaste por link. */
-      function renderFbLinks(){
-        var box = $("fbLinkResults");
-        if (!box) return;
+      function renderDzSearchResults(list, query){
+        var box = $("dzSearchResults");
         box.innerHTML = "";
-        var list = [];
-        for (var i = 0; i < tracks.length; i++){ if (tracks[i].type === "facebook") list.push(i); }
-        if (!list.length){
-          box.innerHTML = "<div class=\"yt-msg\">Todavía no agregas videos de Facebook. Pega un link arriba.</div>";
-          return;
-        }
-        list.forEach(function(idx){
-          var t = tracks[idx];
+        list.forEach(function(r){
           var row = document.createElement("button");
           row.type = "button";
           row.className = "yt-result";
           var img = document.createElement("img");
-          img.src = t.artUrl || "logo.png";
+          img.src = r.cover || "logo.png";
           img.alt = "";
           img.onerror = function(){ this.onerror = null; this.src = "logo.png"; };
           var meta = document.createElement("span");
           meta.className = "yr-meta";
-          var tt = document.createElement("span");
-          tt.className = "yr-t";
-          tt.textContent = cleanTitle(t.title || "Video de Facebook");
-          var cc = document.createElement("span");
-          cc.className = "yr-c";
-          cc.textContent = (t.artist || "Facebook") + (t.duration ? " · " + fmt(t.duration) : "");
-          meta.appendChild(tt);
-          meta.appendChild(cc);
+          var t = document.createElement("span");
+          t.className = "yr-t";
+          t.textContent = cleanTitle(r.title || "Canción de Deezer");
+          var c = document.createElement("span");
+          c.className = "yr-c";
+          c.textContent = (r.artist || "Deezer") + (r.album ? " · " + r.album : "") + (r.duration ? " · " + fmt(r.duration) : "") + " · Vista previa 30 s";
+          meta.appendChild(t);
+          meta.appendChild(c);
           var go = document.createElement("span");
           go.className = "yr-go";
           go.textContent = "›";
           row.appendChild(img);
           row.appendChild(meta);
           row.appendChild(go);
-          row.addEventListener("click", function(){ openChoice({ indices: [idx], groupTitle: null, canDownload: true }); });
+          row.addEventListener("click", function(){
+            var track = makeDzTrack({ id: r.id, title: r.title || "Canción de Deezer", artist: r.artist || "Deezer", album: r.album || "Deezer", duration: r.duration || 0, cover: r.cover, preview: r.preview });
+            track.searchQuery = query || "";
+            tracks.push(track);
+            var idx = tracks.length - 1;
+            renderPlaylist();
+            openChoice({ indices: [idx], groupTitle: null, canDownload: true });
+          });
           box.appendChild(row);
         });
       }
-      $("fbAddBtn").addEventListener("click", addFacebookLink);
-      $("fbLinkInput").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); addFacebookLink(); } });
-      $("fbMsg").addEventListener("click", function(){
+      /* Vuelve a poner la última búsqueda de Deezer con sus resultados
+         (sin buscar de nuevo): se usa al entrar a la pestaña Deezer si
+         la vista se vació. No pisa una búsqueda a medias distinta de
+         la guardada. */
+      function restoreLastDzSearch(){
+        var data = null;
+        try { data = JSON.parse(localStorage.getItem(DZSEARCH_KEY) || "null"); } catch(e){}
+        if (!data || !data.q || !Array.isArray(data.results) || !data.results.length) return;
+        var input = $("dzSearchInput");
+        if (input.value && input.value.trim() && input.value.trim() !== data.q) return;
+        input.value = data.q;
+        $("dzMsg").textContent = "✓ " + data.results.length + " resultados (vistas previas de 30 s). Toca uno y elige Escuchar o Descargar.";
+        $("dzMsg").className = "yt-msg ok";
+        renderDzSearchResults(data.results, data.q);
+      }
+      $("dzSearchBtn").addEventListener("click", searchDeezer);
+      $("dzSearchInput").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); searchDeezer(); } });
+      $("dzMsg").addEventListener("click", function(){
         if (this.classList.contains("ok")) return;
         if (this.textContent.trim()) showLastError();
       });
@@ -3430,10 +3581,11 @@
           loadTrack(tracks.length - 1, true);
           return Promise.resolve(true);
         }
-        /* Sin radio para Facebook: su búsqueda se quitó y ya no hay
-           sugerencias de Facebook; la canción para al terminar su cola,
-           como las locales. */
-        if (fromTrack && fromTrack.type === "facebook") return Promise.resolve(false);
+        /* Sin radio para Facebook ni para Deezer: Facebook ya no tiene
+           búsqueda y Deezer solo da vistas previas de 30 s sin
+           sugerencias; la canción para al terminar su cola, como las
+           locales. */
+        if (fromTrack && (fromTrack.type === "facebook" || fromTrack.type === "deezer")) return Promise.resolve(false);
         var jobs = [];
         if (!suggestPool.length && !suggestFetching){
           suggestFetching = true;
@@ -3627,6 +3779,29 @@
         ytLoadSeq++;
         /* Al reabrir la app, vuelve a la posición donde quedó (solo local). */
         var rs = restoreSeekSec; restoreSeekSec = null;
+        /* NUEVO19: Deezer suena directo por el <audio> local (la vista
+           previa es un MP3), sin caché invisible. Pero su link caduca:
+           si no es fresco, se refresca primero y luego se vuelve a
+           cargar la canción. */
+        if (t.type === "deezer" && !t._previewFresh){
+          pauseAllAudio();
+          showTrackOnScreen();
+          renderPlaylist();
+          saveState();
+          dlSetStatus("Buscando la vista previa…", false);
+          refreshDeezerPreview(t, function(ok){
+            dlSetStatus("", false);
+            if (!ok){
+              showToast({ kind: "err", title: "No se pudo cargar la vista previa", msg: "El link de Deezer caducó y no se pudo refrescar. Revisa tu conexión y vuelve a buscar la canción.", details: "deezerTrack sin respuesta o sin preview", retryLabel: "Reintentar", onRetry: function(){ if (tracks[current] === t) loadTrack(current, true); } });
+              setPlayIcons(false);
+              return;
+            }
+            loadTrack(i, autoplay);
+          });
+          $("tCur").textContent = "00:00:00"; $("tTot").textContent = "Deezer · Vista previa 30 s";
+          refreshLyricsForCurrent();
+          return;
+        }
         if (isOnlineType(t) && !t.cacheUrl){
           pauseAllAudio();
           showTrackOnScreen();
@@ -3950,7 +4125,7 @@
 
       /* ---------- Mini reproductor (NUEVO13) ----------
          Fuera de la vista del reproductor (Biblioteca, Descargas,
-         YouTube, Facebook, Ajustes) muestra la canción que suena con
+         YouTube, Deezer, Ajustes) muestra la canción que suena con
          su portada y play/pausa; tocarlo vuelve al reproductor. */
       function syncMiniPlayer(){
         var mp = $("miniPlayer");
@@ -4071,7 +4246,7 @@
           { label: "Todas las canciones", on: libFilter === "all", fn: function(){ libFilter = "all"; syncLibToolState(); renderPlaylist(); } },
           { label: "Solo MP3 locales", on: libFilter === "local", fn: function(){ libFilter = "local"; syncLibToolState(); renderPlaylist(); } },
           { label: "Solo YouTube", on: libFilter === "youtube", fn: function(){ libFilter = "youtube"; syncLibToolState(); renderPlaylist(); } },
-          { label: "Solo Facebook", on: libFilter === "facebook", fn: function(){ libFilter = "facebook"; syncLibToolState(); renderPlaylist(); } },
+          { label: "Solo Deezer", on: libFilter === "deezer", fn: function(){ libFilter = "deezer"; syncLibToolState(); renderPlaylist(); } },
           { label: "Solo descargadas", on: libFilter === "downloaded", fn: function(){ libFilter = "downloaded"; syncLibToolState(); renderPlaylist(); } },
           { label: "✕  Vaciar biblioteca", danger: true, fn: function(){ clearAll(); } }
         ]);
