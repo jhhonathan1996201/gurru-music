@@ -31,28 +31,10 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
-    // Firma release (NUEVO21): la llave vive en los secretos de GitHub
-    // (KEYSTORE_BASE64), NUNCA en el repo. Cada APK sale firmado con la
-    // misma llave, así se puede instalar como actualización encima del
-    // anterior (con la llave debug, que cambiaba en cada corrida, Android
-    // rechazaba la actualización con "conflicto con el paquete").
-    signingConfigs {
-        release {
-            if (System.getenv("KEYSTORE_PATH")) {
-                storeFile file(System.getenv("KEYSTORE_PATH"))
-                storePassword System.getenv("KEYSTORE_PASSWORD")
-                keyAlias System.getenv("KEY_ALIAS")
-                keyPassword System.getenv("KEY_PASSWORD")
-            }
-        }
-    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            if (System.getenv("KEYSTORE_PATH")) {
-                signingConfig signingConfigs.release
-            }
         }
     }
     // yt-dlp + FFmpeg llegan como .so nativos dentro de los AAR: se guardan
