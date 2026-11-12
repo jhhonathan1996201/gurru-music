@@ -854,6 +854,59 @@ public class YtDlpDownloaderPlugin extends Plugin {
         call.resolve(ret);
     }
 
+    /** Una descarga de audio para el caché invisible. Sin cliente Android
+        (primer intento): yt-dlp usa su cliente por defecto y ve los
+        formatos DASH de solo-audio (itag 140 AAC ~130 kbps, 251 Opus
+        ~137 kbps), mucho mejores que el formato 18 (~48 kbps) que es lo
+        único que da el cliente Android. Con cliente Android (reintento):
+        el comportamiento de siempre. El formato pedido es
+        bestaudio[ext=m4a]/bestaudio para preferir el AAC 140 (reempaquetado
+        a M4A sin transcodificar) y caer al mejor audio si no hay M4A. */
+    private void runCacheRequest(String url, String template, final String vid, boolean androidClient) throws Exception {
+        YoutubeDLRequest request = new YoutubeDLRequest(url.trim());
+        request.addOption("-f", androidClient ? "bestaudio/best" : "bestaudio[ext=m4a]/bestaudio");
+        /* Con --extract-audio a M4A (solo audio, sin video): el formato 18
+           (el único con audio en muchos videos de YouTube Music) es un MP4
+           con pista de video, y el WebView pausa el audio cuando la página
+           se oculta si el archivo trae video (por eso la música local MP3
+           seguía sonando en segundo plano y la de YouTube no). Con M4A
+           solo-audio la canción sigue sonando al salir de la app, igual que
+           un MP3 local. Para audio AAC (formato 18, itag 140) es solo un
+           reempaquetado rápido. */
+        request.addOption("--extract-audio");
+        request.addOption("--audio-format", "m4a");
+        request.addOption("--no-playlist");
+        request.addOption("--no-warnings");
+        if (androidClient) request.addOption("--extractor-args", "youtube:player_client=android");
+        addFbCookies(request, url.trim());
+        request.addOption("-o", template);
+        YoutubeDLResponse response = YoutubeDL.getInstance().execute(
+                request, "gurru-cache-" + nextStreamSeq(),
+                new Function3<Float, Long, String, Unit>() {
+                    @Override
+                    public Unit invoke(Float progress, Long eta, String line) {
+                        emitCacheProgress(vid, progress == null ? 0f : progress);
+                        return Unit.INSTANCE;
+                    }
+                });
+        if (response == null || response.getExitCode() != 0) {
+            throw new Exception("yt-dlp no pudo preparar el audio (código "
+                    + (response == null ? "?" : response.getExitCode()) + "): "
+                    + shortError(response == null ? "" : response.getErr(), 300));
+        }
+    }
+
+    /** Borra los archivos del caché de un video (incluidos .part a medias). */
+    private static void deleteCacheFiles(File dir, String vid) {
+        try {
+            File[] files = dir.listFiles();
+            if (files == null) return;
+            for (File f : files) {
+                if (f.getName().startsWith(vid + ".")) { try { f.delete(); } catch (Exception ignored) {} }
+            }
+        } catch (Exception ignored) {}
+    }
+
     /**
      * Caché invisible para escuchar YouTube online como si fuera local:
      * descarga el audio del video (sin convertir, sin metadatos: rápido)
@@ -884,48 +937,29 @@ public class YtDlpDownloaderPlugin extends Plugin {
                     File[] existing = dir.listFiles();
                     if (existing != null) {
                         for (File f : existing) {
-                            if (f.getName().startsWith(vid + ".")) { produced = f; break; }
+                            if (f.getName().startsWith(vid + ".")
+                                        && !f.getName().endsWith(".part")) { produced = f; break; }
                         }
                     }
                     if (produced == null) {
                         emitCacheProgress(vid, 0f);
                         String template = new File(dir, vid + ".%(ext)s").getAbsolutePath();
-                        YoutubeDLRequest request = new YoutubeDLRequest(url.trim());
-                        request.addOption("-f", "bestaudio/best");
-                        /* Con --extract-audio a M4A (solo audio, sin video):
-                           el formato 18 (el único con audio en muchos videos
-                           de YouTube Music) es un MP4 con pista de video, y el
-                           WebView pausa el audio cuando la página se oculta si
-                           el archivo trae video (por eso la música local MP3
-                           seguía sonando en segundo plano y la de YouTube no).
-                           Con M4A solo-audio la canción sigue sonando al salir
-                           de la app, igual que un MP3 local. Para audio AAC
-                           (formato 18, itag 140) es solo un reempaquetado rápido. */
-                        request.addOption("--extract-audio");
-                        request.addOption("--audio-format", "m4a");
-                        request.addOption("--no-playlist");
-                        request.addOption("--no-warnings");
-                        request.addOption("--extractor-args", "youtube:player_client=android");
-                        addFbCookies(request, url.trim());
-                        request.addOption("-o", template);
-                        YoutubeDLResponse response = YoutubeDL.getInstance().execute(
-                                request, "gurru-cache-" + nextStreamSeq(),
-                                new Function3<Float, Long, String, Unit>() {
-                                    @Override
-                                    public Unit invoke(Float progress, Long eta, String line) {
-                                        emitCacheProgress(vid, progress == null ? 0f : progress);
-                                        return Unit.INSTANCE;
-                                    }
-                                });
-                        if (response == null || response.getExitCode() != 0) {
-                            throw new Exception("yt-dlp no pudo preparar el audio (código "
-                                    + (response == null ? "?" : response.getExitCode()) + "): "
-                                    + shortError(response == null ? "" : response.getErr(), 300));
+                        try {
+                            runCacheRequest(url.trim(), template, vid, false);
+                        } catch (Exception firstTry) {
+                            /* El cliente por defecto (formatos DASH de mejor
+                               calidad) falló en este video/red: se borra lo
+                               que haya dejado a medias y se reintenta con el
+                               cliente Android, que es el que siempre ha
+                               funcionado (formato 18). */
+                            deleteCacheFiles(dir, vid);
+                            runCacheRequest(url.trim(), template, vid, true);
                         }
                         File[] out = dir.listFiles();
                         if (out != null) {
                             for (File f : out) {
-                                if (f.getName().startsWith(vid + ".")) { produced = f; break; }
+                                if (f.getName().startsWith(vid + ".")
+                                        && !f.getName().endsWith(".part")) { produced = f; break; }
                             }
                         }
                         if (produced == null || !produced.exists() || produced.length() == 0) {

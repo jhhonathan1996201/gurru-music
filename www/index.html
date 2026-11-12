@@ -518,7 +518,7 @@
 
       <main>
         <!-- ============ REPRODUCIENDO ============ -->
-        <section class="view" id="viewPlayer" aria-label="Canción actual">
+        <section class="view" id="viewPlayer" aria-label="Canción actual" hidden>
           <div class="np">
             <div class="art-wrap" id="artWrap">
               <div class="art" id="artBox">
@@ -592,7 +592,7 @@
         </section>
 
         <!-- ============ BIBLIOTECA ============ -->
-        <section class="view" id="viewLibrary" aria-label="Biblioteca de música" hidden>
+        <section class="view" id="viewLibrary" aria-label="Biblioteca de música">
           <div class="lib">
           <button class="add-toggle" id="addToggle" type="button">− Agregar música</button>
           <div class="add-section" id="addSection">
@@ -854,7 +854,7 @@
       var seeking = false;
       var uid = 0;
       var view = "player";
-      var lastVol = 0.8;
+      var lastVol = 1;
 
       /* ===== Guardar la biblioteca y el historial en el teléfono =====
          Al cerrar y abrir la app, la biblioteca (canciones de YouTube y
@@ -1074,9 +1074,10 @@
       function saveMetaOverrides(){ try{ localStorage.setItem(META_OV_KEY, JSON.stringify(metaOverrides)); }catch(e){} }
 
       /* ---------- Vistas ---------- */
-      /* Sin botón Atrás: entrar a Biblioteca deja una entrada en el historial,
-         así el gesto atrás del teléfono (popstate) regresa al reproductor. */
-      var libraryInHistory = false;
+      /* La pantalla principal es la Biblioteca (no el reproductor).
+         Entrar a otra vista deja una entrada en el historial, así el
+         gesto atrás del teléfono (popstate) regresa a la Biblioteca. */
+      var navInHistory = false;
       var suppressNextPop = false;
       function showView(v, skipHistory){
         view = v;
@@ -1101,16 +1102,16 @@
         });
         syncMiniPlayer();
         if (!skipHistory){
-          if (v !== "player" && !libraryInHistory){
-            libraryInHistory = true;
+          if (v !== "library" && !navInHistory){
+            navInHistory = true;
             try{ history.pushState({ gurruView: v }, ""); }catch(e){}
-          } else if (v === "player" && libraryInHistory){
-            libraryInHistory = false;
+          } else if (v === "library" && navInHistory){
+            navInHistory = false;
             suppressNextPop = true;
             try{ history.back(); }catch(e){ suppressNextPop = false; }
           }
-        } else if (v === "player"){
-          libraryInHistory = false;
+        } else if (v === "library"){
+          navInHistory = false;
         }
         if (v === "player"){
           requestAnimationFrame(function(){ setMarquee($("mTitle")); setMarquee($("mArtist")); });
@@ -1124,14 +1125,17 @@
       }
       window.addEventListener("popstate", function(){
         if (suppressNextPop){ suppressNextPop = false; return; }
-        libraryInHistory = false;
-        if (view !== "player") showView("player", true);
+        navInHistory = false;
+        if (view !== "library") showView("library", true);
       });
       /* Gesto atrás EN EL APK: en el WebView de Capacitor el botón/gesto
          atrás del sistema NO dispara popstate, así que sin esto la app se
          cerraba desde cualquier vista. Con el plugin App de Capacitor se
-         intercepta: si hay una ventana encima se cierra, si no estás en el
-         reproductor se vuelve a él, y solo en el reproductor se sale. */
+         intercepta: si hay una ventana encima se cierra, si no estás en
+         la Biblioteca se vuelve a ella, y en la Biblioteca NO se sale de
+         la app: se minimiza (queda en segundo plano y la música sigue
+         sonando, como YouTube Music). Salir del todo solo se hace desde
+         Recientes o con el botón Detener de la notificación. */
       (function(){
         var capApp = null;
         try {
@@ -1146,8 +1150,11 @@
             if (overlay && overlay.classList.contains("show")){ closeChoice(); return; }
             var editOv = $("editOverlay");
             if (editOv && editOv.classList.contains("show")){ closeEdit(); return; }
-            if (view !== "player"){ showView("player", true); return; }
-            try { capApp.exitApp(); } catch(e){}
+            if (view !== "library"){ showView("library", true); return; }
+            /* En la pantalla principal (Biblioteca) no se cierra la app:
+               se minimiza para que la música siga sonando. Si el plugin
+               no trae minimizeApp, se sale como antes. */
+            try { if (capApp.minimizeApp) capApp.minimizeApp(); else capApp.exitApp(); } catch(e){ try{ capApp.exitApp(); }catch(e2){} }
           });
         } catch(e){}
       })();
@@ -3526,8 +3533,9 @@
 
       /* ---------- Volumen (sin barra visible) ----------
          La barra de volumen se quitó de la pantalla: el volumen queda en
-         80% al arrancar y solo se puede silenciar con el botón de la
-         bocina o con las flechas ↑/↓ del teclado. */
+         100% al arrancar (igual que YouTube Music) y solo se puede
+         silenciar con el botón de la bocina o con las flechas ↑/↓ del
+         teclado. Antes quedaba en 80% y por eso se escuchaba más bajo. */
       function setVolume(v){
         v = Math.max(0, Math.min(1, v));
         audio.volume = v;
@@ -3535,8 +3543,8 @@
         if (ytApiPlayer && ytApiPlayer.setVolume){ try{ ytApiPlayer.setVolume(Math.round(v * 100)); }catch(e){} }
         if (v > 0) lastVol = v;
       }
-      audio.volume = 0.8;
-      try{ ytAudioEl.volume = 0.8; }catch(e){}
+      audio.volume = 1;
+      try{ ytAudioEl.volume = 1; }catch(e){}
       $("btnMute").addEventListener("click", function(){ setVolume(audio.volume > 0 ? 0 : lastVol); });
 
       /* ---------- Aleatorio / repetir ---------- */
@@ -3807,7 +3815,7 @@
       document.addEventListener("keydown", function(ev){
         var tag = (ev.target && ev.target.tagName) || "";
         if (tag === "INPUT" || tag === "TEXTAREA") return;
-        if (ev.key === "Escape"){ var eo = $("editOverlay"); if (eo && eo.classList.contains("show")){ closeEdit(); return; } var lo = $("lyricsOverlay"); if (lo && lo.classList.contains("show")){ closeLyrics(); return; } if (view !== "player") showView("player"); return; }
+        if (ev.key === "Escape"){ var eo = $("editOverlay"); if (eo && eo.classList.contains("show")){ closeEdit(); return; } var lo = $("lyricsOverlay"); if (lo && lo.classList.contains("show")){ closeLyrics(); return; } if (view !== "library") showView("library"); return; }
         if (ev.code === "Space"){ ev.preventDefault(); togglePlay(); }
         else if (ev.key === "ArrowRight"){ seekBySeconds(5); }
         else if (ev.key === "ArrowLeft"){ seekBySeconds(-5); }
@@ -3817,7 +3825,7 @@
 
       renderPlaylist();
       resetScreen();
-      showView("player");
+      showView("library");
       /* Restaura la biblioteca y el historial guardados antes de pintar. */
       loadDlHistory();
       var restored = loadSavedState();
@@ -3847,16 +3855,6 @@
               try{ var m = $("dlUpdateMsg"); if (m) m.textContent = (r && r.status === "ALREADY_UP_TO_DATE") ? "yt-dlp ya está al día (" + (r.version || "") + ")." : "yt-dlp actualizado (" + ((r && r.version) || "") + ")."; }catch(e){}
             }).catch(function(){ /* se reintenta en la próxima apertura */ });
           }
-        }
-      } catch(e){}
-      /* Aviso único sobre la batería: OPPO/ColorOS apaga las apps en
-         segundo plano aunque tengan servicio en primer plano; si la
-         música se apaga al salir, hay que poner la app en Sin
-         restricciones en Ajustes → Batería. */
-      try {
-        if (window.localStorage && !localStorage.getItem("gurru-batt-tip")){
-          localStorage.setItem("gurru-batt-tip", "1");
-          showToast({ title: "Si la música se apaga al salir de la app", msg: "En OPPO, ve a Ajustes → Batería → Gurru Music y ponla en «Sin restricciones» para que siga sonando en segundo plano.", ms: 15000 });
         }
       } catch(e){}
       if (restored && current >= 0 && tracks[current]){ loadTrack(current, false); }
