@@ -752,7 +752,6 @@ public class YtDlpDownloaderPlugin extends Plugin {
                     // "Sign in to confirm you're not a bot" (403). Pedir el
                     // audio como cliente Android suele pasar ese bloqueo.
                     request.addOption("--extractor-args", "youtube:player_client=android");
-                    addFbCookies(request, url);
                     request.addOption("-o", tmpTemplate);
 
                     lastProgressId = null;
@@ -878,7 +877,6 @@ public class YtDlpDownloaderPlugin extends Plugin {
         request.addOption("--no-playlist");
         request.addOption("--no-warnings");
         if (androidClient) request.addOption("--extractor-args", "youtube:player_client=android");
-        addFbCookies(request, url.trim());
         request.addOption("-o", template);
         YoutubeDLResponse response = YoutubeDL.getInstance().execute(
                 request, "gurru-cache-" + nextStreamSeq(),
@@ -1097,16 +1095,4 @@ public class YtDlpDownloaderPlugin extends Plugin {
         });
     }
 
-    /** Si la URL es de Facebook y hay sesión guardada (inicio de sesión
-        dentro de la app), yt-dlp usa sus cookies para poder bajar el
-        audio de los videos que piden login. */
-    private void addFbCookies(YoutubeDLRequest request, String url) {
-        try {
-            if (url == null || url.indexOf("facebook.com") < 0) return;
-            File f = FacebookAuthPlugin.cookiesFile(getContext());
-            if (f != null && f.exists() && f.length() > 0) {
-                request.addOption("--cookies", f.getAbsolutePath());
-            }
-        } catch (Exception ignored) {}
-    }
 }

@@ -152,6 +152,23 @@
       /* ===== Apartado FACEBOOK (NUEVO13, prueba) ===== */
       .fb-box{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; margin-top:12px; border:1.5px solid rgba(24,119,242,.6); background:rgba(24,119,242,.12); border-radius:12px; padding:12px; }
       .fb-box .yt-h .fb-badge{ background:#1877F2; color:#fff; font-size:11px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:.04em; }
+      /* Descubre (NUEVO17): tarjeta encima del buscador de YouTube. */
+      .discover-card{ border:1.5px solid rgba(34,211,238,.5); background:rgba(34,211,238,.08); border-radius:12px; padding:12px; margin-top:12px; }
+      .discover-card .yt-h{ display:flex; align-items:center; gap:8px; font-weight:900; font-size:15px; }
+      .discover-card .yt-badge{ background:#0891b2; color:#fff; font-size:11px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:.04em; }
+      .discover-card p{ margin:6px 0 10px; font-size:13px; color:var(--soft); line-height:1.45; }
+      .discover-chips{ display:flex; flex-wrap:wrap; gap:8px; }
+      .discover-chip{ background:rgba(255,255,255,.08); border:1px solid rgba(34,211,238,.45); color:inherit; border-radius:999px; padding:8px 14px; font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+      .discover-chip:active{ background:rgba(34,211,238,.2); }
+      /* Mezclas para ti (NUEVO17): tarjeta encima de la lista de Biblioteca. */
+      .mixes-card{ border:1.5px solid rgba(167,139,250,.5); background:rgba(167,139,250,.08); border-radius:12px; padding:12px; margin:12px 0; }
+      .mixes-card h3{ margin:0 0 4px; font-size:15px; font-weight:900; }
+      .mixes-card p{ margin:0 0 10px; font-size:12px; color:var(--soft); }
+      .mixes-list{ display:flex; flex-wrap:wrap; gap:8px; }
+      .mix-chip{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; background:rgba(255,255,255,.08); border:1px solid rgba(167,139,250,.45); color:inherit; border-radius:10px; padding:10px 12px; font:inherit; cursor:pointer; text-align:left; }
+      .mix-chip:active{ background:rgba(167,139,250,.2); }
+      .mix-chip .mix-t{ font-weight:800; font-size:13.5px; }
+      .mix-chip .mix-s{ font-size:11.5px; color:var(--soft); }
       .fb-add{ border:0; background:#1877F2; color:#fff; border-radius:9px; padding:10px 14px; font-weight:800; font-size:13.5px; white-space:nowrap; }
       .fb-auth{ display:flex; flex-direction:column; gap:8px; margin:2px 0 10px; padding:10px; border:1px solid rgba(125,211,252,.3); border-radius:10px; background:rgba(2,132,199,.1); }
       .fb-auth-msg{ font-size:13px; color:#fff; line-height:1.45; }
@@ -633,6 +650,12 @@
               <button class="icon-btn" id="viewBtn" type="button" title="Vista de cuadrícula o lista" aria-label="Cambiar vista de lista o cuadrícula"><svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></button>
             </div>
 
+            <div class="mixes-card" id="mixesCard" hidden>
+              <h3>Mezclas para ti</h3>
+              <p>Automáticas, con tu música local: por lo que más escuchas. Toca una para sonar.</p>
+              <div class="mixes-list" id="mixesList"></div>
+            </div>
+
             <ul class="playlist" id="playlist"></ul>
             <div class="empty-state" id="emptyState">
               <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
@@ -667,6 +690,12 @@
         <!-- ============ YOUTUBE ============ -->
         <section class="view" id="viewYouTube" aria-label="YouTube" hidden>
           <div class="lib">
+            <div class="discover-card" id="discoverCard">
+              <div class="yt-h"><span class="yt-badge">Descubre</span><span id="discoverSeedLabel">Artistas parecidos</span></div>
+              <p id="discoverSeedText">Basado en lo que escuchas.</p>
+              <div class="discover-chips" id="discoverChips"></div>
+              <div class="yt-msg" id="discoverMsg" role="status"></div>
+            </div>
             <div class="yt-box">
               <div class="yt-h"><span class="yt-badge">YouTube Music</span><span>Buscar música</span></div>
               <p>Escribe el nombre de una canción o un artista y toca <b>Buscar</b>.</p>
@@ -680,23 +709,18 @@
           </div>
         </section>
 
-        <!-- ============ FACEBOOK (prueba, NUEVO13) ============ -->
+        <!-- ============ FACEBOOK (solo por links, NUEVO17) ============ -->
         <section class="view" id="viewFacebook" aria-label="Facebook" hidden>
           <div class="lib">
             <div class="fb-box">
-              <div class="yt-h"><span class="fb-badge">Facebook</span><span>Buscar música</span></div>
-              <p>Busca canciones completas publicadas en Facebook. Primero inicia sesión con tu cuenta: la búsqueda se hace con tu sesión.</p>
-              <div class="fb-auth" id="fbAuthBox">
-                <div class="fb-auth-msg" id="fbAuthMsg">No has iniciado sesión en Facebook.</div>
-                <button class="fb-btn" id="fbLoginBtn" type="button">Iniciar sesión en Facebook</button>
-                <button class="fb-btn ghost" id="fbLogoutBtn" type="button" hidden>Cerrar sesión</button>
-              </div>
+              <div class="yt-h"><span class="fb-badge">Facebook</span><span>Pegar link</span></div>
+              <p>Pega el link de un video <b>público</b> de Facebook y escúchalo o descárgalo como cualquier canción online. Los videos privados o solo para amigos no funcionan sin sesión, y la app ya no inicia sesión en Facebook.</p>
               <div class="yt-row">
-                <input type="search" id="fbSearchInput" placeholder="Canción o artista…" aria-label="Buscar en Facebook" />
-                <button class="fb-add" id="fbSearchBtn">Buscar</button>
+                <input type="url" id="fbLinkInput" placeholder="https://www.facebook.com/…/videos/…" aria-label="Link del video de Facebook" />
+                <button class="fb-add" id="fbAddBtn">Agregar</button>
               </div>
               <div class="yt-msg" id="fbMsg" role="status"></div>
-              <div class="yt-results" id="fbSearchResults" aria-label="Resultados de Facebook"></div>
+              <div class="yt-results" id="fbLinkResults" aria-label="Videos de Facebook agregados"></div>
             </div>
           </div>
         </section>
@@ -1092,8 +1116,11 @@
            sigue ahí (se guarda en el teléfono); si la vista se vació
            por algún motivo, se restaura sin buscar de nuevo. */
         if (v === "youtube" && !$("ytSearchResults").children.length) restoreLastYtSearch();
-        /* NUEVO13: igual en Facebook (última búsqueda + estado de la sesión). */
-        if (v === "facebook"){ fbCheckLogin(); if (!$("fbSearchResults").children.length) restoreLastFbSearch(); }
+        /* NUEVO17: al entrar a YouTube, Descubre carga artistas
+           parecidos al que suena (o al más escuchado de la biblioteca). */
+        if (v === "youtube") loadDiscover();
+        /* NUEVO17: Facebook es solo por links; al entrar se listan los videos ya agregados. */
+        if (v === "facebook"){ renderFbLinks(); }
         /* La barra inferior fija marca la sección activa (en el
            reproductor ninguna está activa: es su propia pantalla). */
         ["downloads", "library", "youtube", "facebook", "settings"].forEach(function(k){
@@ -1408,10 +1435,16 @@
         if (!addSectionTouched){ addSectionOpen = tracks.length === 0; syncAddSection(); }
         updateScreenMeta();
         renderQueue();
+        renderMixes();
       }
       function removeTrack(i){
         var t = tracks[i];
         tracks.splice(i, 1);
+        /* La mezcla pierde ese índice y los de después bajan uno. */
+        if (activeMix){
+          activeMix.indices = activeMix.indices.filter(function(x){ return x !== i; }).map(function(x){ return x > i ? x - 1 : x; });
+          if (!activeMix.indices.length) activeMix = null;
+        }
         if (t.artUrl) URL.revokeObjectURL(t.artUrl);
         if (i === current){
           stopYouTube();
@@ -1431,10 +1464,154 @@
         try{ ytAudioEl.removeAttribute("src"); ytAudioEl.load(); }catch(e){}
         tracks.forEach(function(t){ if (t.url) URL.revokeObjectURL(t.url); if (t.artUrl) URL.revokeObjectURL(t.artUrl); });
         tracks = []; current = -1;
+        activeMix = null;
         resetScreen(); renderPlaylist();
         saveState();
       }
 
+      /* ---------- Mezclas para ti (NUEVO17) ----------
+         Contador local de lo que se escucha completo (+1) y lo que se
+         salta antes de la mitad (-1), y mezclas automáticas de tus MP3
+         locales: por artista, por álbum y una sorpresa. Todo offline.
+         Por género/época no se puede todavía: el escaneo no lee género
+         ni año (haría falta ampliar el plugin LocalMusicPlugin). */
+      var PLAYS_KEY = "gurru-plays-v1";
+      var playCountsCache = null;
+      var activeMix = null; /* { name, indices: [realIdx...] } o null */
+      var mixesSig = null;
+      function loadPlayCounts(){
+        if (playCountsCache) return playCountsCache;
+        var c = {};
+        try { c = JSON.parse(localStorage.getItem(PLAYS_KEY) || "{}") || {}; } catch(e){ c = {}; }
+        playCountsCache = c;
+        return c;
+      }
+      function savePlayCounts(){
+        try { localStorage.setItem(PLAYS_KEY, JSON.stringify(playCountsCache || {})); } catch(e){}
+      }
+      function playKey(t){
+        if (!t) return "";
+        if (t.videoId) return (t.type === "facebook" ? "fb:" : "yt:") + t.videoId;
+        if (t.id && String(t.id).indexOf("local-") === 0) return String(t.id);
+        if (t.nativePath) return "file:" + t.nativePath;
+        if (t.url && t.url.indexOf("blob:") !== 0) return "url:" + t.url;
+        return "t:" + (t.title || "") + "|" + (t.artist || "");
+      }
+      function recordPlay(t, delta){
+        if (!t) return;
+        var k = playKey(t);
+        if (!k) return;
+        var c = loadPlayCounts();
+        var v = (c[k] || 0) + delta;
+        if (v > 50) v = 50;
+        if (v < -5) v = -5;
+        c[k] = v;
+        savePlayCounts();
+        mixesSig = null;
+      }
+      /* Canción escuchada completa: +1. */
+      function recordPlayEnd(){
+        var t = (current >= 0 && tracks[current]) ? tracks[current] : null;
+        if (t) recordPlay(t, 1);
+      }
+      /* Al salir de una canción antes de la mitad: -1 (se saltó). */
+      function noteLeavingTrack(){
+        var t = (current >= 0 && tracks[current]) ? tracks[current] : null;
+        if (!t) return;
+        var el = null;
+        try { el = curAudio(); } catch(e){}
+        var d = (el && el.duration) || t.duration || 0;
+        var pos = (el && el.currentTime) || 0;
+        if (d > 0 && pos < d / 2) recordPlay(t, -1);
+      }
+      function localTrackIndices(){
+        var out = [];
+        for (var i = 0; i < tracks.length; i++){
+          var t = tracks[i];
+          if (t && t.type === "local" && !t.downloaded) out.push(i);
+        }
+        return out;
+      }
+      function buildMixes(){
+        var counts = loadPlayCounts();
+        var idxs = localTrackIndices();
+        if (idxs.length < 2) return [];
+        var byArtist = {}, byAlbum = {};
+        idxs.forEach(function(i){
+          var t = tracks[i];
+          var a = (t.artist || "Artista desconocido").trim();
+          var al = (t.album || "").trim();
+          var k = a.toLowerCase();
+          if (!byArtist[k]) byArtist[k] = { name: a, indices: [], score: 0 };
+          byArtist[k].indices.push(i);
+          byArtist[k].score += counts[playKey(t)] || 0;
+          if (al){
+            var ka = al.toLowerCase();
+            if (!byAlbum[ka]) byAlbum[ka] = { name: al, indices: [], score: 0 };
+            byAlbum[ka].indices.push(i);
+            byAlbum[ka].score += counts[playKey(t)] || 0;
+          }
+        });
+        function topGroups(map, max){
+          var arr = Object.keys(map).map(function(k){ return map[k]; });
+          arr.sort(function(x, y){ return (y.score - x.score) || (y.indices.length - x.indices.length); });
+          return arr.slice(0, max);
+        }
+        function byPlays(list){
+          return list.slice().sort(function(a, b){ return (counts[playKey(tracks[b])] || 0) - (counts[playKey(tracks[a])] || 0); });
+        }
+        var mixes = [];
+        topGroups(byArtist, 3).forEach(function(g){
+          if (g.indices.length < 1) return;
+          mixes.push({ name: "Lo más de " + g.name, desc: g.indices.length + (g.indices.length === 1 ? " canción" : " canciones"), indices: byPlays(g.indices) });
+        });
+        topGroups(byAlbum, 2).forEach(function(g){
+          if (g.indices.length < 2) return;
+          mixes.push({ name: "Álbum: " + g.name, desc: g.indices.length + " canciones", indices: byPlays(g.indices) });
+        });
+        /* Mezcla sorpresa: todo lo local revuelto. */
+        var all = idxs.slice();
+        for (var i = all.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var tmp = all[i]; all[i] = all[j]; all[j] = tmp; }
+        mixes.push({ name: "Mezcla sorpresa", desc: "Toda tu música, revuelta", indices: all.slice(0, 30) });
+        return mixes;
+      }
+      function renderMixes(){
+        var card = $("mixesCard"), list = $("mixesList");
+        if (!card || !list) return;
+        var sig = localTrackIndices().map(function(i){ return tracks[i].id; }).join(",") + "|" + JSON.stringify(loadPlayCounts());
+        if (sig === mixesSig) return;
+        mixesSig = sig;
+        var mixes = buildMixes();
+        list.innerHTML = "";
+        if (!mixes.length){
+          card.hidden = true;
+          return;
+        }
+        card.hidden = false;
+        mixes.forEach(function(m){
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "mix-chip";
+          var t1 = document.createElement("span");
+          t1.className = "mix-t";
+          t1.textContent = m.name;
+          var t2 = document.createElement("span");
+          t2.className = "mix-s";
+          t2.textContent = m.desc;
+          b.appendChild(t1);
+          b.appendChild(t2);
+          b.addEventListener("click", function(){ startMix(m); });
+          list.appendChild(b);
+        });
+      }
+      function startMix(m){
+        if (!m || !m.indices.length) return;
+        noteLeavingTrack();
+        activeMix = { name: m.name, indices: m.indices.slice() };
+        showView("player");
+        loadTrack(m.indices[0], true);
+        renderPlaylist();
+      }
       /* ---------- Cola: anterior, actual y siguientes ----------
          La cola es POR ORIGEN: si suena YouTube, solo aparecen las de
          YouTube; si suena la Biblioteca, solo las locales (las
@@ -1451,6 +1628,15 @@
       }
       function queueIndices(){
         if (current < 0 || !tracks[current]) return [];
+        /* Mezcla activa (NUEVO17): la cola es la mezcla, no toda la
+           biblioteca. Si el tema actual ya no está en la mezcla (se
+           quitó de la biblioteca), la mezcla termina. */
+        if (activeMix){
+          if (activeMix.indices.indexOf(current) >= 0){
+            return activeMix.indices.filter(function(i){ return tracks[i] != null; });
+          }
+          activeMix = null;
+        }
         var org = originOf(tracks[current]);
         var out = [];
         for (var i = 0; i < tracks.length; i++){
@@ -1468,6 +1654,10 @@
         var tmp = tracks[realIdx];
         tracks[realIdx] = tracks[other];
         tracks[other] = tmp;
+        /* La mezcla sigue el reorden: sus índices se intercambian igual. */
+        if (activeMix){
+          activeMix.indices = activeMix.indices.map(function(i){ if (i === realIdx) return other; if (i === other) return realIdx; return i; });
+        }
         if (current === realIdx) current = other;
         else if (current === other) current = realIdx;
         renderPlaylist();
@@ -1486,7 +1676,7 @@
         empty.style.display = "none";
         var q = queueIndices();
         var pos = q.indexOf(current);
-        $("queueCount").textContent = (pos + 1) + "/" + q.length + (shuffle ? " · aleatorio" : "");
+        $("queueCount").textContent = (pos + 1) + "/" + q.length + (shuffle ? " · aleatorio" : "") + (activeMix ? " · " + activeMix.name : "");
         q.forEach(function(realIdx, qi){
           var t = tracks[realIdx];
           var label, kind;
@@ -2773,225 +2963,118 @@
         $("ytMsg").className = "yt-msg ok";
         renderYtSearchResults(data.results, data.q);
       }
-      /* ----- Facebook (NUEVO13, prueba) -----
-         Facebook no tiene buscador público: la búsqueda se hace con la
-         sesión del usuario (plugin nativo FacebookAuth: login en un
-         WebView dentro de la app + búsqueda en m.facebook.com con sus
-         cookies). Los resultados se escuchan y se descargan con el
-         mismo camino que YouTube online (caché invisible + Descargar),
-         y yt-dlp usa las cookies cuando la URL es de facebook.com. */
-      var FBSEARCH_KEY = "gurru-fbsearch-v1";
-      var fbAuthPlugin = null;
-      var fbAuthChecked = false;
-      var fbLoggedIn = false;
-      function getFacebookAuth(){
-        if (fbAuthChecked) return fbAuthPlugin;
-        try {
-          if (window.Capacitor && window.Capacitor.registerPlugin
-              && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()){
-            fbAuthPlugin = window.Capacitor.registerPlugin("FacebookAuth");
-            fbAuthChecked = true;
-          }
-        } catch(e){ fbAuthPlugin = null; }
-        return fbAuthPlugin;
+      /* ----- Facebook por links (NUEVO17) -----
+         La búsqueda de Facebook se abandonó (NUEVO15: cero resultados
+         en el teléfono) y el login se quitó por completo: Facebook
+         queda solo pegando el link de un video PÚBLICO. yt-dlp lee
+         título/duración/página con getVideoInfo y la canción se escucha
+         (caché invisible) y se descarga igual que una de YouTube. Los
+         videos privados o de amigos no funcionan sin sesión. */
+      function fbLinkIdFromUrl(u){
+        if (!u) return "";
+        var m = u.match(/\/videos\/(\d+)/) || u.match(/[?&]v=(\d+)/) || u.match(/\/reel\/(\d+)/) || u.match(/\/watch\/\?v=(\d+)/);
+        return m ? m[1] : "";
       }
-      function fbSetAuthUI(loggedIn){
-        fbLoggedIn = !!loggedIn;
-        var msg = $("fbAuthMsg");
-        var loginBtn = $("fbLoginBtn");
-        var logoutBtn = $("fbLogoutBtn");
-        if (msg) msg.innerHTML = loggedIn
-          ? "Sesión iniciada en Facebook. <small>Ya puedes buscar canciones completas publicadas en Facebook.</small>"
-          : "No has iniciado sesión en Facebook. <small>La búsqueda de Facebook necesita tu sesión: se abre una ventana de Facebook dentro de la app.</small>";
-        if (loginBtn) loginBtn.hidden = loggedIn;
-        if (logoutBtn) logoutBtn.hidden = !loggedIn;
-      }
-      function fbCheckLogin(){
-        var p = getFacebookAuth();
-        if (!p || !p.isLoggedIn){ fbSetAuthUI(false); return Promise.resolve(false); }
-        return p.isLoggedIn().then(function(r){
-          fbSetAuthUI(!!(r && r.loggedIn));
-          return !!(r && r.loggedIn);
-        }).catch(function(){ fbSetAuthUI(false); return false; });
-      }
-      function fbLogin(){
-        var p = getFacebookAuth();
-        var msg = $("fbMsg");
-        if (!p || !p.login){
-          if (msg){ msg.textContent = "El inicio de sesión en Facebook solo funciona dentro del APK instalado (icono de la patita)."; msg.className = "yt-msg"; }
-          return;
-        }
-        if (msg){ msg.textContent = "Abriendo Facebook…"; msg.className = "yt-msg"; }
-        p.login().then(function(r){
-          if (r && r.loggedIn){
-            fbSetAuthUI(true);
-            if (msg){ msg.textContent = "✓ Sesión iniciada. Ya puedes buscar música en Facebook."; msg.className = "yt-msg ok"; }
-          } else {
-            fbSetAuthUI(false);
-            if (msg){ msg.textContent = (r && r.message) || "No se inició sesión en Facebook."; msg.className = "yt-msg"; }
-          }
-        }).catch(function(err){
-          var m = (err && err.message) ? err.message : String(err || "");
-          if (msg){ msg.textContent = "No se pudo abrir el inicio de sesión: " + m; msg.className = "yt-msg"; }
-        });
-      }
-      function fbLogout(){
-        var p = getFacebookAuth();
-        if (!p || !p.logout){ fbSetAuthUI(false); return; }
-        p.logout().then(function(){ fbSetAuthUI(false); $("fbSearchResults").innerHTML = ""; $("fbMsg").textContent = "Sesión cerrada."; $("fbMsg").className = "yt-msg"; }).catch(function(){ fbSetAuthUI(false); });
-      }
-      function makeFbTrack(v){
-        return applyMetaOverrides({ id: ++uid, type: "facebook", kind: "video", videoId: String(v.id), playlistId: null, url: v.url, title: v.title || "Video de Facebook", artist: v.page || "Facebook", album: "Facebook · Solo audio", artUrl: v.thumbnail || null, duration: v.duration || 0, downloaded: false, dlState: null });
-      }
-      function searchFacebook(){
-        var input = $("fbSearchInput"), msg = $("fbMsg"), btn = $("fbSearchBtn"), box = $("fbSearchResults");
-        var q = (input.value || "").trim();
-        if (!q){
-          msg.textContent = "Escribe el nombre de una canción o un artista para buscar en Facebook.";
+      function addFacebookLink(){
+        var input = $("fbLinkInput"), msg = $("fbMsg"), btn = $("fbAddBtn");
+        var u = (input.value || "").trim();
+        if (!u || (u.indexOf("facebook.com") < 0 && u.indexOf("fb.watch") < 0)){
+          msg.textContent = "Pega el link de un video de Facebook (de facebook.com o fb.watch).";
           msg.className = "yt-msg";
           return;
         }
-        var p = getFacebookAuth();
-        if (!p || !p.searchVideos){
-          msg.textContent = "La búsqueda en Facebook solo funciona dentro del APK instalado (icono de la patita).";
+        var p = getNativeDl();
+        if (!p || !p.getVideoInfo){
+          msg.textContent = "Leer links de Facebook solo funciona dentro del APK instalado (icono de la patita).";
           msg.className = "yt-msg";
           return;
         }
         btn.disabled = true;
-        msg.textContent = "Buscando «" + q + "» en Facebook…";
+        msg.textContent = "Leyendo el video…";
         msg.className = "yt-msg";
-        box.innerHTML = "";
-        p.searchVideos({ query: q, limit: 20 }).then(function(res){
+        p.getVideoInfo({ url: u }).then(function(info){
           btn.disabled = false;
-          if (res && res.needsLogin){
-            fbSetAuthUI(false);
-            msg.textContent = "Facebook pide iniciar sesión: toca «Iniciar sesión en Facebook» y vuelve a buscar.";
+          /* yt-dlp trae el título con el prefijo de Facebook ("121K
+             views · 1.3K reactions | …"): se quita para que se lea la
+             canción, no el contador de la publicación. */
+          var rawTitle = (info && info.title) ? info.title : "Video de Facebook";
+          var title = rawTitle.replace(/^\s*[\d.,KM]+\s*views?\s*·\s*[\d.,KM]+\s*reactions?\s*\|\s*/i, "");
+          var dur = (info && info.duration) ? info.duration : 0;
+          var page = (info && (info.uploader || info.artist)) ? (info.uploader || info.artist) : "Facebook";
+          var vid = fbLinkIdFromUrl(u) || ((info && info.id) ? String(info.id) : "");
+          if (!vid){
+            msg.textContent = "No pude sacar el identificador del video de ese link.";
             msg.className = "yt-msg";
             return;
           }
-          var list = (res && res.results) || [];
-          if (!list.length){
-            msg.textContent = "No encontré nada para «" + q + "» en Facebook. Prueba con otro nombre o pega el link del video desde la app de Facebook.";
-            msg.className = "yt-msg";
-            return;
+          for (var i = 0; i < tracks.length; i++){
+            if (tracks[i].type === "facebook" && tracks[i].videoId === vid){
+              msg.textContent = "Ese video ya está en tu biblioteca.";
+              msg.className = "yt-msg ok";
+              openChoice({ indices: [i], groupTitle: null, canDownload: true });
+              return;
+            }
           }
-          msg.textContent = "✓ " + list.length + " resultados. Toca uno y elige Escuchar o Descargar.";
+          var track = makeFbTrack({ id: vid, url: u, title: title, page: page, duration: dur, thumbnail: null });
+          tracks.push(track);
+          var idx = tracks.length - 1;
+          renderPlaylist();
+          saveState();
+          renderFbLinks();
+          msg.textContent = "✓ " + cleanTitle(title) + " agregado.";
           msg.className = "yt-msg ok";
-          try { localStorage.setItem(FBSEARCH_KEY, JSON.stringify({ q: q, results: list })); } catch(e){}
-          renderFbSearchResults(list, q);
+          try { input.value = ""; } catch(e){}
+          openChoice({ indices: [idx], groupTitle: null, canDownload: true });
         }).catch(function(err){
           btn.disabled = false;
           var m = (err && err.message) ? err.message : String(err || "");
-          msg.textContent = "No se pudo buscar en Facebook: " + (m || "inténtalo de nuevo") + ".";
+          msg.textContent = "No se pudo leer ese link: " + (m || "revisa que el video sea público") + ".";
           msg.className = "yt-msg";
-          showToast({ kind: "err", title: "No se pudo buscar en Facebook", msg: "La búsqueda en Facebook falló. Toca para ver el motivo completo.", details: m || "sin motivo", retryLabel: "Reintentar búsqueda", onRetry: searchFacebook });
+          showToast({ kind: "err", title: "No se pudo leer el link de Facebook", msg: "Toca para ver el motivo completo.", details: m || "sin motivo", retryLabel: "Reintentar", onRetry: addFacebookLink });
         });
       }
-      function renderFbSearchResults(list, query){
-        var box = $("fbSearchResults");
+      /* Lista de los videos de Facebook que ya agregaste por link. */
+      function renderFbLinks(){
+        var box = $("fbLinkResults");
+        if (!box) return;
         box.innerHTML = "";
-        list.forEach(function(r){
+        var list = [];
+        for (var i = 0; i < tracks.length; i++){ if (tracks[i].type === "facebook") list.push(i); }
+        if (!list.length){
+          box.innerHTML = "<div class=\"yt-msg\">Todavía no agregas videos de Facebook. Pega un link arriba.</div>";
+          return;
+        }
+        list.forEach(function(idx){
+          var t = tracks[idx];
           var row = document.createElement("button");
           row.type = "button";
           row.className = "yt-result";
           var img = document.createElement("img");
-          img.src = r.thumbnail || "logo.png";
+          img.src = t.artUrl || "logo.png";
           img.alt = "";
           img.onerror = function(){ this.onerror = null; this.src = "logo.png"; };
           var meta = document.createElement("span");
           meta.className = "yr-meta";
-          var t = document.createElement("span");
-          t.className = "yr-t";
-          t.textContent = cleanTitle(r.title || "Video de Facebook");
-          var c = document.createElement("span");
-          c.className = "yr-c";
-          c.textContent = (r.page || "Facebook") + (r.duration ? " · " + fmt(r.duration) : "");
-          meta.appendChild(t);
-          meta.appendChild(c);
+          var tt = document.createElement("span");
+          tt.className = "yr-t";
+          tt.textContent = cleanTitle(t.title || "Video de Facebook");
+          var cc = document.createElement("span");
+          cc.className = "yr-c";
+          cc.textContent = (t.artist || "Facebook") + (t.duration ? " · " + fmt(t.duration) : "");
+          meta.appendChild(tt);
+          meta.appendChild(cc);
           var go = document.createElement("span");
           go.className = "yr-go";
           go.textContent = "›";
           row.appendChild(img);
           row.appendChild(meta);
           row.appendChild(go);
-          row.addEventListener("click", function(){
-            var track = makeFbTrack({ id: r.id, url: r.url, title: r.title || "Video de Facebook", page: r.page || "Facebook", duration: r.duration || 0, thumbnail: r.thumbnail });
-            track.searchQuery = query || "";
-            tracks.push(track);
-            var idx = tracks.length - 1;
-            renderPlaylist();
-            openChoice({ indices: [idx], groupTitle: null, canDownload: true });
-          });
+          row.addEventListener("click", function(){ openChoice({ indices: [idx], groupTitle: null, canDownload: true }); });
           box.appendChild(row);
         });
       }
-      /* La última búsqueda de Facebook sigue ahí al salir y entrar. */
-      function restoreLastFbSearch(){
-        var data = null;
-        try { data = JSON.parse(localStorage.getItem(FBSEARCH_KEY) || "null"); } catch(e){}
-        if (!data || !data.q || !Array.isArray(data.results) || !data.results.length) return;
-        var input = $("fbSearchInput");
-        if (input.value && input.value.trim() && input.value.trim() !== data.q) return;
-        input.value = data.q;
-        $("fbMsg").textContent = "✓ " + data.results.length + " resultados. Toca uno y elige Escuchar o Descargar.";
-        $("fbMsg").className = "yt-msg ok";
-        renderFbSearchResults(data.results, data.q);
-      }
-      /* Sugerencias de Facebook en "A continuación": más videos del
-         mismo artista/página, buscados en Facebook con la sesión. */
-      function fetchFbSuggestions(t){
-        var p = getFacebookAuth();
-        if (!p || !p.searchVideos) return Promise.resolve([]);
-        var gen = suggestGen;
-        var q = artistForSuggestions(t);
-        if (!q) return Promise.resolve([]);
-        return p.searchVideos({ query: q, limit: 10 }).then(function(res){
-          if (gen !== suggestGen) return [];
-          if (res && res.needsLogin) return [];
-          var list = (res && res.results) || [];
-          var fresh = list.filter(function(r){
-            if (!r || !r.id || suggestPlayed[r.id]) return false;
-            for (var i = 0; i < tracks.length; i++){ if (tracks[i].videoId === String(r.id)) return false; }
-            return true;
-          });
-          suggestPool = fresh.map(function(r){
-            return makeFbTrack({ id: r.id, url: r.url, title: r.title || "Video de Facebook", page: r.page || "Facebook", duration: r.duration || 0, thumbnail: r.thumbnail });
-          });
-          return suggestPool;
-        }).catch(function(){ return []; });
-      }
-      function ensureFbSuggestions(t){
-        if (!t || t.type !== "facebook") return;
-        if (t._suggSeeded) return;
-        var q = queueIndices();
-        var pos = q.indexOf(current);
-        var upcoming = (pos >= 0) ? q.length - pos - 1 : 0;
-        if (upcoming >= 3) return;
-        t._suggSeeded = true;
-        function appendFromPool(){
-          var added = 0;
-          while (suggestPool.length && added < 5){
-            var s = suggestPool.shift();
-            suggestPlayed[s.videoId] = true;
-            s.suggested = true;
-            tracks.push(s);
-            added++;
-          }
-          if (added){ renderPlaylist(); saveState(); }
-          return added;
-        }
-        if (suggestPool.length){ appendFromPool(); return; }
-        if (suggestFetching) return;
-        suggestFetching = true;
-        fetchFbSuggestions(t).then(function(){
-          suggestFetching = false;
-          appendFromPool();
-        });
-      }
-      $("fbSearchBtn").addEventListener("click", searchFacebook);
-      $("fbSearchInput").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); searchFacebook(); } });
-      $("fbLoginBtn").addEventListener("click", fbLogin);
-      $("fbLogoutBtn").addEventListener("click", fbLogout);
+      $("fbAddBtn").addEventListener("click", addFacebookLink);
+      $("fbLinkInput").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); addFacebookLink(); } });
       $("fbMsg").addEventListener("click", function(){
         if (this.classList.contains("ok")) return;
         if (this.textContent.trim()) showLastError();
@@ -3227,7 +3310,11 @@
         }
         if (suggestFetching) return Promise.resolve(false);
         suggestFetching = true;
-        var fetchFn = (fromTrack && fromTrack.type === "facebook") ? fetchFbSuggestions : fetchSuggestions;
+        /* Sin radio para Facebook: su búsqueda se quitó y ya no hay
+           sugerencias de Facebook; la canción para al terminar su cola,
+           como las locales. */
+        if (fromTrack && fromTrack.type === "facebook") return Promise.resolve(false);
+        var fetchFn = fetchSuggestions;
         return fetchFn(fromTrack).then(function(pool){
           suggestFetching = false;
           if (!pool.length) return false;
@@ -3281,6 +3368,176 @@
         if (this.textContent.trim()) showLastError();
       });
       $("ytSearchInput").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); searchYouTube(); } });
+      /* ---------- Descubre (NUEVO17, sin llave) ----------
+         Artistas parecidos al que suena, sin llave de Last.fm: primero
+         MusicBrainz (etiquetas del artista → otros artistas con las
+         mismas etiquetas) y si no alcanza, iTunes (género del artista →
+         artistas de ese género). Tocar un artista busca sus canciones
+         en YouTube con el buscador de siempre. El resultado se guarda
+         en el teléfono por artista (24 h) para no pedirlo a cada rato. */
+      var DISCOVER_KEY = "gurru-discover-v1";
+      var discoverLoading = false;
+      var discoverSeed = null;
+      var lastMbCall = 0;
+      function mbWait(){
+        var now = Date.now();
+        var wait = 1100 - (now - lastMbCall);
+        lastMbCall = now + Math.max(0, wait);
+        return wait > 0 ? new Promise(function(res){ setTimeout(res, wait); }) : Promise.resolve();
+      }
+      function mbFetch(url){
+        return mbWait().then(function(){
+          return fetch(url, { headers: { "Accept": "application/json" } });
+        }).then(function(r){
+          if (!r.ok) throw new Error("MusicBrainz " + r.status);
+          return r.json();
+        });
+      }
+      function itunesFetch(url){
+        return fetch(url).then(function(r){
+          if (!r.ok) throw new Error("iTunes " + r.status);
+          return r.json();
+        });
+      }
+      function discoverSeedArtist(){
+        var t = (current >= 0 && tracks[current]) ? tracks[current] : null;
+        if (t){
+          var a = (t._metaArtist || t.artist || "").trim();
+          if (a && a !== "Artista desconocido" && a !== "YouTube" && a !== "Facebook") return a;
+          var parsed = artistForSuggestions(t);
+          if (parsed && parsed !== t.title) return parsed;
+        }
+        return topLocalArtist();
+      }
+      function topLocalArtist(){
+        var counts = loadPlayCounts();
+        var byArtist = {};
+        tracks.forEach(function(t){
+          if (!t || t.type !== "local" || t.downloaded) return;
+          var a = (t.artist || "").trim();
+          if (!a || a === "Artista desconocido") return;
+          var k = a.toLowerCase();
+          if (!byArtist[k]) byArtist[k] = { name: a, score: 0, n: 0 };
+          byArtist[k].score += counts[playKey(t)] || 0;
+          byArtist[k].n++;
+        });
+        var best = null;
+        Object.keys(byArtist).forEach(function(k){
+          var e = byArtist[k];
+          if (!best || e.score > best.score || (e.score === best.score && e.n > best.n)) best = e;
+        });
+        return best ? best.name : null;
+      }
+      function loadDiscover(force){
+        var label = $("discoverSeedLabel"), text = $("discoverSeedText"), chips = $("discoverChips"), msg = $("discoverMsg");
+        var seed = discoverSeedArtist();
+        if (!seed){
+          if (label) label.textContent = "Artistas parecidos";
+          if (text) text.textContent = "Escucha una canción o carga tu música y aquí te sugiero artistas parecidos.";
+          if (chips) chips.innerHTML = "";
+          return;
+        }
+        if (label) label.textContent = "Parecidos a " + seed;
+        if (text) text.textContent = "Toca un artista para buscar sus canciones en YouTube.";
+        if (!force && seed === discoverSeed && chips && chips.children.length) return;
+        discoverSeed = seed;
+        var cached = null;
+        try { cached = JSON.parse(localStorage.getItem(DISCOVER_KEY) || "null"); } catch(e){}
+        if (!force && cached && cached.seed === seed && Array.isArray(cached.artists) && cached.artists.length && (Date.now() - (cached.ts || 0)) < 24*3600*1000){
+          renderDiscoverChips(cached.artists);
+          return;
+        }
+        if (discoverLoading) return;
+        discoverLoading = true;
+        if (msg){ msg.textContent = "Buscando artistas parecidos a " + seed + "…"; msg.className = "yt-msg"; }
+        if (chips) chips.innerHTML = "";
+        fetchSimilarArtists(seed).then(function(artists){
+          discoverLoading = false;
+          if (msg) msg.textContent = "";
+          if (!artists.length){
+            if (msg){ msg.textContent = "No encontré parecidos para " + seed + " ahora. Inténtalo más tarde."; msg.className = "yt-msg"; }
+            return;
+          }
+          try { localStorage.setItem(DISCOVER_KEY, JSON.stringify({ seed: seed, artists: artists, ts: Date.now() })); } catch(e){}
+          renderDiscoverChips(artists);
+        }).catch(function(){
+          discoverLoading = false;
+          if (msg){ msg.textContent = "No se pudo cargar Descubre ahora. Revisa tu conexión y toca la tarjeta para reintentar."; msg.className = "yt-msg"; }
+        });
+      }
+      function renderDiscoverChips(artists){
+        var chips = $("discoverChips");
+        if (!chips) return;
+        chips.innerHTML = "";
+        artists.forEach(function(name){
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "discover-chip";
+          b.textContent = name;
+          b.addEventListener("click", function(){
+            var input = $("ytSearchInput");
+            if (input) input.value = name;
+            searchYouTube();
+          });
+          chips.appendChild(b);
+        });
+      }
+      function fetchSimilarArtists(seed){
+        var found = [];
+        function addNames(names){
+          (names || []).forEach(function(n){
+            n = (n || "").trim();
+            if (!n || n.toLowerCase() === seed.toLowerCase()) return;
+            if (found.indexOf(n) < 0) found.push(n);
+          });
+        }
+        /* MusicBrainz: artista → etiquetas → artistas con esas etiquetas. */
+        var mb = mbFetch("https://musicbrainz.org/ws/2/artist/?query=" + encodeURIComponent("artist:" + seed) + "&fmt=json&limit=1")
+          .then(function(d){
+            var a = (d && d.artists && d.artists[0]) || null;
+            if (!a || !a.id) return [];
+            return mbFetch("https://musicbrainz.org/ws/2/artist/" + a.id + "?inc=tags&fmt=json").then(function(d2){
+              var tags = (d2 && d2.tags) || [];
+              tags.sort(function(x, y){ return (y.count || 0) - (x.count || 0); });
+              var top = tags.slice(0, 2).map(function(t){ return t.name; }).filter(function(t){ return t && t.length >= 2; });
+              var chain = Promise.resolve();
+              var out = [];
+              top.forEach(function(tag){
+                chain = chain.then(function(){
+                  return mbFetch("https://musicbrainz.org/ws/2/artist/?query=" + encodeURIComponent("tag:\"" + tag + "\"") + "&fmt=json&limit=5").then(function(d3){
+                    (d3.artists || []).forEach(function(x){ if (x && x.name) out.push(x.name); });
+                  }).catch(function(){});
+                });
+              });
+              return chain.then(function(){ return out; });
+            });
+          })
+          .catch(function(){ return []; });
+        return mb.then(function(mbNames){
+          addNames(mbNames);
+          if (found.length >= 5) return found.slice(0, 6);
+          /* iTunes: género del artista → artistas de ese género. */
+          return itunesFetch("https://itunes.apple.com/search?term=" + encodeURIComponent(seed) + "&entity=musicArtist&limit=1")
+            .then(function(d){
+              var r = (d && d.results && d.results[0]) || null;
+              var genre = r ? r.primaryGenreName : "";
+              if (!genre) return found.slice(0, 6);
+              return itunesFetch("https://itunes.apple.com/search?term=" + encodeURIComponent(genre) + "&entity=musicArtist&limit=10")
+                .then(function(d2){
+                  (d2.results || []).forEach(function(x){
+                    if (x && x.artistName && x.artistName.toLowerCase() !== genre.toLowerCase()) addNames([x.artistName]);
+                  });
+                  return found.slice(0, 6);
+                }).catch(function(){ return found.slice(0, 6); });
+            })
+            .catch(function(){ return found.slice(0, 6); });
+        });
+      }
+      $("discoverCard").addEventListener("click", function(ev){
+        if (ev.target && ev.target.closest && ev.target.closest(".discover-chip")) return;
+        var chips = $("discoverChips");
+        if (chips && !chips.children.length) loadDiscover(true);
+      });
 
       /* Al abrir una canción nueva desde online, la cola "A continuación"
          se borra y se genera una nueva desde esa canción (sus sugerencias
@@ -3292,6 +3549,9 @@
         var org = originOf(keep);
         suggestGen++;
         suggestPool = [];
+        /* Abrir una canción online termina la mezcla local (sus índices
+           se moverían al quitar canciones online de la lista). */
+        activeMix = null;
         var kept = [];
         for (var i = 0; i < tracks.length; i++){
           var s = tracks[i];
@@ -3318,8 +3578,8 @@
           renderPlaylist();
           saveState();
           playYouTubeOnline(t, autoplay, rs);
-          if (t.type === "facebook"){ ensureFbSuggestions(t); }
-          else { ensureYtSuggestions(t); resolveArtist(t); }
+          /* Las de Facebook ya no siembran sugerencias (sin búsqueda). */
+          if (t.type !== "facebook"){ ensureYtSuggestions(t); resolveArtist(t); }
           $("tCur").textContent = "00:00:00"; $("tTot").textContent = (t.type === "facebook" ? "Facebook · Audio" : "YouTube · Audio");
           refreshLyricsForCurrent();
           return;
@@ -3337,12 +3597,15 @@
         if (autoplay) startPlayback(); else setPlayIcons(false);
         /* En caché la canción es online aunque suene por el <audio>
            local: las sugerencias del artista también se siembran aquí. */
-        if (t.type === "facebook"){ ensureFbSuggestions(t); }
-        else if (t.type === "youtube" || t.type === "ytaudio"){ ensureYtSuggestions(t); resolveArtist(t); }
+        if (t.type === "youtube" || t.type === "ytaudio"){ ensureYtSuggestions(t); resolveArtist(t); }
         refreshLyricsForCurrent();
       }
       function playTrack(i){
         if (i === current && tracks.length){ togglePlay(); return; }
+        /* Saltar a otra canción antes de la mitad cuenta como salto. */
+        noteLeavingTrack();
+        /* Tocar una canción fuera de la mezcla termina la mezcla. */
+        if (activeMix && activeMix.indices.indexOf(i) < 0) activeMix = null;
         var t = tracks[i];
         if (t && isOnlineType(t)){
           /* Abrir una canción online regenera la cola desde ella. */
@@ -3402,6 +3665,10 @@
       function stopPlayback(){ stopYouTube(); pauseAllAudio(); try{ audio.currentTime = 0; }catch(e){} try{ ytAudioEl.currentTime = 0; }catch(e){} bgAudioStop(); }
       function nextTrack(auto){
         if (!tracks.length) return;
+        /* Salto manual (botón, notificación, MediaSession): si la
+           canción no llegó a la mitad, cuenta como salto. Al terminar
+           sola (auto) no: el +1 ya lo dio el evento ended. */
+        if (!auto) noteLeavingTrack();
         if (auto && repeatMode === 2){ if (isHiddenYouTube()){ playHiddenYouTube(tracks[current], true); return; } try{ curAudio().currentTime = 0; }catch(e){} startPlayback(); return; }
         /* Siguiente DENTRO de la cola actual (por origen): la música de
            YouTube no salta a la local ni al revés. */
@@ -3416,14 +3683,18 @@
             var cur = tracks[current];
             if (cur && isOnlineType(cur)){
               /* Fin de la cola con un tema online: la radio sigue con
-                 música sugerida del mismo origen (YouTube o Facebook);
-                 si no hay sugeridos, para. */
+                 música sugerida de YouTube; si no hay sugeridos, para.
+                 (Las de Facebook ya no tienen radio: paran, como las
+                 locales, porque su búsqueda se quitó.) */
               playNextSuggestion(cur).then(function(ok){
                 if (!ok){ pauseAllAudio(); if (ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } }
               });
               return;
             }
-            pauseAllAudio(); if (ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } return;
+            pauseAllAudio(); if (ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} }
+            /* Fin de la mezcla (o de la cola local): la mezcla termina. */
+            activeMix = null;
+            return;
           }
           n = q[0];
         }
@@ -3434,6 +3705,8 @@
         if (isHiddenYouTube()){
           if (ytCurrentTime() > 3){ if (ytApiPlayer && ytApiPlayer.seekTo){ try{ ytApiPlayer.seekTo(0, true); }catch(e){} } else { try{ ytAudioEl.currentTime = 0; }catch(e){} } return; }
         } else if (curAudio().currentTime > 3){ curAudio().currentTime = 0; return; }
+        /* Salto manual a la anterior: si la canción no llegó a la mitad, cuenta como salto. */
+        noteLeavingTrack();
         /* Anterior DENTRO de la cola actual (por origen). */
         var q = queueIndices();
         if (!q.length) return;
@@ -3456,7 +3729,7 @@
       }
       ytAudioEl.addEventListener("play", function(){ if (tracks[current] && tracks[current].type === "ytaudio") setPlayIcons(true); });
       ytAudioEl.addEventListener("pause", function(){ if (tracks[current] && tracks[current].type === "ytaudio" && !isHiddenYouTube()) setPlayIcons(false); });
-      ytAudioEl.addEventListener("ended", function(){ if (tracks[current] && tracks[current].type === "ytaudio") nextTrack(true); });
+      ytAudioEl.addEventListener("ended", function(){ if (tracks[current] && tracks[current].type === "ytaudio"){ recordPlayEnd(); nextTrack(true); } });
       ytAudioEl.addEventListener("loadedmetadata", function(){
         if (!tracks[current] || tracks[current].type !== "ytaudio") return;
         $("tTot").textContent = fmt(ytAudioEl.duration);
@@ -3473,7 +3746,7 @@
       });
       audio.addEventListener("play", function(){ setPlayIcons(true); bgAudioSync(); try{ if (vizCtx && vizCtx.state === "suspended") vizCtx.resume(); }catch(e){} });
       audio.addEventListener("pause", function(){ setPlayIcons(false); bgAudioSync(); saveState(); });
-      audio.addEventListener("ended", function(){ nextTrack(true); });
+      audio.addEventListener("ended", function(){ recordPlayEnd(); nextTrack(true); });
       audio.addEventListener("error", function(){
         var t = tracks[current];
         if (!t || !t.cacheUrl || t._cacheRetry) return;
@@ -3840,8 +4113,6 @@
         if (p0 && p0.clearAudioCache) p0.clearAudioCache().catch(function(){});
       } catch(e){}
       nativeDlOnCacheProgress();
-      /* NUEVO13: estado de la sesión de Facebook (sin bloquear el arranque). */
-      try { fbCheckLogin(); } catch(e){}
       /* Al instalar la app por primera vez, yt-dlp se actualiza solo en
          segundo plano (una sola vez): así el caché no falla por la
          versión vieja que trae el APK. Si no hay internet, se reintenta
