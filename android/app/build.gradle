@@ -1,5 +1,20 @@
 apply plugin: 'com.android.application'
 
+/* Número de versión (NUEVO21): el número de corrida de GitHub Actions,
+   para que cada APK sea una actualización de la anterior. Se calcula
+   AQUÍ, fuera del bloque android, con asignación directa (versionCode =)
+   en vez de la forma corta de Gradle, porque la expresión con getenv
+   dentro de defaultConfig hacía fallar la evaluación del proyecto
+   ("Value is null" en la corrida #36). Sin número de corrida (build
+   local), queda versionCode 1 / versionName 1.0. */
+def gurruRunNumber = System.getenv("GITHUB_RUN_NUMBER")
+def gurruVersionCode = 1
+def gurruVersionName = "1.0"
+if (gurruRunNumber != null && (gurruRunNumber ==~ /\d+/)) {
+    gurruVersionCode = gurruRunNumber.toInteger()
+    gurruVersionName = "1.0." + gurruRunNumber
+}
+
 android {
     namespace "com.gurru.music"
     compileSdk rootProject.ext.compileSdkVersion
@@ -7,8 +22,8 @@ android {
         applicationId "com.gurru.music"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
-        versionName "1.0." + (System.getenv("GITHUB_RUN_NUMBER") ?: "0")
+        versionCode = gurruVersionCode
+        versionName = gurruVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
