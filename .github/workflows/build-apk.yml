@@ -44,6 +44,22 @@ jobs:
           if [ -z "$KEYSTORE_BASE64" ]; then echo "::error::Falta el secreto KEYSTORE_BASE64 en GitHub (repo → Settings → Secrets and variables → Actions). Agrégalo con la llave de Gurru Music (ver LEEME-LLAVE-DE-FIRMA.txt) y vuelve a correr el workflow."; exit 1; fi
           echo "$KEYSTORE_BASE64" | base64 -d > /tmp/gurru-release.keystore
 
+      - name: Diagnosticar la llave de firma (temporal)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "base64 len: ${#KEYSTORE_BASE64}"
+          echo "alias len: ${#KEY_ALIAS}"
+          echo "store pass len: ${#KEYSTORE_PASSWORD}"
+          echo "key pass len: ${#KEY_PASSWORD}"
+          ls -l /tmp/gurru-release.keystore
+          md5sum /tmp/gurru-release.keystore
+          keytool -list -keystore /tmp/gurru-release.keystore -storepass "$KEYSTORE_PASSWORD" || echo "LIST FALLO"
+          keytool -list -keystore /tmp/gurru-release.keystore -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" || echo "ALIAS NO EXISTE"
+
       - name: Compilar el APK (release, firmado con la llave estable)
         env:
           KEYSTORE_PATH: /tmp/gurru-release.keystore
