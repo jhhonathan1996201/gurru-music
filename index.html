@@ -148,6 +148,26 @@
       /* Resultados del buscador de YouTube: tocar uno abre la ventana
          para elegir Escuchar o Descargar. */
       .yt-results{ margin-top:10px; display:flex; flex-direction:column; gap:8px; overflow:auto; min-height:0; }
+
+      /* ===== Apartado FACEBOOK (NUEVO13, prueba) ===== */
+      .fb-box{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; margin-top:12px; border:1.5px solid rgba(24,119,242,.6); background:rgba(24,119,242,.12); border-radius:12px; padding:12px; }
+      .fb-box .yt-h .fb-badge{ background:#1877F2; color:#fff; font-size:11px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:.04em; }
+      .fb-add{ border:0; background:#1877F2; color:#fff; border-radius:9px; padding:10px 14px; font-weight:800; font-size:13.5px; white-space:nowrap; }
+      .fb-auth{ display:flex; flex-direction:column; gap:8px; margin:2px 0 10px; padding:10px; border:1px solid rgba(125,211,252,.3); border-radius:10px; background:rgba(2,132,199,.1); }
+      .fb-auth-msg{ font-size:13px; color:#fff; line-height:1.45; }
+      .fb-auth-msg small{ display:block; color:var(--soft); font-size:12px; margin-top:2px; }
+      .fb-btn{ border:1.5px solid #1877F2; background:#1877F2; color:#fff; border-radius:10px; padding:10px 14px; font-size:14px; font-weight:800; font-family:inherit; }
+      .fb-btn.ghost{ background:transparent; color:#fff; }
+      .src-badge.fb{ background:#1877F2; }
+      .c-badge.fb{ background:#1877F2; }
+      /* ===== Mini reproductor (NUEVO13) ===== */
+      #miniPlayer{ flex:0 0 auto; display:none; align-items:center; gap:10px; padding:8px 12px; background:linear-gradient(180deg, rgba(2,20,50,.94), rgba(1,10,36,.97)); border-top:1px solid rgba(125,211,252,.28); cursor:pointer; }
+      #miniPlayer.show{ display:flex; }
+      #miniArt{ width:42px; height:42px; border-radius:8px; object-fit:cover; flex:0 0 auto; background:#0a2a5e; }
+      .mini-meta{ flex:1; min-width:0; }
+      #miniTitle{ display:block; font-size:14px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      #miniArtist{ display:block; font-size:12px; color:var(--soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      #miniPlayBtn{ flex:0 0 auto; width:44px; height:44px; border-radius:50%; border:1.5px solid rgba(125,211,252,.55); background:rgba(34,211,238,.18); color:#fff; font-size:18px; display:grid; place-items:center; }
       .yt-result{ display:flex; gap:10px; align-items:center; width:100%; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:8px; cursor:pointer; color:inherit; font:inherit; text-align:left; }
       .yt-result:active{ background:rgba(34,211,238,.14); }
       .yt-result img{ width:96px; height:54px; object-fit:cover; border-radius:6px; flex:0 0 96px; background:#000; }
@@ -201,9 +221,11 @@
          visibles. Reemplaza las pestañas de arriba (ya no hay dos
          navegaciones). */
       .softbar{ flex:0 0 auto; position:relative; z-index:6; display:flex; padding-bottom:env(safe-area-inset-bottom); background:linear-gradient(180deg, rgba(1,10,36,.25), rgba(1,10,36,.92) 30%); border-top:1px solid rgba(125,211,252,.22); }
-      .nav-btn{ flex:1; min-width:0; border:0; background:transparent; color:rgba(186,230,253,.75); display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 4px 10px; font-size:13px; font-weight:800; min-height:56px; cursor:pointer; }
+      .nav-btn{ flex:1; min-width:0; border:0; background:transparent; color:rgba(186,230,253,.75); display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 2px 10px; font-size:11px; font-weight:800; min-height:56px; cursor:pointer; overflow:hidden; }
+      .nav-btn span{ max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .nav-btn svg{ width:24px; height:24px; fill:currentColor; }
       .nav-btn.yt svg{ fill:#ff4d6d; }
+      .nav-btn.fb svg{ fill:#1877F2; }
       .nav-btn.on{ color:var(--accent); text-shadow:0 0 8px var(--glow); box-shadow:inset 0 2px 0 var(--accent); }
       .nav-btn:active{ opacity:.75; }
 
@@ -397,7 +419,7 @@
          - Avisos flotantes (toasts) con Reintentar y detalle expandible.
          - Diálogo para editar datos y buscar la carátula del álbum. */
       .pill-btn{ border:1.5px solid rgba(125,211,252,.55); background:rgba(2,132,199,.22); color:#fff; border-radius:999px; padding:9px 16px; font-size:13px; font-weight:800; cursor:pointer; }
-      .lyrics-row{ flex:0 0 auto; display:flex; justify-content:center; padding:5px 0 0; }
+      .lyrics-row{ flex:0 0 auto; display:flex; justify-content:center; gap:8px; padding:5px 0 0; }
       .lyrics-btn{ min-width:150px; min-height:44px; border:1.5px solid rgba(125,211,252,.6); background:rgba(2,132,199,.22); color:#a5f3fc; border-radius:999px; font-size:15px; font-weight:800; letter-spacing:.04em; padding:8px 24px; box-shadow:0 0 10px rgba(34,211,238,.25); cursor:pointer; }
       .lyrics-btn:active{ transform:scale(.97); }
       .art img.art-logo{ position:static; inset:auto; width:min(62%,230px); height:auto; object-fit:contain; display:none; border-radius:20px; box-shadow:0 0 26px rgba(0,229,255,.4); }
@@ -433,6 +455,7 @@
       .set-credits .cr-big{ font-size:16px; font-weight:800; color:#fff; }
       .set-credits .cr-sub{ font-size:13px; color:var(--soft); margin-top:6px; }
       .set-credits .cr-dev{ font-size:13.5px; color:#fff; margin-top:10px; font-weight:700; }
+      .set-credits .cr-pow{ font-size:11px; color:rgba(186,230,253,.55); margin-top:10px; }
       /* Avisos flotantes (toasts): errores con Reintentar y detalle que se expande al tocar. */
       #toastWrap{ position:absolute; left:12px; right:12px; bottom:76px; z-index:25; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
       .toast{ pointer-events:auto; background:#0a2247; border:1.5px solid rgba(125,211,252,.55); border-radius:12px; padding:10px 12px; box-shadow:0 12px 30px rgba(0,0,0,.55); cursor:pointer; }
@@ -495,7 +518,7 @@
 
       <main>
         <!-- ============ REPRODUCIENDO ============ -->
-        <section class="view" id="viewPlayer" aria-label="Canción actual">
+        <section class="view" id="viewPlayer" aria-label="Canción actual" hidden>
           <div class="np">
             <div class="art-wrap" id="artWrap">
               <div class="art" id="artBox">
@@ -544,6 +567,7 @@
 
             <div class="lyrics-row">
               <button class="lyrics-btn" id="btnLyrics" type="button" title="Ver la letra de la canción" aria-label="Ver la letra de la canción">♪&nbsp; Letra</button>
+              <button class="lyrics-btn" id="btnDownload" type="button" title="Guardar esta canción en el teléfono" aria-label="Descargar esta canción">⬇&nbsp; Descargar</button>
             </div>
 
             <canvas id="viz" width="560" height="30" aria-hidden="true"></canvas>
@@ -568,7 +592,7 @@
         </section>
 
         <!-- ============ BIBLIOTECA ============ -->
-        <section class="view" id="viewLibrary" aria-label="Biblioteca de música" hidden>
+        <section class="view" id="viewLibrary" aria-label="Biblioteca de música">
           <div class="lib">
           <button class="add-toggle" id="addToggle" type="button">− Agregar música</button>
           <div class="add-section" id="addSection">
@@ -656,6 +680,27 @@
           </div>
         </section>
 
+        <!-- ============ FACEBOOK (prueba, NUEVO13) ============ -->
+        <section class="view" id="viewFacebook" aria-label="Facebook" hidden>
+          <div class="lib">
+            <div class="fb-box">
+              <div class="yt-h"><span class="fb-badge">Facebook</span><span>Buscar música</span></div>
+              <p>Busca canciones completas publicadas en Facebook. Primero inicia sesión con tu cuenta: la búsqueda se hace con tu sesión.</p>
+              <div class="fb-auth" id="fbAuthBox">
+                <div class="fb-auth-msg" id="fbAuthMsg">No has iniciado sesión en Facebook.</div>
+                <button class="fb-btn" id="fbLoginBtn" type="button">Iniciar sesión en Facebook</button>
+                <button class="fb-btn ghost" id="fbLogoutBtn" type="button" hidden>Cerrar sesión</button>
+              </div>
+              <div class="yt-row">
+                <input type="search" id="fbSearchInput" placeholder="Canción o artista…" aria-label="Buscar en Facebook" />
+                <button class="fb-add" id="fbSearchBtn">Buscar</button>
+              </div>
+              <div class="yt-msg" id="fbMsg" role="status"></div>
+              <div class="yt-results" id="fbSearchResults" aria-label="Resultados de Facebook"></div>
+            </div>
+          </div>
+        </section>
+
         <!-- ============ CONFIGURACIÓN ============ -->
         <section class="view" id="viewSettings" aria-label="Configuración" hidden>
           <div class="set-wrap">
@@ -673,13 +718,22 @@
             </div>
             <div class="set-h">Créditos</div>
             <div class="set-credits">
-              <div class="cr-big">App diseñada con el poder de Muse</div>
+              <div class="cr-big">Desarrollador: Jonathan Aguilar Lopez</div>
               <div class="cr-sub">Gurru Music · Reproductor de música</div>
-              <div class="cr-dev">Desarrollador: Jonathan Aguilar Lopez</div>
+              <div class="cr-pow">Powered by Muse</div>
             </div>
           </div>
         </section>
       </main>
+
+      <!-- Mini reproductor (NUEVO13): fuera de la vista del reproductor
+           muestra la canción que suena (portada, título, artista) con
+           play/pausa; tocarlo vuelve al reproductor principal. -->
+      <div id="miniPlayer" role="button" tabindex="0" aria-label="Volver al reproductor">
+        <img id="miniArt" src="logo.png" alt="" />
+        <span class="mini-meta"><span id="miniTitle">Sin música</span><span id="miniArtist"></span></span>
+        <button id="miniPlayBtn" type="button" aria-label="Reproducir o pausar">▶</button>
+      </div>
 
       <!-- Barra inferior fija de navegación (uso con el pulgar): Descargas,
            Biblioteca y YouTube siempre visibles. En Biblioteca no hay botón
@@ -697,6 +751,10 @@
           <svg viewBox="0 0 24 24"><path d="M23 12s0-3.8-.5-5.6c-.3-1-1.7-1-2-2C18.7 4 12 4 12 4s-6.7 0-8.5.4c-1 .3-1.7 1-2 2C1 8.2 1 12 1 12s0 3.8.5 5.6c.3 1 1 1.7 2 2 1.8.4 8.5.4 8.5.4s6.7 0 8.5-.4c1-.3 1.7-1 2-2 .5-1.8.5-5.6.5-5.6zM9.8 15.5v-7l6 3.5-6 3.5z"/></svg>
           <span>YouTube</span>
         </button>
+        <button class="nav-btn fb" id="navFacebook" data-view="facebook" type="button">
+          <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          <span>Facebook</span>
+        </button>
         <button class="nav-btn" id="navSettings" data-view="settings" type="button">
           <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.03-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.98 3.6-3.6 3.6z"/></svg>
           <span>Ajustes</span>
@@ -711,7 +769,7 @@
            el usuario elige Escuchar o Descargar. -->
       <div class="choice-overlay" id="choiceOverlay" role="dialog" aria-modal="true" aria-labelledby="choiceTitle">
         <div class="choice-card">
-          <span class="c-badge">YouTube</span>
+          <span class="c-badge" id="choiceBadge">YouTube</span>
           <h2 id="choiceTitle">¿Qué quieres hacer?</h2>
           <p class="c-sub" id="choiceSub"></p>
           <button class="choice-btn listen" id="choiceListenBtn">
@@ -796,7 +854,7 @@
       var seeking = false;
       var uid = 0;
       var view = "player";
-      var lastVol = 0.8;
+      var lastVol = 1;
 
       /* ===== Guardar la biblioteca y el historial en el teléfono =====
          Al cerrar y abrir la app, la biblioteca (canciones de YouTube y
@@ -1016,9 +1074,10 @@
       function saveMetaOverrides(){ try{ localStorage.setItem(META_OV_KEY, JSON.stringify(metaOverrides)); }catch(e){} }
 
       /* ---------- Vistas ---------- */
-      /* Sin botón Atrás: entrar a Biblioteca deja una entrada en el historial,
-         así el gesto atrás del teléfono (popstate) regresa al reproductor. */
-      var libraryInHistory = false;
+      /* La pantalla principal es la Biblioteca (no el reproductor).
+         Entrar a otra vista deja una entrada en el historial, así el
+         gesto atrás del teléfono (popstate) regresa a la Biblioteca. */
+      var navInHistory = false;
       var suppressNextPop = false;
       function showView(v, skipHistory){
         view = v;
@@ -1026,29 +1085,33 @@
         $("viewLibrary").hidden = v !== "library";
         $("viewDownloads").hidden = v !== "downloads";
         $("viewYouTube").hidden = v !== "youtube";
+        $("viewFacebook").hidden = v !== "facebook";
         $("viewSettings").hidden = v !== "settings";
         if (v === "library"){ maybeRetryLocalScan(); }
         /* Al entrar a YouTube, la última búsqueda con sus resultados
            sigue ahí (se guarda en el teléfono); si la vista se vació
            por algún motivo, se restaura sin buscar de nuevo. */
         if (v === "youtube" && !$("ytSearchResults").children.length) restoreLastYtSearch();
+        /* NUEVO13: igual en Facebook (última búsqueda + estado de la sesión). */
+        if (v === "facebook"){ fbCheckLogin(); if (!$("fbSearchResults").children.length) restoreLastFbSearch(); }
         /* La barra inferior fija marca la sección activa (en el
            reproductor ninguna está activa: es su propia pantalla). */
-        ["downloads", "library", "youtube", "settings"].forEach(function(k){
+        ["downloads", "library", "youtube", "facebook", "settings"].forEach(function(k){
           var b = $("nav" + k.charAt(0).toUpperCase() + k.slice(1));
           if (b) b.classList.toggle("on", v === k);
         });
+        syncMiniPlayer();
         if (!skipHistory){
-          if (v !== "player" && !libraryInHistory){
-            libraryInHistory = true;
+          if (v !== "library" && !navInHistory){
+            navInHistory = true;
             try{ history.pushState({ gurruView: v }, ""); }catch(e){}
-          } else if (v === "player" && libraryInHistory){
-            libraryInHistory = false;
+          } else if (v === "library" && navInHistory){
+            navInHistory = false;
             suppressNextPop = true;
             try{ history.back(); }catch(e){ suppressNextPop = false; }
           }
-        } else if (v === "player"){
-          libraryInHistory = false;
+        } else if (v === "library"){
+          navInHistory = false;
         }
         if (v === "player"){
           requestAnimationFrame(function(){ setMarquee($("mTitle")); setMarquee($("mArtist")); });
@@ -1062,14 +1125,17 @@
       }
       window.addEventListener("popstate", function(){
         if (suppressNextPop){ suppressNextPop = false; return; }
-        libraryInHistory = false;
-        if (view !== "player") showView("player", true);
+        navInHistory = false;
+        if (view !== "library") showView("library", true);
       });
       /* Gesto atrás EN EL APK: en el WebView de Capacitor el botón/gesto
          atrás del sistema NO dispara popstate, así que sin esto la app se
          cerraba desde cualquier vista. Con el plugin App de Capacitor se
-         intercepta: si hay una ventana encima se cierra, si no estás en el
-         reproductor se vuelve a él, y solo en el reproductor se sale. */
+         intercepta: si hay una ventana encima se cierra, si no estás en
+         la Biblioteca se vuelve a ella, y en la Biblioteca NO se sale de
+         la app: se minimiza (queda en segundo plano y la música sigue
+         sonando, como YouTube Music). Salir del todo solo se hace desde
+         Recientes o con el botón Detener de la notificación. */
       (function(){
         var capApp = null;
         try {
@@ -1084,8 +1150,11 @@
             if (overlay && overlay.classList.contains("show")){ closeChoice(); return; }
             var editOv = $("editOverlay");
             if (editOv && editOv.classList.contains("show")){ closeEdit(); return; }
-            if (view !== "player"){ showView("player", true); return; }
-            try { capApp.exitApp(); } catch(e){}
+            if (view !== "library"){ showView("library", true); return; }
+            /* En la pantalla principal (Biblioteca) no se cierra la app:
+               se minimiza para que la música siga sonando. Si el plugin
+               no trae minimizeApp, se sale como antes. */
+            try { if (capApp.minimizeApp) capApp.minimizeApp(); else capApp.exitApp(); } catch(e){ try{ capApp.exitApp(); }catch(e2){} }
           });
         } catch(e){}
       })();
@@ -1282,8 +1351,9 @@
       }
       function openRowMenu(anchor, t, i){
         var isYt = t.type === "youtube" || t.type === "ytaudio";
+        var isOnlineDl = isOnlineType(t);
         var items = [{ label: "▶  Escuchar", fn: function(){ playTrack(i); showView("player"); } }];
-        if (isYt && !t.downloaded){
+        if (isOnlineDl && !t.downloaded){
           items.push({ label: t.dlState === "downloading" ? "⬇  Descargando…" : "⬇  Descargar al teléfono", fn: function(){ queueDownload(t, true); } });
         }
         items.push({ label: "✎  Editar datos / carátula", fn: function(){ openEdit(t); } });
@@ -1300,6 +1370,7 @@
           if (q && (t.title + " " + t.artist + " " + t.album).toLowerCase().indexOf(q) === -1) return;
           if (libFilter === "local" && t.type !== "local") return;
           if (libFilter === "youtube" && !(t.type === "youtube" || t.type === "ytaudio")) return;
+          if (libFilter === "facebook" && t.type !== "facebook") return;
           if (libFilter === "downloaded" && !t.downloaded) return;
           items.push({ t: t, i: i });
         });
@@ -1314,11 +1385,13 @@
           var isYt = t.type === "youtube" || t.type === "ytaudio";
           var art = t.artUrl || "logo.png";
           var dlBadge = "";
-          if (isYt && !t.downloaded && t.dlState === "downloading") dlBadge = '<span class="dl-badge">' + (typeof t.dlProgress === "number" ? Math.floor(t.dlProgress) + "%" : "…") + '</span>';
+          if ((isYt || t.type === "facebook") && !t.downloaded && t.dlState === "downloading") dlBadge = '<span class="dl-badge">' + (typeof t.dlProgress === "number" ? Math.floor(t.dlProgress) + "%" : "…") + '</span>';
           else if (t.downloaded) dlBadge = '<span class="dl-badge">MP3</span>';
           var playIcon = isYt
             ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ff0033" d="M23 12s0-3.8-.5-5.6c-.3-1-1-1.7-2-2C18.7 4 12 4 12 4s-6.7 0-8.5.4c-1 .3-1.7 1-2 2C1 8.2 1 12 1 12s0 3.8.5 5.6c.3 1 1 1.7 2 2 1.8.4 8.5.4 8.5.4s6.7 0 8.5-.4c1-.3 1.7-1 2-2 .5-1.8.5-5.6.5-5.6zM9.8 15.5v-7l6 3.5-6 3.5z"/></svg>'
-            : '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#22d3ee" d="M8 5v14l11-7z"/></svg>';
+            : (t.type === "facebook"
+            ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>'
+            : '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#22d3ee" d="M8 5v14l11-7z"/></svg>');
           li.innerHTML =
             '<span class="thumb"><img src="' + esc(art) + '" alt="" onerror="this.onerror=null;this.src=\'logo.png\';" /></span>' +
             '<span class="meta"><span class="pt">' + esc(cleanTitle(t.title)) + dlBadge + '</span><span class="pa">' + esc(t.artist) + '</span></span>' +
@@ -1367,15 +1440,21 @@
          YouTube; si suena la Biblioteca, solo las locales (las
          descargadas ya son locales). Cada fila lleva su número en la
          cola (1/12…) y botones ↑ ↓ para reordenarla con un toque. */
+      /* NUEVO13: Facebook es un tercer origen (sus canciones solo se
+         mezclan con las de Facebook, no con las de YouTube). */
+      function isOnlineType(t){ return !!t && (t.type === "youtube" || t.type === "ytaudio" || t.type === "facebook"); }
+      function originOf(t){
+        if (!t) return "local";
+        if (t.type === "youtube" || t.type === "ytaudio") return "yt";
+        if (t.type === "facebook") return "fb";
+        return "local";
+      }
       function queueIndices(){
         if (current < 0 || !tracks[current]) return [];
-        var cur = tracks[current];
-        var yt = cur.type === "youtube" || cur.type === "ytaudio";
+        var org = originOf(tracks[current]);
         var out = [];
         for (var i = 0; i < tracks.length; i++){
-          var t = tracks[i];
-          var isYt = t.type === "youtube" || t.type === "ytaudio";
-          if (isYt === yt) out.push(i);
+          if (originOf(tracks[i]) === org) out.push(i);
         }
         return out;
       }
@@ -1416,11 +1495,11 @@
           else { kind = "next"; label = (qi === pos + 1) ? "Siguiente" : "Después"; }
           var li = document.createElement("li");
           li.className = kind === "current" ? "is-current" : (kind === "prev" ? "is-prev" : "is-next");
-          var badge = (t.type === "youtube" || t.type === "ytaudio") ? '<span class="src-badge">YouTube</span>' + (t.suggested ? '<span class="src-badge sugg">Sugerencia</span>' : "") : (t.downloaded ? '<span class="src-badge saved">MP3</span>' : "");
+          var badge = (t.type === "youtube" || t.type === "ytaudio") ? '<span class="src-badge">YouTube</span>' + (t.suggested ? '<span class="src-badge sugg">Sugerencia</span>' : "") : (t.type === "facebook" ? '<span class="src-badge fb">Facebook</span>' + (t.suggested ? '<span class="src-badge sugg">Sugerencia</span>' : "") : (t.downloaded ? '<span class="src-badge saved">MP3</span>' : ""));
           li.innerHTML =
             '<span class="q-first"><span class="q-num">' + (qi + 1) + '</span><span class="q-tag">' + esc(label) + '</span></span>' +
             '<span class="q-t">' + esc(cleanTitle(t.title)) + badge + ' <span class="q-a">&middot; ' + esc(t.artist) + '</span></span>' +
-            '<span class="q-dur">' + (t.duration ? fmtShort(t.duration) : (t.type === "youtube" ? (t.kind === "playlist" ? "Lista" : "Audio") : "--:--")) + '</span>' +
+            '<span class="q-dur">' + (t.duration ? fmtShort(t.duration) : (t.type === "youtube" ? (t.kind === "playlist" ? "Lista" : "Audio") : (t.type === "facebook" ? "Audio" : "--:--"))) + '</span>' +
             '<span class="q-move"><button type="button" data-mv="-1" ' + (qi === 0 ? "disabled" : "") + ' title="Subir en la cola" aria-label="Subir en la cola">↑</button>' +
             '<button type="button" data-mv="1" ' + (qi === q.length - 1 ? "disabled" : "") + ' title="Bajar en la cola" aria-label="Bajar en la cola">↓</button></span>';
           if (kind !== "current"){
@@ -1478,6 +1557,8 @@
             navigator.mediaSession.metadata = new MediaMetadata(md);
           }catch(e){}
         }
+        syncPlayerDownloadBtn();
+        syncMiniPlayer();
       }
       function resetScreen(){
         $("tTitle").textContent = "Elige una carpeta";
@@ -1889,8 +1970,10 @@
       function downloadTrackNative(track, entry, retried){
         nativeDlOnProgress();
         var p = getNativeDl();
-        var watch = "https://www.youtube.com/watch?v=" + encodeURIComponent(track.videoId);
-        var base = (track.artist && track.artist !== "YouTube" ? track.artist + " - " : "") + track.title;
+        var watch = (track.type === "facebook" && track.url)
+          ? track.url
+          : "https://www.youtube.com/watch?v=" + encodeURIComponent(track.videoId);
+        var base = (track.artist && track.artist !== "YouTube" && track.artist !== "Facebook" ? track.artist + " - " : "") + track.title;
         var id = String(entry.id);
         dlNativeRunningId = id;
         dlSetStatus("⬇ Descargando con yt-dlp (" + dlFormat.toUpperCase() + "): " + track.title + " — el porcentaje va en Descargas…", false);
@@ -2142,6 +2225,9 @@
           dlSetStatus("Preparando «" + cleanTitle(cachePreparing.track.title) + "»… " + pct + "%", false);
         });
       }
+      /* NUEVO13: también prepara las de Facebook (su URL ya viene en
+         la canción); el caché es el mismo y yt-dlp usa las cookies de
+         la sesión cuando la URL es de facebook.com. */
       function playYouTubeOnline(track, autoplay, seekSec){
         stopYouTube();
         if (!autoplay){
@@ -2168,7 +2254,9 @@
         cachePreparing = { track: track, token: token };
         dlSetStatus("Preparando «" + cleanTitle(track.title) + "»…", false);
         setPlayIcons(false);
-        var watch = "https://www.youtube.com/watch?v=" + encodeURIComponent(track.videoId);
+        var watch = (track.type === "facebook" && track.url)
+          ? track.url
+          : "https://www.youtube.com/watch?v=" + encodeURIComponent(track.videoId);
         p.cacheAudio({ url: watch, videoId: track.videoId }).then(function(res){
           if (token === cacheToken) cacheBusy = false;
           var path = res && res.path;
@@ -2343,6 +2431,12 @@
         choiceCtx = ctx;
         var n = ctx.indices.length;
         var first = tracks[ctx.indices[0]];
+        /* La ventana dice de dónde salió la canción (YouTube o Facebook). */
+        var fbBadge = $("choiceBadge");
+        if (fbBadge){
+          if (first && first.type === "facebook"){ fbBadge.textContent = "Facebook"; fbBadge.classList.add("fb"); }
+          else { fbBadge.textContent = "YouTube"; fbBadge.classList.remove("fb"); }
+        }
         if (ctx.groupTitle){
           $("choiceTitle").textContent = "Playlist agregada: " + n + (n === 1 ? " canción" : " canciones");
           $("choiceSub").textContent = "Se cargó la lista completa, canción por canción, en tu Biblioteca. Nada está sonando ni descargándose todavía: tú eliges.";
@@ -2568,7 +2662,7 @@
         if (!choiceCtx) return;
         var firstIdx = choiceCtx.indices[0];
         closeChoice();
-        if (typeof firstIdx === "number" && tracks[firstIdx]){ showView("player"); loadTrack(clearYtQueueExcept(firstIdx), true); }
+        if (typeof firstIdx === "number" && tracks[firstIdx]){ showView("player"); loadTrack(clearOnlineQueueExcept(firstIdx), true); }
       });
       $("choiceDownloadBtn").addEventListener("click", function(){
         if (!choiceCtx) return;
@@ -2679,6 +2773,230 @@
         $("ytMsg").className = "yt-msg ok";
         renderYtSearchResults(data.results, data.q);
       }
+      /* ----- Facebook (NUEVO13, prueba) -----
+         Facebook no tiene buscador público: la búsqueda se hace con la
+         sesión del usuario (plugin nativo FacebookAuth: login en un
+         WebView dentro de la app + búsqueda en m.facebook.com con sus
+         cookies). Los resultados se escuchan y se descargan con el
+         mismo camino que YouTube online (caché invisible + Descargar),
+         y yt-dlp usa las cookies cuando la URL es de facebook.com. */
+      var FBSEARCH_KEY = "gurru-fbsearch-v1";
+      var fbAuthPlugin = null;
+      var fbAuthChecked = false;
+      var fbLoggedIn = false;
+      function getFacebookAuth(){
+        if (fbAuthChecked) return fbAuthPlugin;
+        try {
+          if (window.Capacitor && window.Capacitor.registerPlugin
+              && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()){
+            fbAuthPlugin = window.Capacitor.registerPlugin("FacebookAuth");
+            fbAuthChecked = true;
+          }
+        } catch(e){ fbAuthPlugin = null; }
+        return fbAuthPlugin;
+      }
+      function fbSetAuthUI(loggedIn){
+        fbLoggedIn = !!loggedIn;
+        var msg = $("fbAuthMsg");
+        var loginBtn = $("fbLoginBtn");
+        var logoutBtn = $("fbLogoutBtn");
+        if (msg) msg.innerHTML = loggedIn
+          ? "Sesión iniciada en Facebook. <small>Ya puedes buscar canciones completas publicadas en Facebook.</small>"
+          : "No has iniciado sesión en Facebook. <small>La búsqueda de Facebook necesita tu sesión: se abre una ventana de Facebook dentro de la app.</small>";
+        if (loginBtn) loginBtn.hidden = loggedIn;
+        if (logoutBtn) logoutBtn.hidden = !loggedIn;
+      }
+      function fbCheckLogin(){
+        var p = getFacebookAuth();
+        if (!p || !p.isLoggedIn){ fbSetAuthUI(false); return Promise.resolve(false); }
+        return p.isLoggedIn().then(function(r){
+          fbSetAuthUI(!!(r && r.loggedIn));
+          return !!(r && r.loggedIn);
+        }).catch(function(){ fbSetAuthUI(false); return false; });
+      }
+      function fbLogin(){
+        var p = getFacebookAuth();
+        var msg = $("fbMsg");
+        if (!p || !p.login){
+          if (msg){ msg.textContent = "El inicio de sesión en Facebook solo funciona dentro del APK instalado (icono de la patita)."; msg.className = "yt-msg"; }
+          return;
+        }
+        if (msg){ msg.textContent = "Abriendo Facebook…"; msg.className = "yt-msg"; }
+        p.login().then(function(r){
+          if (r && r.loggedIn){
+            fbSetAuthUI(true);
+            if (msg){ msg.textContent = "✓ Sesión iniciada. Ya puedes buscar música en Facebook."; msg.className = "yt-msg ok"; }
+          } else {
+            fbSetAuthUI(false);
+            if (msg){ msg.textContent = (r && r.message) || "No se inició sesión en Facebook."; msg.className = "yt-msg"; }
+          }
+        }).catch(function(err){
+          var m = (err && err.message) ? err.message : String(err || "");
+          if (msg){ msg.textContent = "No se pudo abrir el inicio de sesión: " + m; msg.className = "yt-msg"; }
+        });
+      }
+      function fbLogout(){
+        var p = getFacebookAuth();
+        if (!p || !p.logout){ fbSetAuthUI(false); return; }
+        p.logout().then(function(){ fbSetAuthUI(false); $("fbSearchResults").innerHTML = ""; $("fbMsg").textContent = "Sesión cerrada."; $("fbMsg").className = "yt-msg"; }).catch(function(){ fbSetAuthUI(false); });
+      }
+      function makeFbTrack(v){
+        return applyMetaOverrides({ id: ++uid, type: "facebook", kind: "video", videoId: String(v.id), playlistId: null, url: v.url, title: v.title || "Video de Facebook", artist: v.page || "Facebook", album: "Facebook · Solo audio", artUrl: v.thumbnail || null, duration: v.duration || 0, downloaded: false, dlState: null });
+      }
+      function searchFacebook(){
+        var input = $("fbSearchInput"), msg = $("fbMsg"), btn = $("fbSearchBtn"), box = $("fbSearchResults");
+        var q = (input.value || "").trim();
+        if (!q){
+          msg.textContent = "Escribe el nombre de una canción o un artista para buscar en Facebook.";
+          msg.className = "yt-msg";
+          return;
+        }
+        var p = getFacebookAuth();
+        if (!p || !p.searchVideos){
+          msg.textContent = "La búsqueda en Facebook solo funciona dentro del APK instalado (icono de la patita).";
+          msg.className = "yt-msg";
+          return;
+        }
+        btn.disabled = true;
+        msg.textContent = "Buscando «" + q + "» en Facebook…";
+        msg.className = "yt-msg";
+        box.innerHTML = "";
+        p.searchVideos({ query: q, limit: 20 }).then(function(res){
+          btn.disabled = false;
+          if (res && res.needsLogin){
+            fbSetAuthUI(false);
+            msg.textContent = "Facebook pide iniciar sesión: toca «Iniciar sesión en Facebook» y vuelve a buscar.";
+            msg.className = "yt-msg";
+            return;
+          }
+          var list = (res && res.results) || [];
+          if (!list.length){
+            msg.textContent = "No encontré nada para «" + q + "» en Facebook. Prueba con otro nombre o pega el link del video desde la app de Facebook.";
+            msg.className = "yt-msg";
+            return;
+          }
+          msg.textContent = "✓ " + list.length + " resultados. Toca uno y elige Escuchar o Descargar.";
+          msg.className = "yt-msg ok";
+          try { localStorage.setItem(FBSEARCH_KEY, JSON.stringify({ q: q, results: list })); } catch(e){}
+          renderFbSearchResults(list, q);
+        }).catch(function(err){
+          btn.disabled = false;
+          var m = (err && err.message) ? err.message : String(err || "");
+          msg.textContent = "No se pudo buscar en Facebook: " + (m || "inténtalo de nuevo") + ".";
+          msg.className = "yt-msg";
+          showToast({ kind: "err", title: "No se pudo buscar en Facebook", msg: "La búsqueda en Facebook falló. Toca para ver el motivo completo.", details: m || "sin motivo", retryLabel: "Reintentar búsqueda", onRetry: searchFacebook });
+        });
+      }
+      function renderFbSearchResults(list, query){
+        var box = $("fbSearchResults");
+        box.innerHTML = "";
+        list.forEach(function(r){
+          var row = document.createElement("button");
+          row.type = "button";
+          row.className = "yt-result";
+          var img = document.createElement("img");
+          img.src = r.thumbnail || "logo.png";
+          img.alt = "";
+          img.onerror = function(){ this.onerror = null; this.src = "logo.png"; };
+          var meta = document.createElement("span");
+          meta.className = "yr-meta";
+          var t = document.createElement("span");
+          t.className = "yr-t";
+          t.textContent = cleanTitle(r.title || "Video de Facebook");
+          var c = document.createElement("span");
+          c.className = "yr-c";
+          c.textContent = (r.page || "Facebook") + (r.duration ? " · " + fmt(r.duration) : "");
+          meta.appendChild(t);
+          meta.appendChild(c);
+          var go = document.createElement("span");
+          go.className = "yr-go";
+          go.textContent = "›";
+          row.appendChild(img);
+          row.appendChild(meta);
+          row.appendChild(go);
+          row.addEventListener("click", function(){
+            var track = makeFbTrack({ id: r.id, url: r.url, title: r.title || "Video de Facebook", page: r.page || "Facebook", duration: r.duration || 0, thumbnail: r.thumbnail });
+            track.searchQuery = query || "";
+            tracks.push(track);
+            var idx = tracks.length - 1;
+            renderPlaylist();
+            openChoice({ indices: [idx], groupTitle: null, canDownload: true });
+          });
+          box.appendChild(row);
+        });
+      }
+      /* La última búsqueda de Facebook sigue ahí al salir y entrar. */
+      function restoreLastFbSearch(){
+        var data = null;
+        try { data = JSON.parse(localStorage.getItem(FBSEARCH_KEY) || "null"); } catch(e){}
+        if (!data || !data.q || !Array.isArray(data.results) || !data.results.length) return;
+        var input = $("fbSearchInput");
+        if (input.value && input.value.trim() && input.value.trim() !== data.q) return;
+        input.value = data.q;
+        $("fbMsg").textContent = "✓ " + data.results.length + " resultados. Toca uno y elige Escuchar o Descargar.";
+        $("fbMsg").className = "yt-msg ok";
+        renderFbSearchResults(data.results, data.q);
+      }
+      /* Sugerencias de Facebook en "A continuación": más videos del
+         mismo artista/página, buscados en Facebook con la sesión. */
+      function fetchFbSuggestions(t){
+        var p = getFacebookAuth();
+        if (!p || !p.searchVideos) return Promise.resolve([]);
+        var gen = suggestGen;
+        var q = artistForSuggestions(t);
+        if (!q) return Promise.resolve([]);
+        return p.searchVideos({ query: q, limit: 10 }).then(function(res){
+          if (gen !== suggestGen) return [];
+          if (res && res.needsLogin) return [];
+          var list = (res && res.results) || [];
+          var fresh = list.filter(function(r){
+            if (!r || !r.id || suggestPlayed[r.id]) return false;
+            for (var i = 0; i < tracks.length; i++){ if (tracks[i].videoId === String(r.id)) return false; }
+            return true;
+          });
+          suggestPool = fresh.map(function(r){
+            return makeFbTrack({ id: r.id, url: r.url, title: r.title || "Video de Facebook", page: r.page || "Facebook", duration: r.duration || 0, thumbnail: r.thumbnail });
+          });
+          return suggestPool;
+        }).catch(function(){ return []; });
+      }
+      function ensureFbSuggestions(t){
+        if (!t || t.type !== "facebook") return;
+        if (t._suggSeeded) return;
+        var q = queueIndices();
+        var pos = q.indexOf(current);
+        var upcoming = (pos >= 0) ? q.length - pos - 1 : 0;
+        if (upcoming >= 3) return;
+        t._suggSeeded = true;
+        function appendFromPool(){
+          var added = 0;
+          while (suggestPool.length && added < 5){
+            var s = suggestPool.shift();
+            suggestPlayed[s.videoId] = true;
+            s.suggested = true;
+            tracks.push(s);
+            added++;
+          }
+          if (added){ renderPlaylist(); saveState(); }
+          return added;
+        }
+        if (suggestPool.length){ appendFromPool(); return; }
+        if (suggestFetching) return;
+        suggestFetching = true;
+        fetchFbSuggestions(t).then(function(){
+          suggestFetching = false;
+          appendFromPool();
+        });
+      }
+      $("fbSearchBtn").addEventListener("click", searchFacebook);
+      $("fbSearchInput").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); searchFacebook(); } });
+      $("fbLoginBtn").addEventListener("click", fbLogin);
+      $("fbLogoutBtn").addEventListener("click", fbLogout);
+      $("fbMsg").addEventListener("click", function(){
+        if (this.classList.contains("ok")) return;
+        if (this.textContent.trim()) showLastError();
+      });
+
       /* ---------- Música local automática (MediaStore, solo APK) ---------- */
       /* En el APK la app busca sola todas las canciones del teléfono con
          el plugin nativo LocalMusic (MediaStore): sin elegir carpetas.
@@ -2720,10 +3038,11 @@
           localScanRunning = false;
           localScanDone = true;
           var songs = (res && res.songs) || [];
-          /* Se conservan las de YouTube y las ya descargadas (que tras
-             descargar pasan a ser type "local" con downloaded=true); las
-             locales se reemplazan por el resultado nuevo del escaneo. */
-          var kept = tracks.filter(function(t){ return t.type === "youtube" || t.type === "ytaudio" || t.downloaded; });
+          /* Se conservan las online (YouTube y Facebook) y las ya
+             descargadas (que tras descargar pasan a ser type "local"
+             con downloaded=true); las locales se reemplazan por el
+             resultado nuevo del escaneo. */
+          var kept = tracks.filter(function(t){ return isOnlineType(t) || t.downloaded; });
           /* Las descargadas de YouTube también están en MediaStore (son
              archivos en Música/Gurru Music): no duplicarlas como locales.
              El título del archivo es "Artista - Título" y el de la pista
@@ -2908,7 +3227,8 @@
         }
         if (suggestFetching) return Promise.resolve(false);
         suggestFetching = true;
-        return fetchSuggestions(fromTrack).then(function(pool){
+        var fetchFn = (fromTrack && fromTrack.type === "facebook") ? fetchFbSuggestions : fetchSuggestions;
+        return fetchFn(fromTrack).then(function(pool){
           suggestFetching = false;
           if (!pool.length) return false;
           var t2 = suggestPool.shift();
@@ -2964,17 +3284,18 @@
 
       /* Al abrir una canción nueva desde online, la cola "A continuación"
          se borra y se genera una nueva desde esa canción (sus sugerencias
-         del mismo artista): las de YouTube anteriores salen de la cola;
-         las locales y las descargadas no se tocan. */
-      function clearYtQueueExcept(idx){
+         del mismo artista): las del mismo origen anteriores salen de la
+         cola; las locales y las descargadas no se tocan. */
+      function clearOnlineQueueExcept(idx){
         var keep = tracks[idx];
-        if (!keep || (keep.type !== "youtube" && keep.type !== "ytaudio")) return idx;
+        if (!keep || !isOnlineType(keep)) return idx;
+        var org = originOf(keep);
         suggestGen++;
         suggestPool = [];
         var kept = [];
         for (var i = 0; i < tracks.length; i++){
           var s = tracks[i];
-          if (s.type === "youtube" || s.type === "ytaudio"){ if (i === idx) kept.push(s); }
+          if (originOf(s) === org){ if (i === idx) kept.push(s); }
           else kept.push(s);
         }
         tracks = kept;
@@ -2991,15 +3312,15 @@
         ytLoadSeq++;
         /* Al reabrir la app, vuelve a la posición donde quedó (solo local). */
         var rs = restoreSeekSec; restoreSeekSec = null;
-        if ((t.type === "youtube" || t.type === "ytaudio") && !t.cacheUrl){
+        if (isOnlineType(t) && !t.cacheUrl){
           pauseAllAudio();
           showTrackOnScreen();
           renderPlaylist();
           saveState();
           playYouTubeOnline(t, autoplay, rs);
-          ensureYtSuggestions(t);
-          resolveArtist(t);
-          $("tCur").textContent = "00:00:00"; $("tTot").textContent = "YouTube · Audio";
+          if (t.type === "facebook"){ ensureFbSuggestions(t); }
+          else { ensureYtSuggestions(t); resolveArtist(t); }
+          $("tCur").textContent = "00:00:00"; $("tTot").textContent = (t.type === "facebook" ? "Facebook · Audio" : "YouTube · Audio");
           refreshLyricsForCurrent();
           return;
         }
@@ -3016,15 +3337,16 @@
         if (autoplay) startPlayback(); else setPlayIcons(false);
         /* En caché la canción es online aunque suene por el <audio>
            local: las sugerencias del artista también se siembran aquí. */
-        if (t.type === "youtube" || t.type === "ytaudio"){ ensureYtSuggestions(t); resolveArtist(t); }
+        if (t.type === "facebook"){ ensureFbSuggestions(t); }
+        else if (t.type === "youtube" || t.type === "ytaudio"){ ensureYtSuggestions(t); resolveArtist(t); }
         refreshLyricsForCurrent();
       }
       function playTrack(i){
         if (i === current && tracks.length){ togglePlay(); return; }
         var t = tracks[i];
-        if (t && (t.type === "youtube" || t.type === "ytaudio")){
+        if (t && isOnlineType(t)){
           /* Abrir una canción online regenera la cola desde ella. */
-          loadTrack(clearYtQueueExcept(i), true);
+          loadTrack(clearOnlineQueueExcept(i), true);
           return;
         }
         loadTrack(i, true);
@@ -3034,7 +3356,7 @@
         var t = tracks[current];
         /* En caché suena en el <audio> local, como un MP3: no pasa por
            el audio directo ni por el reproductor oficial. */
-        if (!t.cacheUrl && (t.type === "youtube" || t.type === "ytaudio" || isHiddenYouTube())){
+        if (!t.cacheUrl && (isOnlineType(t) || isHiddenYouTube())){
           if (ytApiPlayer && ytApiPlayer.playVideo){ try{ ytApiPlayer.setPlaybackQuality("highres"); ytApiPlayer.setVolume(Math.round(audio.volume * 100)); ytApiPlayer.playVideo(); }catch(e){} }
           else if (isHiddenYouTube()){
             var hasSrc = false;
@@ -3092,9 +3414,10 @@
         else {
           if (auto && repeatMode === 0){
             var cur = tracks[current];
-            if (cur && (cur.type === "youtube" || cur.type === "ytaudio")){
+            if (cur && isOnlineType(cur)){
               /* Fin de la cola con un tema online: la radio sigue con
-                 música sugerida de YouTube; si no hay sugeridos, para. */
+                 música sugerida del mismo origen (YouTube o Facebook);
+                 si no hay sugeridos, para. */
               playNextSuggestion(cur).then(function(ok){
                 if (!ok){ pauseAllAudio(); if (ytApiPlayer && ytApiPlayer.pauseVideo){ try{ ytApiPlayer.pauseVideo(); }catch(e){} } }
               });
@@ -3121,6 +3444,7 @@
       function setPlayIcons(playing){
         $("playIcon").innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
         renderPlayingState();
+        syncMiniPlayer();
       }
       function renderPlayingState(){
         var rows = $("playlist").querySelectorAll("li");
@@ -3209,8 +3533,9 @@
 
       /* ---------- Volumen (sin barra visible) ----------
          La barra de volumen se quitó de la pantalla: el volumen queda en
-         80% al arrancar y solo se puede silenciar con el botón de la
-         bocina o con las flechas ↑/↓ del teclado. */
+         100% al arrancar (igual que YouTube Music) y solo se puede
+         silenciar con el botón de la bocina o con las flechas ↑/↓ del
+         teclado. Antes quedaba en 80% y por eso se escuchaba más bajo. */
       function setVolume(v){
         v = Math.max(0, Math.min(1, v));
         audio.volume = v;
@@ -3218,8 +3543,8 @@
         if (ytApiPlayer && ytApiPlayer.setVolume){ try{ ytApiPlayer.setVolume(Math.round(v * 100)); }catch(e){} }
         if (v > 0) lastVol = v;
       }
-      audio.volume = 0.8;
-      try{ ytAudioEl.volume = 0.8; }catch(e){}
+      audio.volume = 1;
+      try{ ytAudioEl.volume = 1; }catch(e){}
       $("btnMute").addEventListener("click", function(){ setVolume(audio.volume > 0 ? 0 : lastVol); });
 
       /* ---------- Aleatorio / repetir ---------- */
@@ -3236,6 +3561,86 @@
       $("btnShuffle").addEventListener("click", function(){ shuffle = !shuffle; syncModes(); });
       $("btnRepeat").addEventListener("click", function(){ repeatMode = (repeatMode + 1) % 3; syncModes(); });
       $("btnLyrics").addEventListener("click", function(){ openLyrics(); });
+
+      /* ---------- Botón Descargar en el reproductor (NUEVO13) ----------
+         Cuando suena una canción online, su audio YA está descargado en
+         el caché invisible: el botón solo mueve ese archivo a
+         Música/Gurru Music (no lo baja de nuevo). Si el caché ya no
+         está, usa la descarga normal de yt-dlp. */
+      function syncPlayerDownloadBtn(){
+        var b = $("btnDownload");
+        if (!b) return;
+        var t = (current >= 0) ? tracks[current] : null;
+        b.style.display = (t && isOnlineType(t) && !t.downloaded) ? "" : "none";
+      }
+      function saveCurrentOnlineTrack(){
+        var t = (current >= 0) ? tracks[current] : null;
+        if (!t || !isOnlineType(t) || t.downloaded) return;
+        var btn = $("btnDownload");
+        if (t.cachePath){
+          var p = getNativeDl();
+          if (p && p.saveCachedAudio){
+            if (btn) btn.disabled = true;
+            dlSetStatus("Guardando «" + cleanTitle(t.title) + "» en Música/Gurru Music…", false);
+            var base = (t.artist && t.artist !== "YouTube" && t.artist !== "Facebook" ? t.artist + " - " : "") + t.title;
+            p.saveCachedAudio({ videoId: t.videoId, title: base }).then(function(res){
+              if (btn) btn.disabled = false;
+              var fmt = (res && res.format) || "m4a";
+              var fileUrl = null;
+              try { fileUrl = (window.Capacitor && window.Capacitor.convertFileSrc) ? window.Capacitor.convertFileSrc("file://" + res.filePath) : "file://" + res.filePath; } catch(e){ fileUrl = "file://" + res.filePath; }
+              t.url = fileUrl;
+              t.nativePath = res.filePath;
+              t.downloaded = true;
+              t.dlState = "done";
+              t.dlProgress = 100;
+              t.type = "local";
+              t.savedName = (res && res.fileName) || (dlSafeName(base) + "." + fmt);
+              /* Ya suena desde el archivo público: el caché ya no se usa. */
+              t.cacheUrl = null; t.cachePath = null;
+              loadDuration(fileUrl).then(function(d){
+                if (d){ t.duration = d; renderPlaylist(); if (tracks[current] === t) $("tTot").textContent = fmt(d); }
+              });
+              renderPlaylist();
+              saveState(); saveDlHistory();
+              if (tracks[current] === t) showTrackOnScreen();
+              dlSetStatus("✓ «" + cleanTitle(t.title) + "» guardada en Música/Gurru Music (" + fmt.toUpperCase() + "). Ya es pista local.", false);
+              syncPlayerDownloadBtn();
+            }).catch(function(err){
+              if (btn) btn.disabled = false;
+              /* El caché ya no tenía la canción: se usa la descarga normal. */
+              dlSetStatus("El caché ya no tenía la canción; se descarga normal en Descargas…", false);
+              queueDownload(t, true);
+            });
+            return;
+          }
+        }
+        /* Sin caché (o sin el método nuevo): descarga normal. */
+        queueDownload(t, true);
+        dlSetStatus("⬇ Descargando «" + cleanTitle(t.title) + "»: el porcentaje va en Descargas…", false);
+      }
+      $("btnDownload").addEventListener("click", saveCurrentOnlineTrack);
+
+      /* ---------- Mini reproductor (NUEVO13) ----------
+         Fuera de la vista del reproductor (Biblioteca, Descargas,
+         YouTube, Facebook, Ajustes) muestra la canción que suena con
+         su portada y play/pausa; tocarlo vuelve al reproductor. */
+      function syncMiniPlayer(){
+        var mp = $("miniPlayer");
+        if (!mp) return;
+        var t = (current >= 0) ? tracks[current] : null;
+        var show = view !== "player" && !!t;
+        mp.classList.toggle("show", show);
+        if (!show) return;
+        var art = $("miniArt");
+        if (art) art.src = (t.artUrl || "logo.png");
+        $("miniTitle").textContent = cleanTitle(t.title);
+        $("miniArtist").textContent = t.artist || "";
+        var btn = $("miniPlayBtn");
+        if (btn) btn.textContent = activeIsPlaying() ? "❚❚" : "▶";
+      }
+      $("miniPlayer").addEventListener("click", function(){ showView("player"); });
+      $("miniPlayer").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); showView("player"); } });
+      $("miniPlayBtn").addEventListener("click", function(ev){ ev.stopPropagation(); togglePlay(); });
       $("lyricsClose").addEventListener("click", function(){ closeLyrics(); });
       syncModes();
 
@@ -3338,6 +3743,7 @@
           { label: "Todas las canciones", on: libFilter === "all", fn: function(){ libFilter = "all"; syncLibToolState(); renderPlaylist(); } },
           { label: "Solo MP3 locales", on: libFilter === "local", fn: function(){ libFilter = "local"; syncLibToolState(); renderPlaylist(); } },
           { label: "Solo YouTube", on: libFilter === "youtube", fn: function(){ libFilter = "youtube"; syncLibToolState(); renderPlaylist(); } },
+          { label: "Solo Facebook", on: libFilter === "facebook", fn: function(){ libFilter = "facebook"; syncLibToolState(); renderPlaylist(); } },
           { label: "Solo descargadas", on: libFilter === "downloaded", fn: function(){ libFilter = "downloaded"; syncLibToolState(); renderPlaylist(); } },
           { label: "✕  Vaciar biblioteca", danger: true, fn: function(){ clearAll(); } }
         ]);
@@ -3409,7 +3815,7 @@
       document.addEventListener("keydown", function(ev){
         var tag = (ev.target && ev.target.tagName) || "";
         if (tag === "INPUT" || tag === "TEXTAREA") return;
-        if (ev.key === "Escape"){ var eo = $("editOverlay"); if (eo && eo.classList.contains("show")){ closeEdit(); return; } var lo = $("lyricsOverlay"); if (lo && lo.classList.contains("show")){ closeLyrics(); return; } if (view !== "player") showView("player"); return; }
+        if (ev.key === "Escape"){ var eo = $("editOverlay"); if (eo && eo.classList.contains("show")){ closeEdit(); return; } var lo = $("lyricsOverlay"); if (lo && lo.classList.contains("show")){ closeLyrics(); return; } if (view !== "library") showView("library"); return; }
         if (ev.code === "Space"){ ev.preventDefault(); togglePlay(); }
         else if (ev.key === "ArrowRight"){ seekBySeconds(5); }
         else if (ev.key === "ArrowLeft"){ seekBySeconds(-5); }
@@ -3419,7 +3825,7 @@
 
       renderPlaylist();
       resetScreen();
-      showView("player");
+      showView("library");
       /* Restaura la biblioteca y el historial guardados antes de pintar. */
       loadDlHistory();
       var restored = loadSavedState();
@@ -3434,6 +3840,8 @@
         if (p0 && p0.clearAudioCache) p0.clearAudioCache().catch(function(){});
       } catch(e){}
       nativeDlOnCacheProgress();
+      /* NUEVO13: estado de la sesión de Facebook (sin bloquear el arranque). */
+      try { fbCheckLogin(); } catch(e){}
       /* Al instalar la app por primera vez, yt-dlp se actualiza solo en
          segundo plano (una sola vez): así el caché no falla por la
          versión vieja que trae el APK. Si no hay internet, se reintenta
@@ -3447,16 +3855,6 @@
               try{ var m = $("dlUpdateMsg"); if (m) m.textContent = (r && r.status === "ALREADY_UP_TO_DATE") ? "yt-dlp ya está al día (" + (r.version || "") + ")." : "yt-dlp actualizado (" + ((r && r.version) || "") + ")."; }catch(e){}
             }).catch(function(){ /* se reintenta en la próxima apertura */ });
           }
-        }
-      } catch(e){}
-      /* Aviso único sobre la batería: OPPO/ColorOS apaga las apps en
-         segundo plano aunque tengan servicio en primer plano; si la
-         música se apaga al salir, hay que poner la app en Sin
-         restricciones en Ajustes → Batería. */
-      try {
-        if (window.localStorage && !localStorage.getItem("gurru-batt-tip")){
-          localStorage.setItem("gurru-batt-tip", "1");
-          showToast({ title: "Si la música se apaga al salir de la app", msg: "En OPPO, ve a Ajustes → Batería → Gurru Music y ponla en «Sin restricciones» para que siga sonando en segundo plano.", ms: 15000 });
         }
       } catch(e){}
       if (restored && current >= 0 && tracks[current]){ loadTrack(current, false); }

@@ -752,6 +752,7 @@ public class YtDlpDownloaderPlugin extends Plugin {
                     // "Sign in to confirm you're not a bot" (403). Pedir el
                     // audio como cliente Android suele pasar ese bloqueo.
                     request.addOption("--extractor-args", "youtube:player_client=android");
+                    addFbCookies(request, url);
                     request.addOption("-o", tmpTemplate);
 
                     lastProgressId = null;
@@ -853,6 +854,59 @@ public class YtDlpDownloaderPlugin extends Plugin {
         call.resolve(ret);
     }
 
+    /** Una descarga de audio para el caché invisible. Sin cliente Android
+        (primer intento): yt-dlp usa su cliente por defecto y ve los
+        formatos DASH de solo-audio (itag 140 AAC ~130 kbps, 251 Opus
+        ~137 kbps), mucho mejores que el formato 18 (~48 kbps) que es lo
+        único que da el cliente Android. Con cliente Android (reintento):
+        el comportamiento de siempre. El formato pedido es
+        bestaudio[ext=m4a]/bestaudio para preferir el AAC 140 (reempaquetado
+        a M4A sin transcodificar) y caer al mejor audio si no hay M4A. */
+    private void runCacheRequest(String url, String template, final String vid, boolean androidClient) throws Exception {
+        YoutubeDLRequest request = new YoutubeDLRequest(url.trim());
+        request.addOption("-f", androidClient ? "bestaudio/best" : "bestaudio[ext=m4a]/bestaudio");
+        /* Con --extract-audio a M4A (solo audio, sin video): el formato 18
+           (el único con audio en muchos videos de YouTube Music) es un MP4
+           con pista de video, y el WebView pausa el audio cuando la página
+           se oculta si el archivo trae video (por eso la música local MP3
+           seguía sonando en segundo plano y la de YouTube no). Con M4A
+           solo-audio la canción sigue sonando al salir de la app, igual que
+           un MP3 local. Para audio AAC (formato 18, itag 140) es solo un
+           reempaquetado rápido. */
+        request.addOption("--extract-audio");
+        request.addOption("--audio-format", "m4a");
+        request.addOption("--no-playlist");
+        request.addOption("--no-warnings");
+        if (androidClient) request.addOption("--extractor-args", "youtube:player_client=android");
+        addFbCookies(request, url.trim());
+        request.addOption("-o", template);
+        YoutubeDLResponse response = YoutubeDL.getInstance().execute(
+                request, "gurru-cache-" + nextStreamSeq(),
+                new Function3<Float, Long, String, Unit>() {
+                    @Override
+                    public Unit invoke(Float progress, Long eta, String line) {
+                        emitCacheProgress(vid, progress == null ? 0f : progress);
+                        return Unit.INSTANCE;
+                    }
+                });
+        if (response == null || response.getExitCode() != 0) {
+            throw new Exception("yt-dlp no pudo preparar el audio (código "
+                    + (response == null ? "?" : response.getExitCode()) + "): "
+                    + shortError(response == null ? "" : response.getErr(), 300));
+        }
+    }
+
+    /** Borra los archivos del caché de un video (incluidos .part a medias). */
+    private static void deleteCacheFiles(File dir, String vid) {
+        try {
+            File[] files = dir.listFiles();
+            if (files == null) return;
+            for (File f : files) {
+                if (f.getName().startsWith(vid + ".")) { try { f.delete(); } catch (Exception ignored) {} }
+            }
+        } catch (Exception ignored) {}
+    }
+
     /**
      * Caché invisible para escuchar YouTube online como si fuera local:
      * descarga el audio del video (sin convertir, sin metadatos: rápido)
@@ -883,47 +937,29 @@ public class YtDlpDownloaderPlugin extends Plugin {
                     File[] existing = dir.listFiles();
                     if (existing != null) {
                         for (File f : existing) {
-                            if (f.getName().startsWith(vid + ".")) { produced = f; break; }
+                            if (f.getName().startsWith(vid + ".")
+                                        && !f.getName().endsWith(".part")) { produced = f; break; }
                         }
                     }
                     if (produced == null) {
                         emitCacheProgress(vid, 0f);
                         String template = new File(dir, vid + ".%(ext)s").getAbsolutePath();
-                        YoutubeDLRequest request = new YoutubeDLRequest(url.trim());
-                        request.addOption("-f", "bestaudio/best");
-                        /* Con --extract-audio a M4A (solo audio, sin video):
-                           el formato 18 (el único con audio en muchos videos
-                           de YouTube Music) es un MP4 con pista de video, y el
-                           WebView pausa el audio cuando la página se oculta si
-                           el archivo trae video (por eso la música local MP3
-                           seguía sonando en segundo plano y la de YouTube no).
-                           Con M4A solo-audio la canción sigue sonando al salir
-                           de la app, igual que un MP3 local. Para audio AAC
-                           (formato 18, itag 140) es solo un reempaquetado rápido. */
-                        request.addOption("--extract-audio");
-                        request.addOption("--audio-format", "m4a");
-                        request.addOption("--no-playlist");
-                        request.addOption("--no-warnings");
-                        request.addOption("--extractor-args", "youtube:player_client=android");
-                        request.addOption("-o", template);
-                        YoutubeDLResponse response = YoutubeDL.getInstance().execute(
-                                request, "gurru-cache-" + nextStreamSeq(),
-                                new Function3<Float, Long, String, Unit>() {
-                                    @Override
-                                    public Unit invoke(Float progress, Long eta, String line) {
-                                        emitCacheProgress(vid, progress == null ? 0f : progress);
-                                        return Unit.INSTANCE;
-                                    }
-                                });
-                        if (response == null || response.getExitCode() != 0) {
-                            throw new Exception("yt-dlp no pudo preparar el audio (código "
-                                    + (response == null ? "?" : response.getExitCode()) + "): "
-                                    + shortError(response == null ? "" : response.getErr(), 300));
+                        try {
+                            runCacheRequest(url.trim(), template, vid, false);
+                        } catch (Exception firstTry) {
+                            /* El cliente por defecto (formatos DASH de mejor
+                               calidad) falló en este video/red: se borra lo
+                               que haya dejado a medias y se reintenta con el
+                               cliente Android, que es el que siempre ha
+                               funcionado (formato 18). */
+                            deleteCacheFiles(dir, vid);
+                            runCacheRequest(url.trim(), template, vid, true);
                         }
                         File[] out = dir.listFiles();
                         if (out != null) {
                             for (File f : out) {
-                                if (f.getName().startsWith(vid + ".")) { produced = f; break; }
+                                if (f.getName().startsWith(vid + ".")
+                                        && !f.getName().endsWith(".part")) { produced = f; break; }
                             }
                         }
                         if (produced == null || !produced.exists() || produced.length() == 0) {
@@ -989,5 +1025,88 @@ public class YtDlpDownloaderPlugin extends Plugin {
         JSObject ret = new JSObject();
         ret.put("deleted", deleted);
         call.resolve(ret);
+    }
+
+    /**
+     * Guarda en Música/Gurru Music la canción que YA está descargada en
+     * el caché invisible (NUEVO13): cuando suena una canción online, su
+     * audio ya está en el teléfono, así que el botón Descargar del
+     * reproductor solo mueve ese archivo a la carpeta pública en vez de
+     * bajarlo de nuevo. Resuelve: { id, filePath, fileName, format, size }.
+     * Si el caché ya se borró (al preparar otras canciones), rechaza y
+     * el frontend usa la descarga normal.
+     */
+    @PluginMethod
+    public void saveCachedAudio(final PluginCall call) {
+        final String videoId = call.getString("videoId", "");
+        final String title = call.getString("title", "");
+        if (videoId == null || videoId.trim().isEmpty()) {
+            call.reject("saveCachedAudio necesita videoId");
+            return;
+        }
+        final String vid = videoId.trim();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    File dir = cacheDir();
+                    File cached = null;
+                    File[] files = dir.listFiles();
+                    if (files != null) {
+                        for (File f : files) {
+                            if (f.getName().startsWith(vid + ".")) { cached = f; break; }
+                        }
+                    }
+                    if (cached == null || !cached.exists() || cached.length() == 0) {
+                        throw new Exception("La canción ya no está en el caché (se borró al preparar otra). Descárgala desde la lista.");
+                    }
+                    String name = cached.getName();
+                    int dot = name.lastIndexOf('.');
+                    String ext = (dot > 0) ? name.substring(dot + 1).toLowerCase() : "m4a";
+                    if (!"mp3".equals(ext) && !"m4a".equals(ext) && !"aac".equals(ext)
+                            && !"opus".equals(ext) && !"ogg".equals(ext) && !"wav".equals(ext)
+                            && !"flac".equals(ext)) ext = "m4a";
+                    String base = (title != null && !title.trim().isEmpty()) ? title : vid;
+                    String displayName = safeFileName(base, ext);
+                    String finalPath = publishToPublicMusic(cached, displayName, ext);
+                    final long size = cached.length();
+                    final String fPath = finalPath;
+                    final String fName = displayName;
+                    final String fExt = ext;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSObject ret = new JSObject();
+                            ret.put("id", vid);
+                            ret.put("filePath", fPath);
+                            ret.put("fileName", fName);
+                            ret.put("format", fExt);
+                            ret.put("size", size);
+                            call.resolve(ret);
+                        }
+                    });
+                } catch (final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            call.reject(shortError(e.getMessage(), 300));
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    /** Si la URL es de Facebook y hay sesión guardada (inicio de sesión
+        dentro de la app), yt-dlp usa sus cookies para poder bajar el
+        audio de los videos que piden login. */
+    private void addFbCookies(YoutubeDLRequest request, String url) {
+        try {
+            if (url == null || url.indexOf("facebook.com") < 0) return;
+            File f = FacebookAuthPlugin.cookiesFile(getContext());
+            if (f != null && f.exists() && f.length() > 0) {
+                request.addOption("--cookies", f.getAbsolutePath());
+            }
+        } catch (Exception ignored) {}
     }
 }
