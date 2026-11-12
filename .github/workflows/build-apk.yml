@@ -1,4 +1,10 @@
 # Gurru Music — compila el APK en la nube con GitHub Actions
+# Uso desde el celular: sube este proyecto a un repo privado de GitHub,
+# ve a Actions > Build APK > Run workflow, y descarga app-release.apk.
+# No necesita Node.js ni Android Studio en tu computadora ni en tu teléfono.
+# La firma release usa la llave de los secretos de GitHub (KEYSTORE_BASE64,
+# KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD): cada APK sale con la misma
+# llave y se instala como actualización encima del anterior.
 name: Build APK
 
 on:
@@ -31,14 +37,26 @@ jobs:
       - name: Sincronizar la app web con Android
         run: npx cap sync
 
-      - name: Compilar el APK (debug)
+      - name: Preparar la llave de firma (release)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then echo "::error::Falta el secreto KEYSTORE_BASE64 en GitHub (repo → Settings → Secrets and variables → Actions). Agrégalo con la llave de Gurru Music (ver LEEME-LLAVE-DE-FIRMA.txt) y vuelve a correr el workflow."; exit 1; fi
+          echo "$KEYSTORE_BASE64" | base64 -d > /tmp/gurru-release.keystore
+
+      - name: Compilar el APK (release, firmado con la llave estable)
+        env:
+          KEYSTORE_PATH: /tmp/gurru-release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           chmod +x android/gradlew
-          cd android && ./gradlew assembleDebug
+          cd android && ./gradlew assembleRelease
 
       - name: Subir el APK
         uses: actions/upload-artifact@v4
         with:
           name: gurru-music-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
           retention-days: 7
