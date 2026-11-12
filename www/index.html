@@ -152,23 +152,22 @@
       /* ===== Apartado FACEBOOK (NUEVO13, prueba) ===== */
       .fb-box{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; margin-top:12px; border:1.5px solid rgba(24,119,242,.6); background:rgba(24,119,242,.12); border-radius:12px; padding:12px; }
       .fb-box .yt-h .fb-badge{ background:#1877F2; color:#fff; font-size:11px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:.04em; }
-      /* Descubre (NUEVO17): tarjeta encima del buscador de YouTube. */
-      .discover-card{ border:1.5px solid rgba(34,211,238,.5); background:rgba(34,211,238,.08); border-radius:12px; padding:12px; margin-top:12px; }
-      .discover-card .yt-h{ display:flex; align-items:center; gap:8px; font-weight:900; font-size:15px; }
-      .discover-card .yt-badge{ background:#0891b2; color:#fff; font-size:11px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:.04em; }
-      .discover-card p{ margin:6px 0 10px; font-size:13px; color:var(--soft); line-height:1.45; }
-      .discover-chips{ display:flex; flex-wrap:wrap; gap:8px; }
-      .discover-chip{ background:rgba(255,255,255,.08); border:1px solid rgba(34,211,238,.45); color:inherit; border-radius:999px; padding:8px 14px; font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
-      .discover-chip:active{ background:rgba(34,211,238,.2); }
-      /* Mezclas para ti (NUEVO17): tarjeta encima de la lista de Biblioteca. */
-      .mixes-card{ border:1.5px solid rgba(167,139,250,.5); background:rgba(167,139,250,.08); border-radius:12px; padding:12px; margin:12px 0; }
-      .mixes-card h3{ margin:0 0 4px; font-size:15px; font-weight:900; }
-      .mixes-card p{ margin:0 0 10px; font-size:12px; color:var(--soft); }
-      .mixes-list{ display:flex; flex-wrap:wrap; gap:8px; }
-      .mix-chip{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; background:rgba(255,255,255,.08); border:1px solid rgba(167,139,250,.45); color:inherit; border-radius:10px; padding:10px 12px; font:inherit; cursor:pointer; text-align:left; }
-      .mix-chip:active{ background:rgba(167,139,250,.2); }
-      .mix-chip .mix-t{ font-weight:800; font-size:13.5px; }
-      .mix-chip .mix-s{ font-size:11.5px; color:var(--soft); }
+      /* Mezclas para ti (NUEVO18): estante horizontal con portada,
+         estilo Spotify, plegable — integrado a la lista en vez de una
+         tarjeta grande encima de ella. Plegado solo queda una línea. */
+      .mixes-card{ border:1.5px solid rgba(167,139,250,.5); background:rgba(167,139,250,.08); border-radius:12px; padding:10px 12px 12px; margin:12px 0; }
+      .mixes-head{ display:flex; align-items:center; gap:8px; width:100%; background:none; border:0; color:inherit; font:inherit; padding:2px 0; cursor:pointer; text-align:left; }
+      .mixes-title{ font-size:15px; font-weight:900; }
+      .mixes-count{ font-size:11.5px; color:var(--soft); font-weight:700; }
+      .mixes-chev{ margin-left:auto; font-size:15px; color:var(--soft); }
+      .mixes-sub{ margin:2px 0 10px; font-size:12px; color:var(--soft); }
+      .mixes-shelf{ display:flex; gap:10px; overflow-x:auto; padding:2px 2px 6px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; }
+      .mix-card{ flex:0 0 128px; scroll-snap-align:start; display:flex; flex-direction:column; gap:6px; background:rgba(255,255,255,.06); border:1px solid rgba(167,139,250,.4); color:inherit; border-radius:12px; padding:8px; font:inherit; cursor:pointer; text-align:left; }
+      .mix-card:active{ background:rgba(167,139,250,.2); }
+      .mix-cover{ display:block; width:100%; aspect-ratio:1; border-radius:8px; overflow:hidden; background:rgba(255,255,255,.08); }
+      .mix-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+      .mix-t{ font-weight:800; font-size:13px; line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+      .mix-s{ font-size:11.5px; color:var(--soft); }
       .fb-add{ border:0; background:#1877F2; color:#fff; border-radius:9px; padding:10px 14px; font-weight:800; font-size:13.5px; white-space:nowrap; }
       .fb-auth{ display:flex; flex-direction:column; gap:8px; margin:2px 0 10px; padding:10px; border:1px solid rgba(125,211,252,.3); border-radius:10px; background:rgba(2,132,199,.1); }
       .fb-auth-msg{ font-size:13px; color:#fff; line-height:1.45; }
@@ -260,6 +259,7 @@
       .src-badge.saved{ background:#059669; }
       /* NUEVO8: marca de sugerencia en la cola de YouTube. */
       .src-badge.sugg{ background:#6d28d9; }
+      .src-badge.rec{ background:#047857; }
       .playlist .dl{ border:0; background:transparent; color:#a7f3d0; font-size:15px; line-height:1; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; }
       .playlist .dl:disabled{ opacity:.55; }
       .playlist li{ grid-template-columns:28px 1fr auto auto auto; }
@@ -651,9 +651,13 @@
             </div>
 
             <div class="mixes-card" id="mixesCard" hidden>
-              <h3>Mezclas para ti</h3>
-              <p>Automáticas, con tu música local: por lo que más escuchas. Toca una para sonar.</p>
-              <div class="mixes-list" id="mixesList"></div>
+              <button class="mixes-head" id="mixesHead" type="button" aria-expanded="true">
+                <span class="mixes-title">Mezclas para ti</span>
+                <span class="mixes-count" id="mixesCount"></span>
+                <span class="mixes-chev" id="mixesChev">▾</span>
+              </button>
+              <p class="mixes-sub">Automáticas, con tu música local: por lo que más escuchas. Toca una para sonar.</p>
+              <div class="mixes-shelf" id="mixesList"></div>
             </div>
 
             <ul class="playlist" id="playlist"></ul>
@@ -690,12 +694,6 @@
         <!-- ============ YOUTUBE ============ -->
         <section class="view" id="viewYouTube" aria-label="YouTube" hidden>
           <div class="lib">
-            <div class="discover-card" id="discoverCard">
-              <div class="yt-h"><span class="yt-badge">Descubre</span><span id="discoverSeedLabel">Artistas parecidos</span></div>
-              <p id="discoverSeedText">Basado en lo que escuchas.</p>
-              <div class="discover-chips" id="discoverChips"></div>
-              <div class="yt-msg" id="discoverMsg" role="status"></div>
-            </div>
             <div class="yt-box">
               <div class="yt-h"><span class="yt-badge">YouTube Music</span><span>Buscar música</span></div>
               <p>Escribe el nombre de una canción o un artista y toca <b>Buscar</b>.</p>
@@ -918,7 +916,7 @@
         return { id: t.id, type: t.type, kind: t.kind || null, videoId: t.videoId || null, playlistId: t.playlistId || null,
           url: t.url, title: t.title, artist: t.artist, album: t.album || "", artUrl: t.artUrl || null, artRaw: t.artRaw || null,
           duration: t.duration || 0, downloaded: !!t.downloaded, savedName: t.savedName || null, nativePath: t.nativePath || null,
-          scanned: !!t.scanned, suggested: !!t.suggested };
+          scanned: !!t.scanned, suggested: !!t.suggested, recommended: !!t.recommended };
       }
       function saveState(){
         try {
@@ -937,7 +935,7 @@
           return applyMetaOverrides({ id: s.id, type: s.type, kind: s.kind || null, videoId: s.videoId || null, playlistId: s.playlistId || null,
             url: s.url, title: s.title, artist: s.artist, album: s.album || "", artUrl: s.artUrl || null, artRaw: s.artRaw || null,
             duration: s.duration || 0, downloaded: !!s.downloaded, dlState: s.downloaded ? "done" : null, savedName: s.savedName || null,
-            nativePath: s.nativePath || null, scanned: !!s.scanned, suggested: !!s.suggested });
+            nativePath: s.nativePath || null, scanned: !!s.scanned, suggested: !!s.suggested, recommended: !!s.recommended });
         });
         tracks.forEach(function(t){ if (typeof t.id === "number" && t.id >= uid) uid = t.id + 1; });
         var idx = (typeof data.current === "number") ? data.current : -1;
@@ -991,6 +989,7 @@
           if (snap.videoId && x.videoId === snap.videoId) return x;
           if (x.title === snap.title && x.artist === snap.artist) return x;
         }
+        if (snap.videoId && snap.type === "facebook") return makeFbTrack({ id: snap.videoId, url: snap.url, title: snap.title, page: snap.artist, duration: snap.duration, thumbnail: snap.artUrl });
         if (snap.videoId) return makeYtTrack({ videoId: snap.videoId, title: snap.title, artist: snap.artist, artUrl: snap.artUrl });
         return null;
       }
@@ -1116,9 +1115,6 @@
            sigue ahí (se guarda en el teléfono); si la vista se vació
            por algún motivo, se restaura sin buscar de nuevo. */
         if (v === "youtube" && !$("ytSearchResults").children.length) restoreLastYtSearch();
-        /* NUEVO17: al entrar a YouTube, Descubre carga artistas
-           parecidos al que suena (o al más escuchado de la biblioteca). */
-        if (v === "youtube") loadDiscover();
         /* NUEVO17: Facebook es solo por links; al entrar se listan los videos ya agregados. */
         if (v === "facebook"){ renderFbLinks(); }
         /* La barra inferior fija marca la sección activa (en el
@@ -1575,6 +1571,35 @@
         mixes.push({ name: "Mezcla sorpresa", desc: "Toda tu música, revuelta", indices: all.slice(0, 30) });
         return mixes;
       }
+      /* Portada de la mezcla: la primera portada que tenga alguna de
+         sus canciones; si ninguna tiene, el logo de Gurru Music. */
+      function mixArt(m){
+        for (var i = 0; i < m.indices.length; i++){
+          var t = tracks[m.indices[i]];
+          if (t && t.artUrl) return t.artUrl;
+        }
+        return null;
+      }
+      /* El estante se puede plegar (queda solo el título en una línea)
+         y se recuerda plegado o abierto en el teléfono. */
+      var MIXES_OPEN_KEY = "gurru-mixes-open";
+      function mixesOpen(){
+        try { return localStorage.getItem(MIXES_OPEN_KEY) !== "0"; } catch(e){ return true; }
+      }
+      function syncMixesOpen(){
+        var shelf = $("mixesList"), chev = $("mixesChev"), head = $("mixesHead"), card = $("mixesCard");
+        if (!shelf || !card) return;
+        var open = mixesOpen();
+        shelf.style.display = open ? "" : "none";
+        var sub = card.querySelector(".mixes-sub");
+        if (sub) sub.style.display = open ? "" : "none";
+        if (chev) chev.textContent = open ? "▾" : "▸";
+        if (head) head.setAttribute("aria-expanded", open ? "true" : "false");
+      }
+      $("mixesHead").addEventListener("click", function(){
+        try { localStorage.setItem(MIXES_OPEN_KEY, mixesOpen() ? "0" : "1"); } catch(e){}
+        syncMixesOpen();
+      });
       function renderMixes(){
         var card = $("mixesCard"), list = $("mixesList");
         if (!card || !list) return;
@@ -1588,28 +1613,43 @@
           return;
         }
         card.hidden = false;
+        var count = $("mixesCount");
+        if (count) count.textContent = mixes.length + (mixes.length === 1 ? " mezcla" : " mezclas");
         mixes.forEach(function(m){
           var b = document.createElement("button");
           b.type = "button";
-          b.className = "mix-chip";
+          b.className = "mix-card";
+          var cover = document.createElement("span");
+          cover.className = "mix-cover";
+          var img = document.createElement("img");
+          img.src = mixArt(m) || "logo.png";
+          img.alt = "";
+          img.onerror = function(){ this.onerror = null; this.src = "logo.png"; };
+          cover.appendChild(img);
           var t1 = document.createElement("span");
           t1.className = "mix-t";
           t1.textContent = m.name;
           var t2 = document.createElement("span");
           t2.className = "mix-s";
           t2.textContent = m.desc;
+          b.appendChild(cover);
           b.appendChild(t1);
           b.appendChild(t2);
           b.addEventListener("click", function(){ startMix(m); });
           list.appendChild(b);
         });
+        syncMixesOpen();
       }
       function startMix(m){
-        if (!m || !m.indices.length) return;
+        if (!m || !m.indices) return;
+        /* Los índices se revalidan al tocar: si la lista cambió desde
+           que se dibujó la mezcla, solo suenan las que siguen ahí. */
+        var idxs = m.indices.filter(function(i){ return tracks[i] && tracks[i].type === "local" && !tracks[i].downloaded; });
+        if (!idxs.length) return;
         noteLeavingTrack();
-        activeMix = { name: m.name, indices: m.indices.slice() };
+        activeMix = { name: m.name, indices: idxs };
         showView("player");
-        loadTrack(m.indices[0], true);
+        loadTrack(idxs[0], true);
         renderPlaylist();
       }
       /* ---------- Cola: anterior, actual y siguientes ----------
@@ -1685,7 +1725,7 @@
           else { kind = "next"; label = (qi === pos + 1) ? "Siguiente" : "Después"; }
           var li = document.createElement("li");
           li.className = kind === "current" ? "is-current" : (kind === "prev" ? "is-prev" : "is-next");
-          var badge = (t.type === "youtube" || t.type === "ytaudio") ? '<span class="src-badge">YouTube</span>' + (t.suggested ? '<span class="src-badge sugg">Sugerencia</span>' : "") : (t.type === "facebook" ? '<span class="src-badge fb">Facebook</span>' + (t.suggested ? '<span class="src-badge sugg">Sugerencia</span>' : "") : (t.downloaded ? '<span class="src-badge saved">MP3</span>' : ""));
+          var badge = (t.type === "youtube" || t.type === "ytaudio") ? '<span class="src-badge">YouTube</span>' + (t.suggested ? '<span class="src-badge sugg">Sugerencia</span>' : "") + (t.recommended ? '<span class="src-badge rec">Recomendación</span>' : "") : (t.type === "facebook" ? '<span class="src-badge fb">Facebook</span>' + (t.suggested ? '<span class="src-badge sugg">Sugerencia</span>' : "") + (t.recommended ? '<span class="src-badge rec">Recomendación</span>' : "") : (t.downloaded ? '<span class="src-badge saved">MP3</span>' : ""));
           li.innerHTML =
             '<span class="q-first"><span class="q-num">' + (qi + 1) + '</span><span class="q-tag">' + esc(label) + '</span></span>' +
             '<span class="q-t">' + esc(cleanTitle(t.title)) + badge + ' <span class="q-a">&middot; ' + esc(t.artist) + '</span></span>' +
@@ -2975,6 +3015,13 @@
         var m = u.match(/\/videos\/(\d+)/) || u.match(/[?&]v=(\d+)/) || u.match(/\/reel\/(\d+)/) || u.match(/\/watch\/\?v=(\d+)/);
         return m ? m[1] : "";
       }
+      /* NUEVO18: makeFbTrack faltaba — en NUEVO17 se borró sin querer
+         junto con el bloque viejo de Facebook y pegar un link rompía
+         con "makeFbTrack is not defined". Misma forma que makeYtTrack:
+         id interno numérico, videoId = el id numérico de Facebook. */
+      function makeFbTrack(v){
+        return applyMetaOverrides({ id: ++uid, type: "facebook", kind: "video", videoId: v.id, playlistId: null, url: v.url || null, title: v.title || "Video de Facebook", artist: v.page || "Facebook", album: "Facebook · Solo audio", artUrl: v.thumbnail || "logo.png", duration: v.duration || 0, downloaded: false, dlState: null });
+      }
       function addFacebookLink(){
         var input = $("fbLinkInput"), msg = $("fbMsg"), btn = $("fbAddBtn");
         var u = (input.value || "").trim();
@@ -3206,6 +3253,12 @@
       var suggestPlayed = {};
       var suggestGen = 0; /* sube cada vez que la cola online se regenera: las búsquedas viejas de sugerencias se descartan */
       var suggestFetching = false;
+      /* NUEVO18: segundo depósito — canciones de artistas PARECIDOS
+         (recomendaciones). La cola "A continuación" alterna entre los
+         dos: una del mismo artista, una recomendación, y así en continuo. */
+      var recommendPool = [];
+      var recommendFetching = false;
+      var lastSuggestKind = "rec"; /* el primer turno prefiere "same" */
       /* El ARTISTA para sugerir más música: sale del TÍTULO ("Belanova
          - Rosa Pastel"), no del canal que subió el video ("armxndo",
          "LatinHype"…): esos canales no son el artista y buscar por ellos
@@ -3274,6 +3327,74 @@
         return t._metaPromise;
       }
       function suggestQueryFor(t){ return artistForSuggestions(t); }
+      /* Saca UNA canción alternando los depósitos: una del mismo artista
+         y luego una recomendación, y así. Si el depósito que toca está
+         vacío, saca del otro; si los dos están vacíos, devuelve null y
+         quien llama tiene que buscar más. En modo estricto (la cola "A
+         continuación"), si el depósito que toca está vacío PERO su
+         búsqueda sigue en camino, NO se saca del otro: se espera a que
+         llegue para que la cola salga de verdad alternada (si no, las
+         rápidas llenan la cola y las lentas quedan todas al final). */
+      function takeNextSuggestion(strict){
+        var want = (lastSuggestKind === "same") ? "rec" : "same";
+        var t = null;
+        if (want === "same" && suggestPool.length) t = suggestPool.shift();
+        else if (want === "rec" && recommendPool.length) t = recommendPool.shift();
+        if (!t){
+          if (strict){
+            if (want === "same" && suggestFetching) return null;
+            if (want === "rec" && recommendFetching) return null;
+          }
+          if (suggestPool.length) t = suggestPool.shift();
+          else if (recommendPool.length) t = recommendPool.shift();
+        }
+        if (!t) return null;
+        if (t.recommended){ lastSuggestKind = "rec"; }
+        else { t.suggested = true; lastSuggestKind = "same"; }
+        suggestPlayed[t.videoId] = true;
+        return t;
+      }
+      /* Canciones de artistas parecidos al que suena: se buscan los
+         parecidos (MusicBrainz + iTunes, sin llave) y de cada uno se
+         trae su primera canción en YouTube (máx. 3 artistas por ronda).
+         Llevan la marca "Recomendación" (verde), distinta de la
+         "Sugerencia" violeta del mismo artista. */
+      function fetchSimilarTracks(t, limit){
+        var p = getNativeDl();
+        if (!p || !p.searchYouTube) return Promise.resolve([]);
+        var gen = suggestGen;
+        return resolveArtist(t).then(function(artist){
+          var seed = artist || suggestQueryFor(t);
+          if (!seed) return [];
+          return fetchSimilarArtists(seed);
+        }).then(function(names){
+          if (gen !== suggestGen) return [];
+          if (!names || !names.length) return [];
+          var out = [];
+          var chain = Promise.resolve();
+          names.slice(0, 3).forEach(function(name){
+            chain = chain.then(function(){
+              if (out.length >= limit) return;
+              return p.searchYouTube({ query: name, limit: 2 }).then(function(res){
+                if (gen !== suggestGen) return;
+                var list = (res && res.results) || [];
+                for (var i = 0; i < list.length; i++){
+                  var r = list[i];
+                  if (!r || !r.id || suggestPlayed[r.id]) continue;
+                  var dup = false;
+                  for (var j = 0; j < tracks.length; j++){ if (tracks[j].videoId === r.id){ dup = true; break; } }
+                  if (dup) continue;
+                  var tr = makeYtTrack({ videoId: r.id, title: r.title || "Canción de YouTube", artist: r.channel || "YouTube", duration: r.duration || 0, artUrl: r.thumbnail });
+                  tr.recommended = true;
+                  out.push(tr);
+                  break; /* solo la primera de cada artista parecido */
+                }
+              }).catch(function(){});
+            });
+          });
+          return chain.then(function(){ return out; });
+        }).catch(function(){ return []; });
+      }
       function fetchSuggestions(t){
         var p = getNativeDl();
         if (!p || !p.searchYouTube) return Promise.resolve([]);
@@ -3301,37 +3422,44 @@
         }).catch(function(){ return []; });
       }
       function playNextSuggestion(fromTrack){
-        if (suggestPool.length){
-          var t = suggestPool.shift();
-          suggestPlayed[t.videoId] = true;
+        /* La radio sigue el mismo patrón que "A continuación": alterna
+           mismo artista y recomendación, en continuo. */
+        var t = takeNextSuggestion(false);
+        if (t){
           tracks.push(t);
           loadTrack(tracks.length - 1, true);
           return Promise.resolve(true);
         }
-        if (suggestFetching) return Promise.resolve(false);
-        suggestFetching = true;
         /* Sin radio para Facebook: su búsqueda se quitó y ya no hay
            sugerencias de Facebook; la canción para al terminar su cola,
            como las locales. */
         if (fromTrack && fromTrack.type === "facebook") return Promise.resolve(false);
-        var fetchFn = fetchSuggestions;
-        return fetchFn(fromTrack).then(function(pool){
-          suggestFetching = false;
-          if (!pool.length) return false;
-          var t2 = suggestPool.shift();
-          suggestPlayed[t2.videoId] = true;
+        var jobs = [];
+        if (!suggestPool.length && !suggestFetching){
+          suggestFetching = true;
+          jobs.push(fetchSuggestions(fromTrack).then(function(){ suggestFetching = false; }));
+        }
+        if (!recommendPool.length && !recommendFetching){
+          recommendFetching = true;
+          jobs.push(fetchSimilarTracks(fromTrack, 3).then(function(list){ recommendFetching = false; recommendPool = recommendPool.concat(list); }));
+        }
+        if (!jobs.length) return Promise.resolve(false);
+        return Promise.all(jobs).then(function(){
+          var t2 = takeNextSuggestion(false);
+          if (!t2) return false;
           tracks.push(t2);
           loadTrack(tracks.length - 1, true);
           return true;
         });
       }
-      /* ---------- Sugerencias en "A continuación" ----------
+      /* ---------- Sugerencias en "A continuación" (NUEVO18) ----------
          Al sonar un tema de YouTube, la cola muestra sugerencias como
-         las siguientes canciones (no solo las que ya están en la lista):
-         si quedan menos de 3 por delante, se buscan más del mismo
-         artista (igual que la radio) y se agregan a la cola con la
-         marca "Sugerencia". Al terminar una, la siguiente ya está ahí;
-         si la cola se vacía, la radio sigue buscando. */
+         las siguientes canciones: se alternan UNA del mismo artista
+         (marca violeta "Sugerencia") y UNA recomendación de un artista
+         parecido (marca verde "Recomendación"), y así en continuo — al
+         terminar una, la siguiente ya está ahí; si la cola se vacía, la
+         radio sigue el mismo patrón. Los dos depósitos se buscan en
+         paralelo y la cola se rellena con lo que llegue primero. */
       function ensureYtSuggestions(t){
         if (!t || (t.type !== "youtube" && t.type !== "ytaudio")) return;
         if (t._suggSeeded) return;
@@ -3340,25 +3468,28 @@
         var upcoming = (pos >= 0) ? q.length - pos - 1 : 0;
         if (upcoming >= 3) return;
         t._suggSeeded = true;
-        function appendFromPool(){
+        function appendMore(){
           var added = 0;
-          while (suggestPool.length && added < 5){
-            var s = suggestPool.shift();
-            suggestPlayed[s.videoId] = true;
-            s.suggested = true;
+          var s;
+          while (added < 5 && (s = takeNextSuggestion(true))){
             tracks.push(s);
             added++;
           }
           if (added){ renderPlaylist(); saveState(); }
           return added;
         }
-        if (suggestPool.length){ appendFromPool(); return; }
-        if (suggestFetching) return;
-        suggestFetching = true;
-        fetchSuggestions(t).then(function(){
-          suggestFetching = false;
-          appendFromPool();
-        });
+        var needSame = !suggestPool.length, needRec = !recommendPool.length;
+        if (needSame && !suggestFetching){
+          suggestFetching = true;
+          fetchSuggestions(t).then(function(){ suggestFetching = false; appendMore(); });
+        }
+        if (needRec && !recommendFetching){
+          recommendFetching = true;
+          fetchSimilarTracks(t, 3).then(function(list){ recommendFetching = false; recommendPool = recommendPool.concat(list); appendMore(); });
+        }
+        /* Si un depósito ya tenía canciones, se agregan de inmediato
+           mientras llega el otro. */
+        appendMore();
       }
       $("ytSearchBtn").addEventListener("click", searchYouTube);
       /* Tocar el mensaje de error de la búsqueda vuelve a mostrar el
@@ -3375,9 +3506,9 @@
          artistas de ese género). Tocar un artista busca sus canciones
          en YouTube con el buscador de siempre. El resultado se guarda
          en el teléfono por artista (24 h) para no pedirlo a cada rato. */
+      /* DISCOVER_KEY: la caché de artistas parecidos ahora la usa
+         fetchSimilarArtists directamente (la cola "A continuación"). */
       var DISCOVER_KEY = "gurru-discover-v1";
-      var discoverLoading = false;
-      var discoverSeed = null;
       var lastMbCall = 0;
       function mbWait(){
         var now = Date.now();
@@ -3399,90 +3530,11 @@
           return r.json();
         });
       }
-      function discoverSeedArtist(){
-        var t = (current >= 0 && tracks[current]) ? tracks[current] : null;
-        if (t){
-          var a = (t._metaArtist || t.artist || "").trim();
-          if (a && a !== "Artista desconocido" && a !== "YouTube" && a !== "Facebook") return a;
-          var parsed = artistForSuggestions(t);
-          if (parsed && parsed !== t.title) return parsed;
-        }
-        return topLocalArtist();
-      }
-      function topLocalArtist(){
-        var counts = loadPlayCounts();
-        var byArtist = {};
-        tracks.forEach(function(t){
-          if (!t || t.type !== "local" || t.downloaded) return;
-          var a = (t.artist || "").trim();
-          if (!a || a === "Artista desconocido") return;
-          var k = a.toLowerCase();
-          if (!byArtist[k]) byArtist[k] = { name: a, score: 0, n: 0 };
-          byArtist[k].score += counts[playKey(t)] || 0;
-          byArtist[k].n++;
-        });
-        var best = null;
-        Object.keys(byArtist).forEach(function(k){
-          var e = byArtist[k];
-          if (!best || e.score > best.score || (e.score === best.score && e.n > best.n)) best = e;
-        });
-        return best ? best.name : null;
-      }
-      function loadDiscover(force){
-        var label = $("discoverSeedLabel"), text = $("discoverSeedText"), chips = $("discoverChips"), msg = $("discoverMsg");
-        var seed = discoverSeedArtist();
-        if (!seed){
-          if (label) label.textContent = "Artistas parecidos";
-          if (text) text.textContent = "Escucha una canción o carga tu música y aquí te sugiero artistas parecidos.";
-          if (chips) chips.innerHTML = "";
-          return;
-        }
-        if (label) label.textContent = "Parecidos a " + seed;
-        if (text) text.textContent = "Toca un artista para buscar sus canciones en YouTube.";
-        if (!force && seed === discoverSeed && chips && chips.children.length) return;
-        discoverSeed = seed;
+      function fetchSimilarArtists(seed){
+        /* Caché por artista (24 h): no pedir lo mismo a cada canción. */
         var cached = null;
         try { cached = JSON.parse(localStorage.getItem(DISCOVER_KEY) || "null"); } catch(e){}
-        if (!force && cached && cached.seed === seed && Array.isArray(cached.artists) && cached.artists.length && (Date.now() - (cached.ts || 0)) < 24*3600*1000){
-          renderDiscoverChips(cached.artists);
-          return;
-        }
-        if (discoverLoading) return;
-        discoverLoading = true;
-        if (msg){ msg.textContent = "Buscando artistas parecidos a " + seed + "…"; msg.className = "yt-msg"; }
-        if (chips) chips.innerHTML = "";
-        fetchSimilarArtists(seed).then(function(artists){
-          discoverLoading = false;
-          if (msg) msg.textContent = "";
-          if (!artists.length){
-            if (msg){ msg.textContent = "No encontré parecidos para " + seed + " ahora. Inténtalo más tarde."; msg.className = "yt-msg"; }
-            return;
-          }
-          try { localStorage.setItem(DISCOVER_KEY, JSON.stringify({ seed: seed, artists: artists, ts: Date.now() })); } catch(e){}
-          renderDiscoverChips(artists);
-        }).catch(function(){
-          discoverLoading = false;
-          if (msg){ msg.textContent = "No se pudo cargar Descubre ahora. Revisa tu conexión y toca la tarjeta para reintentar."; msg.className = "yt-msg"; }
-        });
-      }
-      function renderDiscoverChips(artists){
-        var chips = $("discoverChips");
-        if (!chips) return;
-        chips.innerHTML = "";
-        artists.forEach(function(name){
-          var b = document.createElement("button");
-          b.type = "button";
-          b.className = "discover-chip";
-          b.textContent = name;
-          b.addEventListener("click", function(){
-            var input = $("ytSearchInput");
-            if (input) input.value = name;
-            searchYouTube();
-          });
-          chips.appendChild(b);
-        });
-      }
-      function fetchSimilarArtists(seed){
+        if (cached && cached.seed === seed && Array.isArray(cached.artists) && cached.artists.length && (Date.now() - (cached.ts || 0)) < 24*3600*1000) return Promise.resolve(cached.artists.slice(0, 6));
         var found = [];
         function addNames(names){
           (names || []).forEach(function(n){
@@ -3513,7 +3565,7 @@
             });
           })
           .catch(function(){ return []; });
-        return mb.then(function(mbNames){
+        var chain = mb.then(function(mbNames){
           addNames(mbNames);
           if (found.length >= 5) return found.slice(0, 6);
           /* iTunes: género del artista → artistas de ese género. */
@@ -3532,12 +3584,11 @@
             })
             .catch(function(){ return found.slice(0, 6); });
         });
+        return chain.then(function(list){
+          try { localStorage.setItem(DISCOVER_KEY, JSON.stringify({ seed: seed, artists: list, ts: Date.now() })); } catch(e){}
+          return list;
+        });
       }
-      $("discoverCard").addEventListener("click", function(ev){
-        if (ev.target && ev.target.closest && ev.target.closest(".discover-chip")) return;
-        var chips = $("discoverChips");
-        if (chips && !chips.children.length) loadDiscover(true);
-      });
 
       /* Al abrir una canción nueva desde online, la cola "A continuación"
          se borra y se genera una nueva desde esa canción (sus sugerencias
@@ -3549,6 +3600,10 @@
         var org = originOf(keep);
         suggestGen++;
         suggestPool = [];
+        recommendPool = [];
+        /* Nueva canción online: la alternancia vuelve a empezar por el
+           mismo artista. */
+        lastSuggestKind = "rec";
         /* Abrir una canción online termina la mezcla local (sus índices
            se moverían al quitar canciones online de la lista). */
         activeMix = null;
