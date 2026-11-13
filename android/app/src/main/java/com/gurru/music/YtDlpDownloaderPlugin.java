@@ -717,6 +717,17 @@ public class YtDlpDownloaderPlugin extends Plugin {
             return;
         }
         final String fmt = "m4a".equalsIgnoreCase(format) ? "m4a" : "mp3";
+        /* Calidad de descarga (NUEVO26): la elige el usuario en
+           Configuración (baja/media/alta, por defecto alta). */
+        final String quality = call.getString("quality", "alta");
+        final String formatSel;
+        if ("baja".equalsIgnoreCase(quality)) {
+            formatSel = "bestaudio[abr<=48]/bestaudio/best";
+        } else if ("media".equalsIgnoreCase(quality)) {
+            formatSel = "bestaudio[abr<=96]/bestaudio/best";
+        } else {
+            formatSel = "bestaudio/best";
+        }
         final String processId = PROCESS_PREFIX + id;
         runningProcesses.put(id, processId);
 
@@ -731,54 +742,71 @@ public class YtDlpDownloaderPlugin extends Plugin {
                     File dir = tmpDir();
                     String tmpTemplate = new File(dir, "dl_" + id + ".%(ext)s").getAbsolutePath();
 
-                    YoutubeDLRequest request = new YoutubeDLRequest(url);
-                    request.addOption("-f", "bestaudio/best");
-                    request.addOption("--extract-audio");
-                    request.addOption("--audio-format", fmt);
-                    request.addOption("--audio-quality", "0");
-                    /* Metadata original: --add-metadata escribe en el
-                       archivo el título, artista y demás datos del video,
-                       y --embed-thumbnail incrusta su portada. El audio no
-                       se toca, solo sus etiquetas. */
-                    request.addOption("--add-metadata");
-                    request.addOption("--embed-thumbnail");
-                    request.addOption("--no-playlist");
-                    request.addOption("--no-warnings");
-                    // YouTube bloquea cada vez más al cliente web con
-                    // "Sign in to confirm you're not a bot" (403). Pedir el
-                    // audio como cliente Android suele pasar ese bloqueo.
-                    request.addOption("--extractor-args", "youtube:player_client=android");
-                    request.addOption("-o", tmpTemplate);
-
                     lastProgressId = null;
                     lastProgressSent = -1f;
                     lastProgressSentAt = 0L;
-                    YoutubeDLResponse response = YoutubeDL.getInstance().execute(
-                            request, processId,
-                            new Function3<Float, Long, String, Unit>() {
-                                @Override
-                                public Unit invoke(Float progress, Long eta, String line) {
-                                    long now = System.currentTimeMillis();
-                                    boolean changed = lastProgressId == null
-                                            || !lastProgressId.equals(id)
-                                            || Math.abs(progress - lastProgressSent) >= 1f
-                                            || now - lastProgressSentAt > 1000;
-                                    if (changed) {
-                                        lastProgressId = id;
-                                        lastProgressSent = progress;
-                                        lastProgressSentAt = now;
-                                        emitProgress(id, progress, eta == null ? -1L : eta,
-                                                "downloading", line);
-                                    }
-                                    return Unit.INSTANCE;
-                                }
-                            });
+                    /* NUEVO26: primero con el cliente por defecto (es el
+                       que ofrece el audio DASH de alta calidad, itag 140
+                       ~130 kbps, y el que hace reales las calidades
+                       media/baja); si YouTube lo bloquea con "Sign in to
+                       confirm you're not a bot", se reintenta con el
+                       cliente Android, igual que hace la caché. */
+                    YoutubeDLResponse response = null;
+                    String lastErr = null;
+                    for (int attempt = 0; attempt < 2 && response == null; attempt++) {
+                        boolean androidClient = (attempt == 1);
+                        YoutubeDLRequest request = new YoutubeDLRequest(url);
+                        request.addOption("-f", formatSel);
+                        request.addOption("--extract-audio");
+                        request.addOption("--audio-format", fmt);
+                        request.addOption("--audio-quality", "0");
+                        /* Metadata original: --add-metadata escribe en el
+                           archivo el título, artista y demás datos del video,
+                           y --embed-thumbnail incrusta su portada. El audio no
+                           se toca, solo sus etiquetas. */
+                        request.addOption("--add-metadata");
+                        request.addOption("--embed-thumbnail");
+                        request.addOption("--no-playlist");
+                        request.addOption("--no-warnings");
+                        if (androidClient) request.addOption("--extractor-args", "youtube:player_client=android");
+                        request.addOption("-o", tmpTemplate);
+                        try {
+                            YoutubeDLResponse r = YoutubeDL.getInstance().execute(
+                                    request, processId,
+                                    new Function3<Float, Long, String, Unit>() {
+                                        @Override
+                                        public Unit invoke(Float progress, Long eta, String line) {
+                                            long now = System.currentTimeMillis();
+                                            boolean changed = lastProgressId == null
+                                                    || !lastProgressId.equals(id)
+                                                    || Math.abs(progress - lastProgressSent) >= 1f
+                                                    || now - lastProgressSentAt > 1000;
+                                            if (changed) {
+                                                lastProgressId = id;
+                                                lastProgressSent = progress;
+                                                lastProgressSentAt = now;
+                                                emitProgress(id, progress, eta == null ? -1L : eta,
+                                                        "downloading", line);
+                                            }
+                                            return Unit.INSTANCE;
+                                        }
+                                    });
+                            if (r != null && r.getExitCode() == 0) {
+                                response = r;
+                            } else {
+                                lastErr = r == null ? "sin respuesta de yt-dlp"
+                                        : shortError(r.getErr(), 300);
+                                deleteDownloadPartials(dir, id);
+                            }
+                        } catch (Exception ex) {
+                            lastErr = shortError(ex.getMessage(), 300);
+                            deleteDownloadPartials(dir, id);
+                        }
+                    }
 
-                    if (response == null || response.getExitCode() != 0) {
-                        String err = response == null ? "sin respuesta de yt-dlp"
-                                : shortError(response.getErr(), 300);
-                        throw new Exception("yt-dlp terminó con error (código "
-                                + (response == null ? "?" : response.getExitCode()) + "): " + err);
+                    if (response == null) {
+                        throw new Exception("yt-dlp terminó con error: "
+                                + (lastErr == null ? "sin respuesta" : lastErr));
                     }
 
                     // El archivo temporal producido: dl_<id>.<ext>
@@ -887,6 +915,18 @@ public class YtDlpDownloaderPlugin extends Plugin {
             throw new Exception("yt-dlp no pudo preparar el audio (código "
                     + (response == null ? "?" : response.getExitCode()) + "): "
                     + shortError(response == null ? "" : response.getErr(), 300));
+        }
+    }
+
+    /** Borra los parciales de una descarga (dl_<id>.*) entre reintentos. */
+    private static void deleteDownloadPartials(File dir, String id) {
+        if (dir == null || !dir.isDirectory()) return;
+        File[] files = dir.listFiles();
+        if (files == null) return;
+        for (File f : files) {
+            if (f.getName().startsWith("dl_" + id + ".")) {
+                try { f.delete(); } catch (Exception ignored) {}
+            }
         }
     }
 
