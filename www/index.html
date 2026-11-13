@@ -102,7 +102,12 @@
          La cola NUNCA tapa la barra inferior: es flexible, se encoge si
          falta espacio y su lista rueda por dentro. La barra inferior
          (Biblioteca) va en su propia capa, siempre visible. */
-      .queue{ flex:0 1 auto; min-height:0; display:flex; flex-direction:column; margin-top:2px; border-top:1px solid rgba(125,211,252,.28); padding-top:5px; }
+      .queue{ flex:0 1 auto; min-height:0; display:flex; flex-direction:column; margin-top:2px; border-top:1px solid rgba(125,211,252,.28); padding-top:5px; overflow:hidden; transition:max-height .4s cubic-bezier(.32,.72,.24,1); }
+      /* NUEVO23: la cola es una hoja inferior: una barrita con tirador
+         arriba; con el gesto hacia arriba se abre y hacia abajo se
+         cierra (como en YouTube Music). */
+      .q-handle{ display:flex; justify-content:center; padding:8px 0 2px; cursor:grab; touch-action:none; flex:0 0 auto; }
+      .q-grip{ width:42px; height:4px; border-radius:2px; background:rgba(255,255,255,.35); }
       .queue-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 2px 4px; flex-wrap:wrap; }
       .queue-head .q-title{ font-size:12.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); text-shadow:0 0 6px var(--glow); flex-shrink:0; }
       .queue-head .q-right{ display:flex; align-items:center; gap:8px; min-width:0; flex:1 1 auto; justify-content:flex-end; }
@@ -147,6 +152,56 @@
       /* Resultados del buscador de YouTube: tocar uno abre la ventana
          para elegir Escuchar o Descargar. */
       .yt-results{ margin-top:10px; display:flex; flex-direction:column; gap:8px; overflow:auto; min-height:0; }
+      /* Búsquedas recientes e historial de YouTube (NUEVO23). */
+      .yt-hist{ margin-top:10px; display:flex; flex-direction:column; gap:14px; overflow:auto; min-height:0; }
+      .yt-hist[hidden]{ display:none; }
+      .yt-hist-h{ display:flex; align-items:center; justify-content:space-between; font-size:14px; font-weight:900; margin:2px 2px 8px; }
+      .yt-hist-clear{ border:0; background:none; color:var(--accent); font-weight:800; font-size:12.5px; cursor:pointer; padding:2px 4px; }
+      .yt-recent-row{ display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; }
+      .yt-recent-card{ flex:0 0 96px; border:0; background:none; padding:0; text-align:left; cursor:pointer; color:inherit; font:inherit; }
+      .yt-recent-card img{ width:96px; height:54px; object-fit:cover; border-radius:8px; display:block; background:#000; }
+      .yt-recent-card span{ display:block; font-size:12px; font-weight:700; margin-top:5px; line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+      .yt-hist-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+      .yt-hist-row{ display:flex; align-items:center; gap:12px; width:100%; background:none; border:0; border-bottom:1px solid rgba(255,255,255,.07); padding:11px 2px; color:inherit; font:inherit; text-align:left; cursor:pointer; }
+      .yt-hist-row .yh-clock{ color:var(--soft); font-size:16px; flex:0 0 auto; }
+      .yt-hist-row .yh-term{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; }
+      .yt-hist-row .yh-go{ color:var(--soft); font-size:16px; flex:0 0 auto; border:0; background:none; cursor:pointer; padding:4px; }
+      /* Página del artista (NUEVO23). */
+      #viewArtist .lib{ overflow-y:auto; }
+      #mArtist{ cursor:pointer; }
+      .artist-head{ display:flex; align-items:center; gap:12px; margin-top:12px; }
+      .artist-img{ width:88px; height:88px; border-radius:50%; object-fit:cover; flex:0 0 88px; background:rgba(255,255,255,.08); }
+      .artist-meta{ flex:1; min-width:0; }
+      .artist-name{ font-size:21px; font-weight:900; line-height:1.2; }
+      .artist-sub{ font-size:13px; color:var(--soft); margin-top:3px; }
+      .artist-actions{ display:flex; gap:10px; margin:14px 0 4px; }
+      .artist-actions .pill-btn{ flex:1; padding:10px; font-weight:800; }
+      .artist-sec-h{ font-size:15px; font-weight:900; margin:16px 2px 8px; }
+      .artist-msg{ font-size:13px; color:var(--soft); padding:4px 2px; }
+      .artist-top{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px; }
+      .artist-top li{ display:flex; align-items:center; gap:10px; padding:6px; border-radius:10px; cursor:pointer; }
+      .artist-top li:active{ background:rgba(34,211,238,.12); }
+      .artist-top .at-num{ font-family:"Share Tech Mono",monospace; color:var(--soft); width:20px; text-align:right; flex:0 0 20px; }
+      .artist-top img{ width:48px; height:48px; border-radius:8px; object-fit:cover; flex:0 0 48px; background:#000; }
+      .artist-top .at-t{ flex:1; min-width:0; font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .artist-top .at-t span{ display:block; font-weight:400; font-size:12.5px; color:var(--soft); }
+      .artist-albums{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+      .artist-album-card{ border:0; background:none; padding:0; text-align:left; cursor:pointer; color:inherit; font:inherit; }
+      .artist-album-card img{ width:100%; aspect-ratio:1; object-fit:cover; border-radius:12px; display:block; background:rgba(255,255,255,.08); }
+      .artist-album-card .aa-t{ display:block; font-weight:800; font-size:13.5px; margin-top:6px; line-height:1.25; }
+      .artist-album-card .aa-y{ display:block; font-size:12px; color:var(--soft); margin-top:2px; }
+      .artist-album-head{ display:flex; align-items:center; gap:12px; margin-top:12px; }
+      .artist-album-img{ width:72px; height:72px; border-radius:10px; object-fit:cover; flex:0 0 72px; background:rgba(255,255,255,.08); }
+      .artist-album-meta{ flex:1; min-width:0; }
+      .artist-album-name{ font-size:18px; font-weight:900; }
+      .artist-album-sub{ font-size:13px; color:var(--soft); }
+      .artist-album-tracks{ list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:2px; }
+      .artist-album-tracks li{ display:flex; align-items:center; gap:10px; padding:8px 6px; border-radius:8px; cursor:pointer; }
+      .artist-album-tracks li:active{ background:rgba(34,211,238,.12); }
+      .artist-album-tracks .aat-num{ width:20px; text-align:right; color:var(--soft); font-family:"Share Tech Mono",monospace; flex:0 0 20px; }
+      .artist-album-tracks .aat-t{ flex:1; min-width:0; font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .aat-loading{ color:var(--soft); font-size:13px; padding:10px 6px; cursor:default; }
+      .choice-btn.artist{ background:linear-gradient(180deg,#0e7490,#155e75); }
 
       /* Mezclas para ti (NUEVO20): ya no viven en la Biblioteca — tienen
          su propia pestaña, en rejilla de 2 columnas. Los ítems no se
@@ -172,8 +227,9 @@
       /* Accesos directos (NUEVO20): al bajar en la lista se repliegan
          solos y vuelven al volver arriba, para que la lista de música
          gane toda la pantalla. */
-      #shortcutsWrap{ overflow:hidden; transition:max-height .45s cubic-bezier(.32,.72,.24,1), opacity .35s ease, margin .45s cubic-bezier(.32,.72,.24,1); }
-      #shortcutsWrap.sc-hidden{ opacity:0; margin:0; }
+      /* NUEVO23: los accesos directos ya no se esconden al bajar: viven
+         en su propia pestaña, siempre visibles. */
+      .sc-empty{ text-align:center; color:var(--soft); padding:26px 12px; font-size:13.5px; line-height:1.5; }
       .sc-card{ position:relative; aspect-ratio:1; border:0; border-radius:12px; overflow:hidden; padding:0; cursor:pointer; background:rgba(255,255,255,.08); }
       .sc-card img{ width:100%; height:100%; object-fit:cover; display:block; }
       .sc-name{ position:absolute; left:0; right:0; bottom:0; padding:20px 8px 8px; background:linear-gradient(transparent, rgba(0,0,0,.85)); color:#fff; font-weight:800; font-size:13px; line-height:1.2; text-align:left; }
@@ -194,8 +250,9 @@
       .lib-subtabs::-webkit-scrollbar{ display:none; }
       .lib-subtab{ flex:0 0 auto; border:0; background:none; color:var(--soft); font:inherit; font-size:15px; font-weight:700; padding:8px 12px 9px; cursor:pointer; border-bottom:2.5px solid transparent; margin-bottom:-1px; white-space:nowrap; }
       .lib-subtab.on{ color:#fff; border-bottom-color:var(--accent); text-shadow:0 0 8px var(--glow); }
-      #libPistas, #libGroups, #libDrill{ flex:1; min-height:0; display:flex; flex-direction:column; }
-      #libPistas[hidden], #libGroups[hidden], #libDrill[hidden]{ display:none; }
+      #libPistas, #libGroups, #libDrill, #libAccesos{ flex:1; min-height:0; display:flex; flex-direction:column; }
+      #libPistas[hidden], #libGroups[hidden], #libDrill[hidden], #libAccesos[hidden]{ display:none; }
+      #libAccesos{ overflow-y:auto; }
       /* NUEVO22: sin estas reglas, el display de .pl-create/.grp-grid/
          .grp-rows anulaba el atributo hidden: la fila de crear lista se
          veía en Álbumes/Artistas/Carpetas y la rejilla y las filas vacías
@@ -366,18 +423,23 @@
 
       /* ===== Al tocar un resultado de la búsqueda: Escuchar o Descargar ===== */
       .choice-overlay{ position:absolute; inset:0; z-index:30; display:none; place-items:center; background:rgba(1,8,28,.78); padding:20px; }
-      .lyrics-overlay{ position:fixed; inset:0; z-index:32; display:none; place-items:center; background:rgba(1,8,28,.82); padding:20px; }
+      /* NUEVO23: la letra es a pantalla completa, estilo YouTube Music
+         con la esencia neón de Gurru: letra grande itálica serif, la
+         línea que suena en blanco brillante y las demás apagadas. */
+      .lyrics-overlay{ position:fixed; inset:0; z-index:32; display:none; place-items:center; background:rgba(1,8,28,.82); padding:0; }
       .lyrics-overlay.show{ display:grid; }
-      .lyrics-box{ width:min(560px,94vw); max-height:80dvh; display:flex; flex-direction:column; background:linear-gradient(180deg,#0a2a5e,#04163c); border:2px solid rgba(125,249,255,.45); border-radius:18px; box-shadow:0 10px 40px rgba(0,0,0,.6); overflow:hidden; }
-      .lyrics-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:14px 14px 8px; }
-      .lyrics-titles{ min-width:0; }
+      .lyrics-box{ width:100%; height:100%; max-height:100dvh; display:flex; flex-direction:column; background:linear-gradient(180deg,#0a2a5e,#04163c); border:0; border-radius:0; overflow:hidden; }
+      .lyrics-head{ display:flex; align-items:center; gap:12px; padding:16px 16px 10px; }
+      .lyrics-cover{ width:56px; height:56px; border-radius:10px; object-fit:cover; flex:0 0 56px; background:rgba(255,255,255,.08); }
+      .lyrics-titles{ flex:1; min-width:0; }
       .lyrics-title{ font-size:17px; font-weight:800; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .lyrics-artist{ font-size:13px; color:#7dd3fc; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-      .lyrics-body{ overflow-y:auto; overflow-x:hidden; padding:10px 16px; font-size:15px; line-height:1.65; color:#dbeafe; text-align:left; position:relative; flex:0 0 auto; height:230px; scroll-behavior:smooth; -webkit-mask-image:linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent); mask-image:linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent); }
-      .lyrics-src{ font-size:11px; color:var(--soft); text-align:center; padding:0 16px 10px; }
-      .lyrics-line{ padding:3px 0; opacity:.6; transition:opacity .35s ease, color .35s ease, transform .35s ease, text-shadow .35s ease; text-align:left; line-height:24px; transform-origin:left center; }
-      .lyrics-line.active{ opacity:1; color:#7df9ff; font-weight:700; transform:scale(1.05); text-shadow:0 0 14px rgba(125,249,255,.75); }
-      .lyrics-plain{ white-space:pre-wrap; }
+      .lyrics-body{ overflow-y:auto; overflow-x:hidden; padding:18px 22px; font-family:Georgia,"Times New Roman",serif; font-style:italic; font-size:26px; line-height:1.5; color:#dbeafe; text-align:left; position:relative; flex:1 1 auto; min-height:0; scroll-behavior:smooth; -webkit-mask-image:linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent); mask-image:linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent); }
+      .lyrics-foot{ display:flex; align-items:center; gap:10px; padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px)); border-top:1px solid rgba(125,249,255,.18); }
+      .lyrics-share{ flex:0 0 auto; border:1.5px solid var(--accent); color:var(--accent); background:transparent; border-radius:999px; padding:9px 16px; font-weight:800; font-size:14px; cursor:pointer; }
+      .lyrics-src{ flex:1; min-width:0; font-size:11px; color:var(--soft); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .lyrics-line{ padding:7px 0; opacity:.45; transition:opacity .35s ease, color .35s ease, transform .35s ease, text-shadow .35s ease; text-align:left; font-family:Georgia,"Times New Roman",serif; font-style:italic; font-size:26px; line-height:1.5; transform-origin:left center; }
+      .lyrics-line.active{ opacity:1; color:#fff; font-weight:700; transform:scale(1.03); text-shadow:0 0 16px rgba(125,249,255,.8); }
       .lyrics-loading,.lyrics-empty{ text-align:center; color:#93c5fd; padding:26px 10px; }
       .lyrics-retry{ display:block; margin:6px auto 0; }
       .choice-overlay.show{ display:grid; }
@@ -654,7 +716,8 @@
               <button class="dl-cancel" id="dlCancelBtn">Detener</button>
             </div>
 
-            <div class="queue" id="queuePanel" aria-label="Cola de reproducción">
+            <div class="queue collapsed" id="queuePanel" aria-label="Cola de reproducción">
+              <div class="q-handle" id="queueHandle" role="button" aria-label="Abrir o cerrar la cola"><span class="q-grip"></span></div>
               <div class="queue-head">
                 <span class="q-title">A continuación</span>
                 <span class="q-right"><span class="q-count" id="queueCount"></span><button class="q-toggle" id="queueToggleBtn" aria-expanded="true">Ocultar ▴</button></span>
@@ -717,17 +780,10 @@
               <button class="lib-subtab" data-sub="listas" type="button">Listas</button>
               <button class="lib-subtab" data-sub="artistas" type="button">Artistas</button>
               <button class="lib-subtab" data-sub="carpetas" type="button">Carpetas</button>
+              <button class="lib-subtab" data-sub="accesos" type="button">Accesos</button>
             </div>
 
             <div id="libPistas">
-            <!-- Accesos directos (NUEVO19): página principal estilo
-                 YouTube Music — los artistas que más escuchas, en
-                 rejilla de 3 columnas. Tocar uno suena lo más de él. -->
-            <div id="shortcutsWrap" hidden>
-              <div class="sc-title">Accesos directos</div>
-              <div class="sc-grid" id="shortcutsGrid"></div>
-            </div>
-
             <!-- Selección rápida (NUEVO19): título de la lista, estilo
                  YouTube Music, con el botón para sonar todo lo que se ve. -->
             <div class="quick-head">
@@ -742,6 +798,16 @@
               <p id="emptyStateText">Toca <b>«Elegir carpeta»</b> y selecciona la carpeta donde guardas tu música: se cargan todas de una vez.<br />Toca una canción de la lista para escucharla.</p>
             </div>
             <div class="no-results" id="noResults">Ninguna canción coincide con tu búsqueda.</div>
+            </div>
+            <!-- Accesos directos (NUEVO23): su propia pestaña, como
+                 Pistas / Álbumes / Listas / Artistas / Carpetas. Ya no
+                 se esconden al bajar: siempre están aquí. -->
+            <div id="libAccesos" hidden>
+              <div id="shortcutsWrap">
+                <div class="sc-title">Accesos directos</div>
+                <div class="sc-grid" id="shortcutsGrid"></div>
+                <div class="sc-empty" id="shortcutsEmpty" hidden>Escucha algo de tu Biblioteca y aquí aparecerán tus artistas más escuchados.</div>
+              </div>
             </div>
             <div id="libGroups" hidden>
               <div class="pl-create" id="plCreateRow" hidden>
@@ -796,7 +862,58 @@
                 <button class="yt-add" id="ytSearchBtn">Buscar</button>
               </div>
               <div class="yt-msg" id="ytMsg" role="status"></div>
+              <!-- Búsquedas recientes e historial (NUEVO23): al entrar a
+                   YouTube sin resultados se ven las canciones que
+                   buscaste o escuchaste hace poco y los términos que
+                   buscaste, para volver a buscar con un toque. -->
+              <div class="yt-hist" id="ytHistory" hidden>
+                <div class="yt-hist-sec" id="ytRecentSec">
+                  <div class="yt-hist-h">Búsquedas recientes</div>
+                  <div class="yt-recent-row" id="ytRecentRow"></div>
+                </div>
+                <div class="yt-hist-sec" id="ytHistSec">
+                  <div class="yt-hist-h"><span>Historial</span><button class="yt-hist-clear" id="ytHistClearBtn" type="button">Borrar</button></div>
+                  <ul class="yt-hist-list" id="ytHistList"></ul>
+                </div>
+              </div>
               <div class="yt-results" id="ytSearchResults" aria-label="Resultados de YouTube"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ ARTISTA (NUEVO23) ============ -->
+        <section class="view" id="viewArtist" aria-label="Artista" hidden>
+          <div class="lib">
+            <div id="artistMain">
+              <div class="artist-head">
+                <button class="icon-btn" id="artistBackBtn" type="button" aria-label="Volver a YouTube">←</button>
+                <img class="artist-img" id="artistImg" src="logo.png" alt="" />
+                <div class="artist-meta">
+                  <div class="artist-name" id="artistName"></div>
+                  <div class="artist-sub" id="artistSub"></div>
+                </div>
+              </div>
+              <div class="artist-actions">
+                <button class="pill-btn" id="artistShuffleBtn" type="button">⇄ Aleatorio</button>
+                <button class="pill-btn" id="artistMixBtn" type="button">((•)) Mix</button>
+              </div>
+              <div class="artist-sec-h">Las 10 más populares</div>
+              <div class="artist-msg" id="artistTopMsg" role="status"></div>
+              <ol class="artist-top" id="artistTopList"></ol>
+              <div class="artist-sec-h">Álbumes</div>
+              <div class="artist-msg" id="artistAlbumsMsg" role="status"></div>
+              <div class="artist-albums" id="artistAlbumsGrid"></div>
+            </div>
+            <div class="artist-album" id="artistAlbumPanel" hidden>
+              <div class="artist-album-head">
+                <button class="icon-btn" id="artistAlbumBackBtn" type="button" aria-label="Volver al artista">←</button>
+                <img class="artist-album-img" id="artistAlbumImg" src="logo.png" alt="" />
+                <div class="artist-album-meta">
+                  <div class="artist-album-name" id="artistAlbumName"></div>
+                  <div class="artist-album-sub" id="artistAlbumSub"></div>
+                </div>
+              </div>
+              <ol class="artist-album-tracks" id="artistAlbumTracks"></ol>
             </div>
           </div>
         </section>
@@ -895,6 +1012,10 @@
             <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
             <span><span class="cb-t">Descargar</span><span class="cb-s" id="choiceDownloadSub">Se guarda en el teléfono con yt-dlp (dentro del APK), en el formato elegido y en la máxima calidad. El avance se ve en Descargas, canción por canción.</span></span>
           </button>
+          <button class="choice-btn artist" id="choiceArtistBtn">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <span><span class="cb-t">Ver artista</span><span class="cb-s">Sus 10 canciones más populares y sus álbumes.</span></span>
+          </button>
           <div class="fmt-row" id="fmtRow" role="group" aria-label="Formato de descarga">
             <span class="fmt-label">Formato:</span>
             <button class="fmt-btn on" data-fmt="mp3" type="button">MP3</button>
@@ -911,6 +1032,7 @@
       <div class="lyrics-overlay" id="lyricsOverlay" role="dialog" aria-modal="true" aria-labelledby="lyricsTitle">
         <div class="lyrics-box">
           <div class="lyrics-head">
+            <img class="lyrics-cover" id="lyricsCover" src="logo.png" alt="" />
             <div class="lyrics-titles">
               <div class="lyrics-title" id="lyricsTitle"></div>
               <div class="lyrics-artist" id="lyricsArtist"></div>
@@ -918,7 +1040,10 @@
             <button class="icon-btn" id="lyricsClose" title="Cerrar letra" aria-label="Cerrar letra">✕</button>
           </div>
           <div class="lyrics-body" id="lyricsBody"></div>
-          <div class="lyrics-src" id="lyricsSrc"></div>
+          <div class="lyrics-foot">
+            <button class="lyrics-share" id="lyricsShareBtn" type="button">↗ Compartir</button>
+            <div class="lyrics-src" id="lyricsSrc"></div>
+          </div>
         </div>
       </div>
       <!-- Editar los datos de una canción (título, artista, álbum) y
@@ -1203,13 +1328,14 @@
         $("viewYouTube").hidden = v !== "youtube";
         $("viewMixes").hidden = v !== "mixes";
         $("viewSettings").hidden = v !== "settings";
+        $("viewArtist").hidden = v !== "artist";
         if (v === "library"){ maybeRetryLocalScan(); }
         if (v === "mixes"){ renderMixesGrid(); }
         if (v === "player") kickViz();
         /* Al entrar a YouTube, la última búsqueda con sus resultados
            sigue ahí (se guarda en el teléfono); si la vista se vació
            por algún motivo, se restaura sin buscar de nuevo. */
-        if (v === "youtube" && !$("ytSearchResults").children.length) restoreLastYtSearch();
+        if (v === "youtube"){ if (!$("ytSearchResults").children.length) restoreLastYtSearch(); renderYtHistory(); }
         /* La barra inferior fija marca la sección activa (en el
            reproductor ninguna está activa: es su propia pantalla). */
         ["downloads", "library", "youtube", "mixes", "settings"].forEach(function(k){
@@ -1267,6 +1393,7 @@
             var editOv = $("editOverlay");
             if (editOv && editOv.classList.contains("show")){ closeEdit(); return; }
             if (view === "library" && libDrill){ closeDrill(); return; }
+            if (view === "artist"){ if (artistAlbumOpen()){ closeArtistAlbum(); return; } showView("youtube", true); return; }
             if (view !== "library"){ showView("library", true); return; }
             /* En la pantalla principal (Biblioteca) no se cierra la app:
                se minimiza para que la música siga sonando. Si el plugin
@@ -1282,13 +1409,62 @@
 
       /* ---------- Cola: mostrar / ocultar ---------- */
       var queueCollapsed = true;
+      /* NUEVO23: el origen de la cola se fija cuando empieza a sonar una
+         canción. Si esa canción se descarga en medio de la reproducción
+         pasa a ser local, pero la cola se queda en el origen online. */
+      var queueOrigin = null;
+      var qSheetInit = false;
+      var qAnimTimer = null;
       function setQueueCollapsed(collapsed){
         queueCollapsed = !!collapsed;
-        $("queuePanel").classList.toggle("collapsed", queueCollapsed);
-        $("queueToggleBtn").textContent = queueCollapsed ? "Mostrar ▾" : "Ocultar ▴";
-        $("queueToggleBtn").setAttribute("aria-expanded", queueCollapsed ? "false" : "true");
+        var qp = $("queuePanel");
+        var btn = $("queueToggleBtn");
+        btn.textContent = queueCollapsed ? "Mostrar ▾" : "Ocultar ▴";
+        btn.setAttribute("aria-expanded", queueCollapsed ? "false" : "true");
+        /* La primera vez se pone la clase sin animar (al abrir la app). */
+        if (!qSheetInit){ qSheetInit = true; qp.classList.toggle("collapsed", queueCollapsed); return; }
+        if (qAnimTimer){ clearTimeout(qAnimTimer); qAnimTimer = null; }
+        /* Altura de la barrita colapsada (tirador + encabezado), medida. */
+        var handle = $("queueHandle"), head = qp.querySelector(".queue-head");
+        var collapsedH = 56;
+        try { collapsedH = (handle ? handle.offsetHeight : 0) + (head ? head.offsetHeight : 0) + 8; } catch(e){}
+        if (queueCollapsed){
+          qp.style.maxHeight = qp.scrollHeight + "px";
+          void qp.offsetHeight;
+          qp.style.maxHeight = collapsedH + "px";
+          qAnimTimer = setTimeout(function(){ qp.classList.add("collapsed"); qp.style.maxHeight = ""; qAnimTimer = null; }, 420);
+        } else {
+          qp.classList.remove("collapsed");
+          qp.style.maxHeight = collapsedH + "px";
+          void qp.offsetHeight;
+          qp.style.maxHeight = qp.scrollHeight + "px";
+          qAnimTimer = setTimeout(function(){ qp.style.maxHeight = ""; qAnimTimer = null; }, 420);
+        }
       }
       $("queueToggleBtn").addEventListener("click", function(){ setQueueCollapsed(!queueCollapsed); });
+      /* Gesto en la barrita de la cola: hacia arriba se abre, hacia
+         abajo se cierra; un toque la alterna. Tocar el encabezado de la
+         cola (fuera del botón Mostrar/Ocultar) también la alterna. */
+      (function(){
+        var handle = $("queueHandle");
+        if (!handle) return;
+        var startY = null;
+        handle.addEventListener("pointerdown", function(ev){ startY = ev.clientY; });
+        handle.addEventListener("pointerup", function(ev){
+          if (startY == null) return;
+          var dy = ev.clientY - startY;
+          startY = null;
+          if (dy < -40) setQueueCollapsed(false);
+          else if (dy > 40) setQueueCollapsed(true);
+          else setQueueCollapsed(!queueCollapsed);
+        });
+        handle.addEventListener("pointercancel", function(){ startY = null; });
+        var head = $("queuePanel").querySelector(".queue-head");
+        if (head) head.addEventListener("click", function(ev){
+          if (ev.target && ev.target.closest && ev.target.closest("#queueToggleBtn")) return;
+          setQueueCollapsed(!queueCollapsed);
+        });
+      })();
       /* NUEVO22: al abrir la app, "A continuación" empieza oculta (se
          abre con el botón Mostrar o con el botón de cola del mini
          reproductor). */
@@ -1552,13 +1728,15 @@
         });
         syncLibPanes();
         if (tab === "pistas") renderPlaylist();
+        else if (tab === "accesos") renderShortcuts(($("searchInput").value || "").trim().toLowerCase());
         else renderGroups();
       }
       function syncLibPanes(){
-        var pistas = $("libPistas"), groups = $("libGroups"), drill = $("libDrill");
+        var pistas = $("libPistas"), groups = $("libGroups"), drill = $("libDrill"), acc = $("libAccesos");
         var inDrill = !!libDrill;
         if (pistas) pistas.hidden = inDrill || libSubTab !== "pistas";
-        if (groups) groups.hidden = inDrill || libSubTab === "pistas";
+        if (groups) groups.hidden = inDrill || libSubTab === "pistas" || libSubTab === "accesos";
+        if (acc) acc.hidden = inDrill || libSubTab !== "accesos";
         if (drill) drill.hidden = !inDrill;
       }
       function groupBy(items, keyFn){
@@ -1831,9 +2009,6 @@
         var q = $("searchInput").value.trim().toLowerCase();
         var ul = $("playlist");
         closeLibMenu();
-        /* NUEVO20: al reconstruir la lista se vuelve arriba, así que
-           los accesos directos vuelven a verse. */
-        setShortcutsHidden(false);
         ul.innerHTML = "";
         var items = visibleItems();
         if (libSort === "title") items.sort(function(a, b){ return (a.t.title || "").localeCompare(b.t.title || "", "es"); });
@@ -2097,25 +2272,32 @@
         }
         var arr = Object.keys(byArtist).map(function(k){ return byArtist[k]; });
         arr.sort(function(x, y){ return (y.score - x.score) || (y.indices.length - x.indices.length); });
-        return arr.slice(0, 6).map(function(g){
+        return arr.slice(0, 12).map(function(g){
           var ordered = byPlays(g.indices);
           var art = null;
           for (var i = 0; i < ordered.length; i++){ var t = tracks[ordered[i]]; if (t && t.artUrl){ art = t.artUrl; break; } }
           return { name: g.name, art: art, indices: ordered };
         });
       }
+            /* NUEVO23: los accesos directos viven en su propia pestaña
+         (Accesos), siempre visibles: ya no se esconden al bajar. Si
+         hay una búsqueda escrita, se filtran los artistas por ese
+         texto; si no hay artistas, se muestra el mensaje vacío. */
       function renderShortcuts(q){
-        var wrap = $("shortcutsWrap"), grid = $("shortcutsGrid");
+        var wrap = $("shortcutsWrap"), grid = $("shortcutsGrid"), empty = $("shortcutsEmpty");
         if (!wrap || !grid) return;
-        if ((q && q.trim()) || libFilter !== "all"){ wrap.hidden = true; return; }
-        var sig = localTrackIndices().map(function(i){ return tracks[i].id; }).join(",") + "|" + JSON.stringify(loadPlayCounts());
-        if (sig === shortcutsSig && !wrap.hidden) return;
+        var query = (q || "").trim().toLowerCase();
+        var sig = localTrackIndices().map(function(i){ return tracks[i].id; }).join(",") + "|" + JSON.stringify(loadPlayCounts()) + "|" + query;
+        if (sig === shortcutsSig) return;
         shortcutsSig = sig;
         var list = buildShortcuts();
+        if (query) list = list.filter(function(s){ return (s.name || "").toLowerCase().indexOf(query) >= 0; });
         grid.innerHTML = "";
-        if (!list.length){ wrap.hidden = true; return; }
-        wrap.hidden = false;
-        wrap.style.maxHeight = ""; wrap.classList.remove("sc-hidden");
+        if (!list.length){
+          if (empty) empty.hidden = false;
+          return;
+        }
+        if (empty) empty.hidden = true;
         list.forEach(function(s){
           var b = document.createElement("button");
           b.type = "button";
@@ -2170,11 +2352,15 @@
           }
           activeMix = null;
         }
-        var org = originOf(tracks[current]);
+        var org = queueOrigin || originOf(tracks[current]);
         var out = [];
         for (var i = 0; i < tracks.length; i++){
           if (originOf(tracks[i]) === org) out.push(i);
         }
+        /* La canción que suena se descargó en medio de la reproducción:
+           ya es local, pero la cola sigue siendo la online: se muestra
+           primera en la cola, como la que está sonando. */
+        if (out.indexOf(current) < 0) out.unshift(current);
         return out;
       }
       function moveQueue(realIdx, dir){
@@ -2209,6 +2395,10 @@
         empty.style.display = "none";
         var q = queueIndices();
         var pos = q.indexOf(current);
+        /* La canción actual se añadió primera a la cola porque se
+           descargó mientras sonaba: no se puede reordenar (su lugar en
+           la cola es el de la que suena). */
+        var qPrepended = !!(queueOrigin && tracks[current] && originOf(tracks[current]) !== queueOrigin);
         $("queueCount").textContent = (pos + 1) + "/" + q.length + (shuffle ? " · aleatorio" : "") + (activeMix ? " · " + activeMix.name : "");
         q.forEach(function(realIdx, qi){
           var t = tracks[realIdx];
@@ -2223,8 +2413,8 @@
             '<span class="q-first"><span class="q-num">' + (qi + 1) + '</span><span class="q-tag">' + esc(label) + '</span></span>' +
             '<span class="q-t">' + esc(cleanTitle(t.title)) + badge + ' <span class="q-a">&middot; ' + esc(t.artist) + '</span></span>' +
             '<span class="q-dur">' + (t.duration ? fmtShort(t.duration) : (t.type === "youtube" ? (t.kind === "playlist" ? "Lista" : "Audio") : (t.type === "facebook" ? "Audio" : "--:--"))) + '</span>' +
-            '<span class="q-move"><button type="button" data-mv="-1" ' + (qi === 0 ? "disabled" : "") + ' title="Subir en la cola" aria-label="Subir en la cola">↑</button>' +
-            '<button type="button" data-mv="1" ' + (qi === q.length - 1 ? "disabled" : "") + ' title="Bajar en la cola" aria-label="Bajar en la cola">↓</button></span>';
+            '<span class="q-move"><button type="button" data-mv="-1" ' + ((qi === 0 || (kind === "current" && qPrepended)) ? "disabled" : "") + ' title="Subir en la cola" aria-label="Subir en la cola">↑</button>' +
+            '<button type="button" data-mv="1" ' + ((qi === q.length - 1 || (kind === "current" && qPrepended)) ? "disabled" : "") + ' title="Bajar en la cola" aria-label="Bajar en la cola">↓</button></span>';
           if (kind !== "current"){
             (function(idx){ li.addEventListener("click", function(){ playTrack(idx); }); })(realIdx);
           }
@@ -3170,6 +3360,8 @@
           /* El subtítulo de Escuchar/Descargar ya se puso arriba. */
         }
         $("choiceDownloadBtn").disabled = !ctx.canDownload;
+        var artistBtn = $("choiceArtistBtn");
+        if (artistBtn) artistBtn.style.display = (first && first.type === "youtube") ? "" : "none";
         $("choiceOverlay").classList.add("show");
       }
       function closeChoice(){ $("choiceOverlay").classList.remove("show"); choiceCtx = null; }
@@ -3183,6 +3375,7 @@
       var lyricsCache = {};
       var lyricsLines = [];
       var lyricsActiveIdx = -1;
+      var lyricsPlainText = "";
       function lyricsKey(t){ return t ? (t.id || ((t.title || "") + "|" + (t.artist || ""))) : ""; }
       function parseLrc(lrc){
         var out = [];
@@ -3286,6 +3479,9 @@
         if (!t) return;
         $("lyricsTitle").textContent = t.title || "";
         $("lyricsArtist").textContent = t.artist || "";
+        var cov = $("lyricsCover");
+        if (cov) cov.src = t.artUrl || "logo.png";
+        lyricsPlainText = "";
         $("lyricsBody").innerHTML = '<div class="lyrics-loading">Buscando la letra…</div>';
         $("lyricsSrc").textContent = "";
         lyricsLines = []; lyricsActiveIdx = -1;
@@ -3303,10 +3499,12 @@
           $("lyricsSrc").textContent = res.source ? ("Letra: " + res.source) : "";
           if (res.lines.length){
             lyricsLines = res.lines;
+            lyricsPlainText = res.lines.map(function(l){ return l.text; }).join("\n");
             $("lyricsBody").innerHTML = res.lines.map(function(l){ return '<div class="lyrics-line">' + esc(l.text) + '</div>'; }).join("");
             updateLyricsHighlight(currentTrackTime());
           } else {
-            $("lyricsBody").innerHTML = '<div class="lyrics-plain">' + esc(res.plain) + '</div>';
+            lyricsPlainText = res.plain || "";
+            $("lyricsBody").innerHTML = (res.plain || "").split("\n").map(function(l){ return '<div class="lyrics-line">' + esc(l) + '</div>'; }).join("");
           }
         });
       }
@@ -3404,6 +3602,290 @@
         showToast({ title: "Descargando", msg: "«" + cleanTitle(list[0].title) + "»" + (list.length > 1 ? " y " + (list.length - 1) + " más" : "") + ": el avance está en Descargas.", retryLabel: "Ver Descargas", onRetry: function(){ showView("downloads"); } });
       });
       $("choiceOnlyBtn").addEventListener("click", function(){ closeChoice(); });
+      $("choiceArtistBtn").addEventListener("click", function(){
+        if (!choiceCtx) return;
+        var first = tracks[choiceCtx.indices[0]];
+        var name = first ? first.artist : "";
+        closeChoice();
+        if (name && name !== "YouTube") openArtist(name);
+      });
+      /* ---------- Búsquedas recientes e historial de YouTube (NUEVO23) ----------
+         Se guardan en el teléfono: los términos buscados (máx. 10) y las
+         canciones online que se pusieron (máx. 10, con portada). Al entrar
+         a YouTube sin resultados se ven para volver a buscar con un toque. */
+      var YT_HIST_KEY = "gurru-yt-history-v1";
+      var YT_RECENT_KEY = "gurru-yt-recent-v1";
+      function loadYtHistory(){ try { var v = JSON.parse(localStorage.getItem(YT_HIST_KEY) || "[]"); return Array.isArray(v) ? v : []; } catch(e){ return []; } }
+      function saveYtHistory(list){ try { localStorage.setItem(YT_HIST_KEY, JSON.stringify(list.slice(0, 10))); } catch(e){} }
+      function loadYtRecent(){ try { var v = JSON.parse(localStorage.getItem(YT_RECENT_KEY) || "[]"); return Array.isArray(v) ? v : []; } catch(e){ return []; } }
+      function saveYtRecent(list){ try { localStorage.setItem(YT_RECENT_KEY, JSON.stringify(list.slice(0, 10))); } catch(e){} }
+      function recordYtSearch(q){
+        q = (q || "").trim();
+        if (!q) return;
+        var list = loadYtHistory().filter(function(x){ return (x || "").toLowerCase() !== q.toLowerCase(); });
+        list.unshift(q);
+        saveYtHistory(list);
+      }
+      function recordYtRecent(t){
+        if (!t || !t.videoId) return;
+        var item = { videoId: t.videoId, title: t.title || "Canción de YouTube", artist: t.artist || "YouTube", art: t.artUrl || ("https://i.ytimg.com/vi/" + t.videoId + "/hqdefault.jpg") };
+        var list = loadYtRecent().filter(function(x){ return x.videoId !== t.videoId; });
+        list.unshift(item);
+        saveYtRecent(list);
+      }
+      function renderYtHistory(){
+        var sec = $("ytHistory"), row = $("ytRecentRow"), ul = $("ytHistList");
+        if (!sec || !row || !ul) return;
+        var hasResults = !!($("ytSearchResults") && $("ytSearchResults").children.length);
+        var hist = loadYtHistory(), recent = loadYtRecent();
+        if (hasResults || (!hist.length && !recent.length)){ sec.hidden = true; return; }
+        sec.hidden = false;
+        var rs = $("ytRecentSec"); if (rs) rs.hidden = !recent.length;
+        row.innerHTML = "";
+        recent.forEach(function(r){
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "yt-recent-card";
+          var img = document.createElement("img");
+          img.src = r.art || "logo.png";
+          img.alt = "";
+          img.onerror = function(){ this.onerror = null; this.src = "logo.png"; };
+          var sp = document.createElement("span");
+          sp.textContent = cleanTitle(r.title);
+          b.appendChild(img);
+          b.appendChild(sp);
+          b.addEventListener("click", function(){ openYtResult({ id: r.videoId, title: r.title, channel: r.artist, duration: 0, thumbnail: r.art }, r.title); });
+          row.appendChild(b);
+        });
+        var hs = $("ytHistSec"); if (hs) hs.hidden = !hist.length;
+        ul.innerHTML = "";
+        hist.forEach(function(term){
+          var li = document.createElement("li");
+          var d = document.createElement("div");
+          d.className = "yt-hist-row";
+          d.tabIndex = 0;
+          d.setAttribute("role", "button");
+          var clock = document.createElement("span");
+          clock.className = "yh-clock";
+          clock.textContent = "◷";
+          var tm = document.createElement("span");
+          tm.className = "yh-term";
+          tm.textContent = term;
+          var go = document.createElement("button");
+          go.type = "button";
+          go.className = "yh-go";
+          go.textContent = "↗";
+          go.title = "Poner en el buscador";
+          go.setAttribute("aria-label", "Poner en el buscador");
+          d.appendChild(clock);
+          d.appendChild(tm);
+          d.appendChild(go);
+          var runSearch = function(){ var inp = $("ytSearchInput"); if (inp) inp.value = term; searchYouTube(); };
+          d.addEventListener("click", function(){ runSearch(); });
+          d.addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); runSearch(); } });
+          go.addEventListener("click", function(ev){ ev.stopPropagation(); var inp = $("ytSearchInput"); if (inp){ inp.value = term; inp.focus(); } });
+          li.appendChild(d);
+          ul.appendChild(li);
+        });
+      }
+      /* Abrir un resultado de YouTube: se agrega a la Biblioteca y se
+         abre la ventana para elegir Escuchar o Descargar. */
+      function openYtResult(r, query){
+        var track = makeYtTrack({ videoId: r.id, title: r.title || "Canción de YouTube", artist: r.channel || "YouTube", duration: r.duration || 0, artUrl: r.thumbnail });
+        track.searchQuery = query || "";
+        tracks.push(track);
+        var idx = tracks.length - 1;
+        renderPlaylist();
+        openChoice({ indices: [idx], groupTitle: null, canDownload: true });
+      }
+      /* ---------- Página del artista (NUEVO23) ----------
+         Tras una búsqueda en YouTube se puede ir a la página del
+         artista: las 10 canciones más populares (búsqueda de YouTube
+         Music del artista, ordenada por relevancia) y sus álbumes
+         (iTunes, sin clave). Tocar una canción la pone a sonar; tocar
+         un álbum muestra sus canciones. */
+      var artistState = { name: null, top: [], albums: [] };
+      function artistAlbumOpen(){ var p = $("artistAlbumPanel"); return !!(p && !p.hidden); }
+      function closeArtistAlbum(){
+        var p = $("artistAlbumPanel");
+        if (p) p.hidden = true;
+        var main = $("artistMain");
+        if (main) main.hidden = false;
+      }
+      function playArtistResult(r){
+        var t = makeYtTrack({ videoId: r.id, title: r.title || "Canción de YouTube", artist: r.channel || artistState.name || "YouTube", duration: r.duration || 0, artUrl: r.thumbnail });
+        t.searchQuery = artistState.name || "";
+        tracks.push(t);
+        renderPlaylist();
+        playTrack(tracks.length - 1);
+        showView("player");
+      }
+      function openArtistAlbum(album){
+        var main = $("artistMain");
+        if (main) main.hidden = true;
+        var p = $("artistAlbumPanel");
+        if (!p) return;
+        p.hidden = false;
+        $("artistAlbumName").textContent = album.name || "";
+        $("artistAlbumSub").textContent = (album.artist || "") + (album.year ? " · " + album.year : "");
+        var img = $("artistAlbumImg");
+        if (img) img.src = album.art || "logo.png";
+        var list = $("artistAlbumTracks");
+        list.innerHTML = '<li class="aat-loading">Cargando canciones…</li>';
+        fetch("https://itunes.apple.com/lookup?id=" + album.id + "&entity=song&limit=30").then(function(r){ return r.json(); }).then(function(d){
+          var songs = (d.results || []).filter(function(x){ return x.wrapperType === "track"; });
+          list.innerHTML = "";
+          if (!songs.length){ list.innerHTML = '<li class="aat-loading">No se encontraron las canciones de este álbum.</li>'; return; }
+          songs.forEach(function(sg){
+            var li = document.createElement("li");
+            var num = document.createElement("span");
+            num.className = "aat-num";
+            num.textContent = sg.trackNumber || "";
+            var nm = document.createElement("span");
+            nm.className = "aat-t";
+            nm.textContent = sg.trackName || "";
+            li.appendChild(num);
+            li.appendChild(nm);
+            li.addEventListener("click", function(){ playAlbumTrack(sg.trackName, album.artist || artistState.name); });
+            list.appendChild(li);
+          });
+        }).catch(function(){
+          list.innerHTML = '<li class="aat-loading">No se pudo cargar el álbum. Revisa tu internet y vuelve a tocarlo.</li>';
+        });
+      }
+      function playAlbumTrack(trackName, artistName){
+        var p = getNativeDl();
+        if (!p || !p.searchYouTube){ showToast({ title: "Solo en el APK", msg: "La búsqueda solo funciona dentro del APK instalado." }); return; }
+        showToast({ title: "Buscando", msg: "«" + cleanTitle(trackName) + "» en YouTube…" });
+        p.searchYouTube({ query: (trackName || "") + " " + (artistName || ""), limit: 5 }).then(function(res){
+          var list = (res && res.results) || [];
+          if (!list.length){ showToast({ kind: "err", title: "No se encontró", msg: "No encontré «" + cleanTitle(trackName) + "» en YouTube." }); return; }
+          var r = list[0];
+          var t = makeYtTrack({ videoId: r.id, title: r.title || trackName, artist: r.channel || artistName || "YouTube", duration: r.duration || 0, artUrl: r.thumbnail });
+          t.searchQuery = artistName || "";
+          tracks.push(t);
+          renderPlaylist();
+          playTrack(tracks.length - 1);
+          showView("player");
+        }).catch(function(){
+          showToast({ kind: "err", title: "No se pudo buscar", msg: "La búsqueda en YouTube falló." });
+        });
+      }
+      function openArtist(artistName){
+        artistName = (artistName || "").trim();
+        if (!artistName) return;
+        artistState = { name: artistName, top: [], albums: [] };
+        closeArtistAlbum();
+        showView("artist");
+        $("artistName").textContent = artistName;
+        $("artistSub").textContent = "Cargando…";
+        var img = $("artistImg");
+        if (img) img.src = "logo.png";
+        $("artistTopMsg").textContent = "Buscando las más populares…";
+        $("artistTopList").innerHTML = "";
+        $("artistAlbumsMsg").textContent = "Buscando los álbumes…";
+        $("artistAlbumsGrid").innerHTML = "";
+        var p = getNativeDl();
+        if (p && p.searchYouTube){
+          p.searchYouTube({ query: artistName, limit: 30 }).then(function(res){
+            if (artistState.name !== artistName) return;
+            var top = (res && res.results) || [];
+            top = top.slice(0, 10);
+            artistState.top = top;
+            var ul = $("artistTopList");
+            ul.innerHTML = "";
+            if (!top.length){
+              $("artistTopMsg").textContent = "No encontré canciones de «" + artistName + "» en YouTube.";
+            } else {
+              $("artistTopMsg").textContent = "";
+              if (img && top[0].thumbnail) img.src = top[0].thumbnail;
+              top.forEach(function(r, i){
+                var li = document.createElement("li");
+                var num = document.createElement("span");
+                num.className = "at-num";
+                num.textContent = (i + 1);
+                var im = document.createElement("img");
+                im.src = r.thumbnail || "logo.png";
+                im.alt = "";
+                im.onerror = function(){ this.onerror = null; this.src = "logo.png"; };
+                var tx = document.createElement("span");
+                tx.className = "at-t";
+                tx.textContent = cleanTitle(r.title || "Canción de YouTube");
+                var sub = document.createElement("span");
+                sub.textContent = r.channel || artistName;
+                tx.appendChild(sub);
+                li.appendChild(num);
+                li.appendChild(im);
+                li.appendChild(tx);
+                li.addEventListener("click", function(){ playArtistResult(r); });
+                ul.appendChild(li);
+              });
+            }
+          }).catch(function(){
+            if (artistState.name !== artistName) return;
+            $("artistTopMsg").textContent = "No se pudieron buscar las canciones. Revisa tu internet y vuelve a abrir el artista.";
+          });
+        } else {
+          $("artistTopMsg").textContent = "Las canciones del artista solo se buscan dentro del APK instalado.";
+        }
+        /* Álbumes con iTunes (sin clave): título, portada y año. */
+        fetch("https://itunes.apple.com/search?term=" + encodeURIComponent(artistName) + "&entity=album&attribute=artistTerm&limit=12").then(function(r){ return r.json(); }).then(function(d){
+          if (artistState.name !== artistName) return;
+          var seen = {}, albums = [];
+          (d.results || []).forEach(function(a){
+            if (!a.collectionId || seen[a.collectionId]) return;
+            seen[a.collectionId] = true;
+            albums.push({ id: a.collectionId, name: a.collectionName || "", artist: a.artistName || artistName, year: (a.releaseDate || "").slice(0, 4), art: (a.artworkUrl100 || "").replace("100x100bb.jpg", "600x600bb.jpg") });
+          });
+          artistState.albums = albums;
+          var grid = $("artistAlbumsGrid");
+          grid.innerHTML = "";
+          if (!albums.length){
+            $("artistAlbumsMsg").textContent = "No encontré álbumes de «" + artistName + "».";
+          } else {
+            $("artistAlbumsMsg").textContent = "";
+            var genre = (d.results[0] && d.results[0].primaryGenreName) || "";
+            $("artistSub").textContent = (genre ? genre + " · " : "") + albums.length + (albums.length === 1 ? " álbum" : " álbumes");
+            albums.forEach(function(al){
+              var b = document.createElement("button");
+              b.type = "button";
+              b.className = "artist-album-card";
+              var im = document.createElement("img");
+              im.src = al.art || "logo.png";
+              im.alt = "";
+              im.onerror = function(){ this.onerror = null; this.src = "logo.png"; };
+              var nm = document.createElement("span");
+              nm.className = "aa-t";
+              nm.textContent = al.name;
+              var yr = document.createElement("span");
+              yr.className = "aa-y";
+              yr.textContent = al.year || "";
+              b.appendChild(im);
+              b.appendChild(nm);
+              b.appendChild(yr);
+              b.addEventListener("click", function(){ openArtistAlbum(al); });
+              grid.appendChild(b);
+            });
+          }
+        }).catch(function(){
+          if (artistState.name !== artistName) return;
+          $("artistAlbumsMsg").textContent = "No se pudieron cargar los álbumes. Revisa tu internet y vuelve a abrir el artista.";
+        });
+      }
+      $("artistBackBtn").addEventListener("click", function(){ showView("youtube"); });
+      $("artistAlbumBackBtn").addEventListener("click", function(){ closeArtistAlbum(); });
+      $("artistShuffleBtn").addEventListener("click", function(){
+        var top = artistState.top;
+        if (!top.length) return;
+        shuffle = true; syncModes();
+        var i = Math.floor(Math.random() * top.length);
+        playArtistResult(top[i]);
+      });
+      $("artistMixBtn").addEventListener("click", function(){
+        var top = artistState.top;
+        if (!top.length) return;
+        playArtistResult(top[0]);
+      });
       /* ----- Buscador de YouTube (ya no se usa el link) -----
          La búsqueda la hace yt-dlp dentro del APK (plugin nativo
          YtDlpDownloader.searchYouTube): sin API key y sin servidores de
@@ -3440,7 +3922,9 @@
           /* La última búsqueda con sus resultados se guarda en el
              teléfono: al salir y entrar a YouTube sigue ahí. */
           try { localStorage.setItem(YTSEARCH_KEY, JSON.stringify({ q: q, results: list })); } catch(e){}
+          recordYtSearch(q);
           renderYtSearchResults(list, q);
+          renderYtHistory();
         }).catch(function(err){
           btn.disabled = false;
           var m = (err && err.message) ? err.message : String(err || "");
@@ -3476,16 +3960,7 @@
           row.appendChild(img);
           row.appendChild(meta);
           row.appendChild(go);
-          row.addEventListener("click", function(){
-            var track = makeYtTrack({ videoId: r.id, title: r.title || "Canción de YouTube", artist: r.channel || "YouTube", duration: r.duration || 0, artUrl: r.thumbnail });
-            /* La búsqueda con la que se encontró la canción: sirve para
-               sacar el artista real al sugerir más música de él. */
-            track.searchQuery = query || "";
-            tracks.push(track);
-            var idx = tracks.length - 1;
-            renderPlaylist();
-            openChoice({ indices: [idx], groupTitle: null, canDownload: true });
-          });
+          row.addEventListener("click", function(){ openYtResult(r, query); });
           box.appendChild(row);
         });
       }
@@ -3498,7 +3973,11 @@
         try { data = JSON.parse(localStorage.getItem(YTSEARCH_KEY) || "null"); } catch(e){}
         if (!data || !data.q || !Array.isArray(data.results) || !data.results.length) return;
         var input = $("ytSearchInput");
-        if (input.value && input.value.trim() && input.value.trim() !== data.q) return;
+        /* NUEVO23: solo se restaura si el buscador ya tiene esa búsqueda
+           escrita; si está vacío se ven las búsquedas recientes y el
+           historial (la última búsqueda queda primera en el historial). */
+        if (!input.value || !input.value.trim()) return;
+        if (input.value.trim() !== data.q) return;
         input.value = data.q;
         $("ytMsg").textContent = "✓ " + data.results.length + " resultados. Toca uno y elige Escuchar o Descargar.";
         $("ytMsg").className = "yt-msg ok";
@@ -3888,6 +4367,17 @@
         if (this.textContent.trim()) showLastError();
       });
       $("ytSearchInput").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); searchYouTube(); } });
+      /* Al vaciar el buscador vuelven las búsquedas recientes y el
+         historial; el botón Borrar limpia el historial. */
+      $("ytSearchInput").addEventListener("input", function(){
+        if (!($("ytSearchInput").value || "").trim()){
+          $("ytSearchResults").innerHTML = "";
+          $("ytMsg").textContent = "";
+          $("ytMsg").className = "yt-msg";
+          renderYtHistory();
+        }
+      });
+      $("ytHistClearBtn").addEventListener("click", function(){ saveYtHistory([]); renderYtHistory(); });
       /* ---------- Descubre (NUEVO17, sin llave) ----------
          Artistas parecidos al que suena, sin llave de Last.fm: primero
          MusicBrainz (etiquetas del artista → otros artistas con las
@@ -4013,6 +4503,11 @@
       function loadTrack(i, autoplay){
         current = i;
         var t = tracks[i];
+        /* El origen de la cola es el de la canción que empieza a sonar. */
+        if (t) queueOrigin = originOf(t);
+        /* Canción online recién puesta: queda en las búsquedas recientes
+           de YouTube (tarjetas con portada). */
+        if (t && (t.type === "youtube" || t.type === "ytaudio") && t.videoId) recordYtRecent(t);
         ytLoadSeq++;
         /* Al reabrir la app, vuelve a la posición donde quedó (solo local). */
         var rs = restoreSeekSec; restoreSeekSec = null;
@@ -4278,6 +4773,11 @@
       $("btnShuffle").addEventListener("click", function(){ shuffle = !shuffle; syncModes(); });
       $("btnRepeat").addEventListener("click", function(){ repeatMode = (repeatMode + 1) % 3; syncModes(); });
       $("btnLyrics").addEventListener("click", function(){ openLyrics(); });
+      /* Tocar el artista en el reproductor abre su página (NUEVO23). */
+      $("mArtist").addEventListener("click", function(){
+        var t = tracks[current];
+        if (t && t.artist && t.artist !== "Artista desconocido" && t.artist !== "YouTube") openArtist(t.artist);
+      });
 
       /* ---------- Botón Descargar en el reproductor (NUEVO13) ----------
          Cuando suena una canción online, su audio YA está descargado en
@@ -4361,6 +4861,21 @@
       $("miniPlayer").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); showView("player"); } });
       $("miniPlayBtn").addEventListener("click", function(ev){ ev.stopPropagation(); togglePlay(); });
       $("lyricsClose").addEventListener("click", function(){ closeLyrics(); });
+      /* Compartir la letra (NUEVO23): se comparte el texto con la hoja
+         de compartir de Android; si no está disponible, se copia. */
+      $("lyricsShareBtn").addEventListener("click", function(){
+        var t = tracks[current];
+        var title = t ? ("Letra de «" + cleanTitle(t.title) + "»" + (t.artist ? " – " + t.artist : "")) : "Letra";
+        var text = lyricsPlainText || "";
+        if (!text){ showToast({ title: "Sin letra", msg: "No hay letra para compartir de esta canción." }); return; }
+        if (navigator.share){
+          navigator.share({ title: title, text: text }).catch(function(){});
+        } else if (navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(text).then(function(){ showToast({ title: "Letra copiada", msg: "La letra se copió al portapapeles." }); }).catch(function(){ showToast({ title: "No se pudo compartir", msg: "Tu teléfono no permite compartir desde aquí." }); });
+        } else {
+          showToast({ title: "No se pudo compartir", msg: "Tu teléfono no permite compartir desde aquí." });
+        }
+      });
       syncModes();
 
       /* ---------- Visualizador ---------- */
@@ -4477,33 +4992,8 @@
         if (searchDebounce) clearTimeout(searchDebounce);
         searchDebounce = setTimeout(renderPlaylist, 150);
       });
-      /* NUEVO20: al bajar en la lista de la Biblioteca, los accesos
-         directos se repliegan solos (vuelven al volver arriba). */
-      /* NUEVO22: el repliegue de Accesos directos anima la altura REAL
-         medida (antes animaba un max-height fijo de 320px, así que la
-         primera parte de la animación no se veía y luego se cerraba de
-         golpe: eso era lo tosco). */
-      var scHideTimer = null;
-      function setShortcutsHidden(hide){
-        var w = $("shortcutsWrap");
-        if (!w || w.hidden) return;
-        var isHidden = w.classList.contains("sc-hidden");
-        if (hide === isHidden) return;
-        if (scHideTimer){ clearTimeout(scHideTimer); scHideTimer = null; }
-        if (hide){
-          w.style.maxHeight = w.scrollHeight + "px";
-          void w.offsetHeight;
-          w.style.maxHeight = "0px";
-          w.classList.add("sc-hidden");
-        } else {
-          w.classList.remove("sc-hidden");
-          w.style.maxHeight = w.scrollHeight + "px";
-          scHideTimer = setTimeout(function(){ w.style.maxHeight = ""; scHideTimer = null; }, 480);
-        }
-      }
-      $("playlist").addEventListener("scroll", function(){
-        setShortcutsHidden(this.scrollTop > 24);
-      });
+      /* NUEVO23: los accesos directos ya no se repliegan al bajar: viven
+         en su propia pestaña (Accesos). */
 
       /* La navegación ya es la barra inferior fija (nav-btn); las
          pestañas de arriba se quitaron para no tener dos navegaciones. */
@@ -4590,7 +5080,7 @@
       document.addEventListener("keydown", function(ev){
         var tag = (ev.target && ev.target.tagName) || "";
         if (tag === "INPUT" || tag === "TEXTAREA") return;
-        if (ev.key === "Escape"){ var eo = $("editOverlay"); if (eo && eo.classList.contains("show")){ closeEdit(); return; } var lo = $("lyricsOverlay"); if (lo && lo.classList.contains("show")){ closeLyrics(); return; } if (view === "library" && libDrill){ closeDrill(); return; } if (view !== "library") showView("library"); return; }
+        if (ev.key === "Escape"){ var eo = $("editOverlay"); if (eo && eo.classList.contains("show")){ closeEdit(); return; } var lo = $("lyricsOverlay"); if (lo && lo.classList.contains("show")){ closeLyrics(); return; } if (view === "library" && libDrill){ closeDrill(); return; } if (view === "artist"){ if (artistAlbumOpen()){ closeArtistAlbum(); return; } showView("youtube"); return; } if (view !== "library") showView("library"); return; }
         if (ev.code === "Space"){ ev.preventDefault(); togglePlay(); }
         else if (ev.key === "ArrowRight"){ seekBySeconds(5); }
         else if (ev.key === "ArrowLeft"){ seekBySeconds(-5); }
@@ -4604,6 +5094,7 @@
       /* Restaura la biblioteca y el historial guardados antes de pintar. */
       loadDlHistory();
       var restored = loadSavedState();
+      if (current >= 0 && tracks[current]) queueOrigin = originOf(tracks[current]);
       renderPlaylist();
       renderDownloads();
       restoreLastYtSearch();
