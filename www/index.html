@@ -201,7 +201,6 @@
       .artist-album-tracks .aat-num{ width:20px; text-align:right; color:var(--soft); font-family:"Share Tech Mono",monospace; flex:0 0 20px; }
       .artist-album-tracks .aat-t{ flex:1; min-width:0; font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .aat-loading{ color:var(--soft); font-size:13px; padding:10px 6px; cursor:default; }
-      .choice-btn.artist{ background:linear-gradient(180deg,#0e7490,#155e75); }
 
       /* Mezclas para ti (NUEVO20): ya no viven en la Biblioteca — tienen
          su propia pestaña, en rejilla de 2 columnas. Los ítems no se
@@ -302,14 +301,20 @@
       #miniPlayBtn{ flex:0 0 auto; width:44px; height:44px; border-radius:50%; border:1.5px solid rgba(125,211,252,.55); background:rgba(34,211,238,.18); color:#fff; font-size:18px; display:grid; place-items:center; }
       .yt-result{ display:flex; gap:8px; align-items:center; width:100%; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:8px; color:inherit; font:inherit; text-align:left; }
       .yt-result:active{ background:rgba(34,211,238,.14); }
-      .yr-main{ flex:1; min-width:0; display:flex; gap:10px; align-items:center; background:none; border:0; padding:0; cursor:pointer; color:inherit; font:inherit; text-align:left; }
       .yt-result img{ width:96px; height:54px; object-fit:cover; border-radius:6px; flex:0 0 96px; background:#000; }
       .yt-result .yr-meta{ flex:1; min-width:0; display:flex; flex-direction:column; }
       .yt-result .yr-t{ font-weight:700; font-size:13.5px; line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
       .yt-result .yr-c{ font-size:12.5px; color:var(--soft); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-      /* NUEVO24: botón "Ver artista" en cada resultado, sin tener que
-         tocar la canción: abre la página del artista directo. */
-      .yr-artist{ flex:0 0 auto; border:1.5px solid var(--accent); color:var(--accent); background:transparent; border-radius:999px; padding:6px 9px; font-size:11.5px; font-weight:800; white-space:nowrap; cursor:pointer; }
+      .yt-result .yr-go{ flex:0 0 auto; color:#67e8f9; font-size:22px; line-height:1; }
+      /* NUEVO25: "Ver artista" es UNA sola tarjeta arriba de los
+         resultados, no un botón en cada canción. */
+      .yt-artist-card{ display:flex; gap:12px; align-items:center; width:100%; background:linear-gradient(180deg,#0e7490,#155e75); border:1px solid rgba(125,249,255,.4); border-radius:12px; padding:10px 12px; color:#fff; font:inherit; text-align:left; cursor:pointer; margin-bottom:2px; }
+      .yt-artist-card:active{ background:linear-gradient(180deg,#155e75,#0e7490); }
+      .yac-av{ width:52px; height:52px; border-radius:50%; object-fit:cover; flex:0 0 52px; background:#000; border:1.5px solid rgba(255,255,255,.35); }
+      .yac-tx{ flex:1; min-width:0; display:flex; flex-direction:column; }
+      .yac-n{ font-weight:900; font-size:15px; }
+      .yac-s{ font-size:12.5px; color:#bae6fd; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .yac-go{ flex:0 0 auto; color:#fff; font-size:24px; line-height:1; }
       .src-badge{ font-size:11px; font-weight:900; letter-spacing:.06em; padding:2px 6px; border-radius:999px; background:#ff0033; color:#fff; vertical-align:2px; margin-left:6px; }
 
       /* ===== Biblioteca ===== */
@@ -444,8 +449,9 @@
       .lyrics-mini-play{ flex:0 0 auto; width:42px; height:42px; border-radius:50%; border:1.5px solid var(--accent); color:#fff; background:rgba(255,255,255,.08); font-size:15px; cursor:pointer; }
       .lyrics-head{ display:flex; align-items:center; gap:10px; padding:8px 16px 6px; touch-action:none; flex:0 0 auto; }
       .lyrics-head-t{ font-size:16px; font-weight:900; color:#fff; }
-      .lyrics-body{ overflow-y:auto; overflow-x:hidden; padding:14px 22px 84px; font-family:Georgia,"Times New Roman",serif; font-style:italic; font-size:26px; line-height:1.5; color:#dbeafe; text-align:left; position:relative; flex:1 1 auto; min-height:0; scroll-behavior:smooth; -webkit-mask-image:linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent); mask-image:linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent); }
-      .lyrics-share{ position:absolute; left:50%; bottom:calc(16px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); border:1.5px solid var(--accent); color:var(--accent); background:rgba(4,22,60,.92); border-radius:999px; padding:10px 18px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,.45); z-index:2; }
+      .lyrics-body{ overflow-y:auto; overflow-x:hidden; padding:14px 22px 30px; font-family:Georgia,"Times New Roman",serif; font-style:italic; font-size:26px; line-height:1.5; color:#dbeafe; text-align:left; position:relative; flex:1 1 auto; min-height:0; scroll-behavior:smooth; -webkit-mask-image:linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent); mask-image:linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent); }
+      .lyrics-no-lyrics{ text-align:center; font-size:110px; line-height:1; color:var(--accent); text-shadow:0 0 34px rgba(34,211,238,.55); padding:46px 0 8px; animation:lyrNote 2.4s ease-in-out infinite; }
+      @keyframes lyrNote{ 0%,100%{ transform:translateY(0) scale(1); opacity:.85; } 50%{ transform:translateY(-8px) scale(1.05); opacity:1; } }
       .lyrics-src{ margin-left:auto; font-size:11px; color:var(--soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .lyrics-line{ padding:7px 0; opacity:.45; transition:opacity .35s ease, color .35s ease, transform .35s ease, text-shadow .35s ease; text-align:left; font-family:Georgia,"Times New Roman",serif; font-style:italic; font-size:26px; line-height:1.5; transform-origin:left center; }
       .lyrics-line.active{ opacity:1; color:#fff; font-weight:700; transform:scale(1.03); text-shadow:0 0 16px rgba(125,249,255,.8); }
@@ -1018,10 +1024,6 @@
             <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
             <span><span class="cb-t">Descargar</span><span class="cb-s" id="choiceDownloadSub">Se guarda en el teléfono con yt-dlp (dentro del APK), en el formato elegido y en la máxima calidad. El avance se ve en Descargas, canción por canción.</span></span>
           </button>
-          <button class="choice-btn artist" id="choiceArtistBtn">
-            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-            <span><span class="cb-t">Ver artista</span><span class="cb-s">Sus 10 canciones más populares y sus álbumes.</span></span>
-          </button>
           <div class="fmt-row" id="fmtRow" role="group" aria-label="Formato de descarga">
             <span class="fmt-label">Formato:</span>
             <button class="fmt-btn on" data-fmt="mp3" type="button">MP3</button>
@@ -1051,7 +1053,6 @@
             <button class="icon-btn" id="lyricsClose" title="Cerrar letra" aria-label="Cerrar letra">✕</button>
           </div>
           <div class="lyrics-body" id="lyricsBody"></div>
-          <button class="lyrics-share" id="lyricsShareBtn" type="button">↗ Compartir</button>
         </div>
       </div>
       <!-- Editar los datos de una canción (título, artista, álbum) y
@@ -1328,8 +1329,13 @@
          gesto atrás del teléfono (popstate) regresa a la Biblioteca. */
       var navInHistory = false;
       var suppressNextPop = false;
+      /* NUEVO25: al entrar al reproductor desde el artista, el botón
+         atrás vuelve al artista (se sigue la ruta con la que llegó). */
+      var playerReturnTo = null;
       function showView(v, skipHistory){
+        var prevView = view;
         view = v;
+        if (v === "player") playerReturnTo = (prevView === "artist") ? "artist" : null;
         $("viewPlayer").hidden = v !== "player";
         $("viewLibrary").hidden = v !== "library";
         $("viewDownloads").hidden = v !== "downloads";
@@ -1402,6 +1408,7 @@
             if (editOv && editOv.classList.contains("show")){ closeEdit(); return; }
             if (view === "library" && libDrill){ closeDrill(); return; }
             if (view === "artist"){ if (artistAlbumOpen()){ closeArtistAlbum(); return; } showView("youtube", true); return; }
+            if (view === "player" && playerReturnTo){ var rt = playerReturnTo; playerReturnTo = null; showView(rt, true); return; }
             if (view !== "library"){ showView("library", true); return; }
             /* En la pantalla principal (Biblioteca) no se cierra la app:
                se minimiza para que la música siga sonando. Si el plugin
@@ -3356,8 +3363,6 @@
           /* El subtítulo de Escuchar/Descargar ya se puso arriba. */
         }
         $("choiceDownloadBtn").disabled = !ctx.canDownload;
-        var artistBtn = $("choiceArtistBtn");
-        if (artistBtn) artistBtn.style.display = (first && first.type === "youtube") ? "" : "none";
         $("choiceOverlay").classList.add("show");
       }
       function closeChoice(){ $("choiceOverlay").classList.remove("show"); choiceCtx = null; }
@@ -3372,6 +3377,7 @@
       var lyricsLines = [];
       var lyricsActiveIdx = -1;
       var lyricsPlainText = "";
+      var lyricsPlainCount = 0;
       function lyricsKey(t){ return t ? (t.id || ((t.title || "") + "|" + (t.artist || ""))) : ""; }
       function parseLrc(lrc){
         var out = [];
@@ -3453,14 +3459,40 @@
         if (isHiddenYouTube()){ try { return ytCurrentTime(); } catch(e){ return 0; } }
         return audio ? (audio.currentTime || 0) : 0;
       }
+      /* El momento (segundos) de una línea de la letra: con tiempos,
+         el de la línea; sin tiempos, el estimado por el avance de la
+         canción (NUEVO25). */
+      function lyricsLineTime(idx){
+        if (lyricsLines.length && lyricsLines[idx]) return lyricsLines[idx].t;
+        if (lyricsPlainCount > 0){
+          var d = 0;
+          try { d = currentDuration() || 0; } catch(e){}
+          if (!d){ var t0 = tracks[current]; d = (t0 && t0.duration) || 0; }
+          if (d > 0) return ((idx + 0.5) / lyricsPlainCount) * d;
+        }
+        return null;
+      }
       function updateLyricsHighlight(time){
         var ov = $("lyricsOverlay");
-        if (!ov || !ov.classList.contains("show") || !lyricsLines.length) return;
+        if (!ov || !ov.classList.contains("show")) return;
+        var els = $("lyricsBody").querySelectorAll(".lyrics-line");
+        if (!els.length) return;
         var idx = -1;
-        for (var i = 0; i < lyricsLines.length; i++){ if (lyricsLines[i].t <= time + 0.3) idx = i; else break; }
+        if (lyricsLines.length){
+          for (var i = 0; i < lyricsLines.length; i++){ if (lyricsLines[i].t <= time + 0.3) idx = i; else break; }
+        } else if (lyricsPlainCount > 0){
+          /* Sin tiempos: la línea se estima por el avance de la
+             canción, para que el seguimiento nunca se pierda. */
+          var d = 0;
+          try { d = currentDuration() || 0; } catch(e){}
+          if (!d){ var t0 = tracks[current]; d = (t0 && t0.duration) || 0; }
+          idx = d > 0 ? Math.min(els.length - 1, Math.floor((time / d) * els.length)) : 0;
+        } else return;
+        /* La línea que suena nunca se queda sin marcar: al inicio
+           (antes de la primera línea) queda marcada la primera. */
+        if (idx < 0) idx = 0;
         if (idx === lyricsActiveIdx) return;
         lyricsActiveIdx = idx;
-        var els = $("lyricsBody").querySelectorAll(".lyrics-line");
         els.forEach(function(el, j){ el.classList.toggle("active", j === idx); });
         if (idx >= 0 && els[idx]){
           /* NUEVO22: la línea que suena queda centrada en la ventana de
@@ -3478,7 +3510,7 @@
         lyricsPlainText = "";
         $("lyricsBody").innerHTML = '<div class="lyrics-loading">Buscando la letra…</div>';
         $("lyricsSrc").textContent = "";
-        lyricsLines = []; lyricsActiveIdx = -1;
+        lyricsLines = []; lyricsActiveIdx = -1; lyricsPlainCount = 0;
         var ov = $("lyricsOverlay");
         if (lyricsCloseTimer){ clearTimeout(lyricsCloseTimer); lyricsCloseTimer = null; }
         ov.classList.add("show");
@@ -3488,7 +3520,7 @@
           var ov = $("lyricsOverlay");
           if (!ov || !ov.classList.contains("show")) return;
           if (!res || !res.found){
-            $("lyricsBody").innerHTML = '<div class="lyrics-empty">No se encontró la letra de esta canción.</div><button class="pill-btn lyrics-retry" id="lyricsRetry">Reintentar</button>';
+            $("lyricsBody").innerHTML = '<div class="lyrics-no-lyrics">♪</div><button class="pill-btn lyrics-retry" id="lyricsRetry">Reintentar</button>';
             $("lyricsSrc").textContent = "";
             var rb = $("lyricsRetry");
             if (rb) rb.addEventListener("click", function(){ delete lyricsCache[lyricsKey(tracks[current])]; openLyrics(); });
@@ -3502,7 +3534,10 @@
             updateLyricsHighlight(currentTrackTime());
           } else {
             lyricsPlainText = res.plain || "";
-            $("lyricsBody").innerHTML = (res.plain || "").split("\n").map(function(l){ return '<div class="lyrics-line">' + esc(l) + '</div>'; }).join("");
+            var plainLines = (res.plain || "").split("\n");
+            lyricsPlainCount = plainLines.length;
+            $("lyricsBody").innerHTML = plainLines.map(function(l){ return '<div class="lyrics-line">' + esc(l) + '</div>'; }).join("");
+            updateLyricsHighlight(currentTrackTime());
           }
         });
       }
@@ -3512,7 +3547,7 @@
         ov.classList.remove("open");
         if (lyricsCloseTimer) clearTimeout(lyricsCloseTimer);
         lyricsCloseTimer = setTimeout(function(){ ov.classList.remove("show"); lyricsCloseTimer = null; }, 460);
-        lyricsLines = []; lyricsActiveIdx = -1;
+        lyricsLines = []; lyricsActiveIdx = -1; lyricsPlainCount = 0;
       }
       /* El reproductor minimizado de la hoja de la letra (NUEVO24):
          portada + título/artista + pausa, siempre al día. */
@@ -3611,6 +3646,8 @@
       $("choiceDownloadBtn").addEventListener("click", function(){
         if (!choiceCtx) return;
         var ctx = choiceCtx;
+        /* NUEVO25: descargar no es ponerla desde la búsqueda. */
+        ctx.indices.forEach(function(i){ if (tracks[i]) tracks[i].fromYtSearch = false; });
         var list = ctx.indices.map(function(i){ return tracks[i]; }).filter(Boolean);
         closeChoice();
         queueDownloadSet(list, ctx.groupTitle);
@@ -3618,12 +3655,10 @@
            YouTube; el aviso te deja ir a Descargas si quieres ver el %. */
         showToast({ title: "Descargando", msg: "«" + cleanTitle(list[0].title) + "»" + (list.length > 1 ? " y " + (list.length - 1) + " más" : "") + ": el avance está en Descargas.", retryLabel: "Ver Descargas", onRetry: function(){ showView("downloads"); } });
       });
-      $("choiceOnlyBtn").addEventListener("click", function(){ closeChoice(); });
-      $("choiceArtistBtn").addEventListener("click", function(){
-        if (!choiceCtx) return;
-        var first = tracks[choiceCtx.indices[0]];
+      $("choiceOnlyBtn").addEventListener("click", function(){
+        /* NUEVO25: solo agregarla no es ponerla desde la búsqueda. */
+        if (choiceCtx) choiceCtx.indices.forEach(function(i){ if (tracks[i]) tracks[i].fromYtSearch = false; });
         closeChoice();
-        openArtistForTrack(first);
       });
       /* ---------- Búsquedas recientes e historial de YouTube (NUEVO23) ----------
          Se guardan en el teléfono: los términos buscados (máx. 10) y las
@@ -3709,6 +3744,9 @@
       function openYtResult(r, query){
         var track = makeYtTrack({ videoId: r.id, title: r.title || "Canción de YouTube", artist: r.channel || "YouTube", duration: r.duration || 0, artUrl: r.thumbnail });
         track.searchQuery = query || "";
+        /* NUEVO25: solo las canciones que se ponen desde esta lista
+           entran a las búsquedas recientes (no la cola ni la radio). */
+        track.fromYtSearch = true;
         tracks.push(track);
         var idx = tracks.length - 1;
         renderPlaylist();
@@ -3729,7 +3767,7 @@
          Music del artista, ordenada por relevancia) y sus álbumes
          (iTunes, sin clave). Tocar una canción la pone a sonar; tocar
          un álbum muestra sus canciones. */
-      var artistState = { name: null, top: [], albums: [] };
+      var artistState = { name: null, top: [], albums: [], album: null };
       function artistAlbumOpen(){ var p = $("artistAlbumPanel"); return !!(p && !p.hidden); }
       function closeArtistAlbum(){
         var p = $("artistAlbumPanel");
@@ -3737,13 +3775,51 @@
         var main = $("artistMain");
         if (main) main.hidden = false;
       }
-      function playArtistResult(r){
-        var t = makeYtTrack({ videoId: r.id, title: r.title || "Canción de YouTube", artist: r.channel || artistState.name || "YouTube", duration: r.duration || 0, artUrl: r.thumbnail });
-        t.searchQuery = artistState.name || "";
-        tracks.push(t);
+      /* Poner una lista del artista (top 10 o álbum) con su cola
+         propia (NUEVO25): "A continuación" muestra esas canciones, no
+         la radio. No se pasa por playTrack: su clearOnlineQueueExcept
+         borraría la cola y la mezcla. */
+      var albumFillToken = 0;
+      function playArtistQueue(newTracks, startPos, mixName){
+        if (!newTracks || !newTracks.length) return;
+        /* Las online viejas salen de la lista (las locales y las
+           descargadas se quedan); las nuevas entran, sin duplicar. */
+        var keep = {};
+        newTracks.forEach(function(t){ if (t.videoId) keep[t.videoId] = true; });
+        var kept = [];
+        for (var i = 0; i < tracks.length; i++){
+          var s = tracks[i];
+          if (originOf(s) === "yt" && s.videoId && !keep[s.videoId]) continue;
+          kept.push(s);
+        }
+        tracks = kept;
+        var indices = [];
+        newTracks.forEach(function(t){
+          var ex = -1;
+          for (var j = 0; j < tracks.length; j++){ if (tracks[j].videoId === t.videoId && originOf(tracks[j]) === "yt"){ ex = j; break; } }
+          if (ex >= 0) indices.push(ex);
+          else { tracks.push(t); indices.push(tracks.length - 1); }
+        });
+        if (startPos < 0 || startPos >= indices.length) startPos = 0;
+        noteLeavingTrack();
+        activeMix = { name: mixName, indices: indices };
         renderPlaylist();
-        playTrack(tracks.length - 1);
+        saveState();
+        loadTrack(indices[startPos], true);
         showView("player");
+      }
+      function playArtistResult(r){
+        /* El top 10 completo es la cola: suena la que se tocó y las
+           demás quedan en "A continuación". */
+        var top = artistState.top || [];
+        var list = top.map(function(x){
+          var t = makeYtTrack({ videoId: x.id, title: x.title || "Canción de YouTube", artist: (x.channel && x.channel !== "YouTube") ? x.channel : (artistState.name || "YouTube"), duration: x.duration || 0, artUrl: x.thumbnail });
+          t.searchQuery = artistState.name || "";
+          return t;
+        });
+        var pos = 0;
+        for (var i = 0; i < list.length; i++){ if (list[i].videoId === r.id){ pos = i; break; } }
+        playArtistQueue(list, pos, "Top 10 de " + (artistState.name || ""));
       }
       function openArtistAlbum(album){
         var main = $("artistMain");
@@ -3759,6 +3835,7 @@
         list.innerHTML = '<li class="aat-loading">Cargando canciones…</li>';
         fetch("https://itunes.apple.com/lookup?id=" + album.id + "&entity=song&limit=30").then(function(r){ return r.json(); }).then(function(d){
           var songs = (d.results || []).filter(function(x){ return x.wrapperType === "track"; });
+          artistState.album = { id: album.id, name: album.name, artist: album.artist || artistState.name, tracks: songs };
           list.innerHTML = "";
           if (!songs.length){ list.innerHTML = '<li class="aat-loading">No se encontraron las canciones de este álbum.</li>'; return; }
           songs.forEach(function(sg){
@@ -3778,23 +3855,102 @@
           list.innerHTML = '<li class="aat-loading">No se pudo cargar el álbum. Revisa tu internet y vuelve a tocarlo.</li>';
         });
       }
+      /* Elegir el video ORIGINAL de una canción del álbum (NUEVO25):
+         se descartan las versiones con "(Letra)", cover, karaoke o
+         remix, y entre las que quedan se prefiere la subida desde el
+         perfil del artista (se lee quién subió el video). */
+      function pickOriginalTrack(list, artistName){
+        var bad = /(letra|lyrics?|lyric|cover|karaoke|remix|en vivo|live|instrumental)/i;
+        var cands = (list || []).filter(function(r){ return r && r.id && !bad.test(r.title || ""); });
+        if (!cands.length) cands = (list || []).filter(function(r){ return r && r.id; });
+        if (!cands.length) return Promise.resolve(null);
+        var p = getNativeDl();
+        if (!p || !p.getVideoInfo) return Promise.resolve(cands[0]);
+        var want = (artistName || "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+        var chain = Promise.resolve(null);
+        cands.slice(0, 3).forEach(function(r){
+          chain = chain.then(function(found){
+            if (found) return found;
+            var watch = "https://www.youtube.com/watch?v=" + encodeURIComponent(r.id);
+            return p.getVideoInfo({ url: watch }).then(function(info){
+              var up = (info && info.uploader ? String(info.uploader) : "").toLowerCase().replace(/[^a-z0-9]/g, "");
+              if (want && up && (up === want || up.indexOf(want) >= 0 || want.indexOf(up) >= 0)) return r;
+              return null;
+            }).catch(function(){ return null; });
+          });
+        });
+        return chain.then(function(found){ return found || cands[0]; });
+      }
+      function findAlbumTrackVideo(trackName, artistName){
+        var p = getNativeDl();
+        if (!p || !p.searchYouTube) return Promise.resolve(null);
+        return p.searchYouTube({ query: (trackName || "") + " " + (artistName || ""), limit: 5 }).then(function(res){
+          var list = (res && res.results) || [];
+          if (!list.length) return null;
+          return pickOriginalTrack(list, artistName);
+        }).catch(function(){ return null; });
+      }
       function playAlbumTrack(trackName, artistName){
         var p = getNativeDl();
         if (!p || !p.searchYouTube){ showToast({ title: "Solo en el APK", msg: "La búsqueda solo funciona dentro del APK instalado." }); return; }
         showToast({ title: "Buscando", msg: "«" + cleanTitle(trackName) + "» en YouTube…" });
-        p.searchYouTube({ query: (trackName || "") + " " + (artistName || ""), limit: 5 }).then(function(res){
-          var list = (res && res.results) || [];
-          if (!list.length){ showToast({ kind: "err", title: "No se encontró", msg: "No encontré «" + cleanTitle(trackName) + "» en YouTube." }); return; }
-          var r = list[0];
-          var t = makeYtTrack({ videoId: r.id, title: r.title || trackName, artist: r.channel || artistName || "YouTube", duration: r.duration || 0, artUrl: r.thumbnail });
+        var album = artistState.album;
+        findAlbumTrackVideo(trackName, artistName).then(function(r){
+          if (!r){ showToast({ kind: "err", title: "No se encontró", msg: "No encontré «" + cleanTitle(trackName) + "» en YouTube." }); return; }
+          var t = makeYtTrack({ videoId: r.id, title: r.title || trackName, artist: (r.channel && r.channel !== "YouTube") ? r.channel : (artistName || "YouTube"), duration: r.duration || 0, artUrl: r.thumbnail });
           t.searchQuery = artistName || "";
-          tracks.push(t);
-          renderPlaylist();
-          playTrack(tracks.length - 1);
-          showView("player");
+          /* La cola es el álbum completo: la que se tocó suena y las
+             demás se van agregando en orden mientras se buscan. */
+          if (album && album.tracks && album.tracks.length > 1){
+            var pos = 0;
+            for (var i = 0; i < album.tracks.length; i++){ if (album.tracks[i].trackName === trackName){ pos = i; break; } }
+            playArtistQueue([t], 0, "Álbum: " + (album.name || ""));
+            fillAlbumQueue(album, pos);
+          } else {
+            playArtistQueue([t], 0, "Álbum: " + (album ? (album.name || "") : ""));
+          }
         }).catch(function(){
           showToast({ kind: "err", title: "No se pudo buscar", msg: "La búsqueda en YouTube falló." });
         });
+      }
+      /* Rellena la cola del álbum en segundo plano, en el orden del
+         álbum, mientras suena la primera (NUEVO25). */
+      function fillAlbumQueue(album, playedPos){
+        var token = ++albumFillToken;
+        var mixName = "Álbum: " + (album.name || "");
+        var songs = album.tracks || [];
+        var order = [];
+        for (var i = 0; i < songs.length; i++){ if (i !== playedPos) order.push(i); }
+        var slots = [];
+        for (var k = 0; k < songs.length; k++) slots.push(null);
+        /* La que suena ya está en la mezcla: se marca en su lugar. */
+        if (activeMix && activeMix.name === mixName){
+          var cur = tracks[current];
+          if (cur) slots[playedPos] = current;
+        }
+        (function next(n){
+          if (n >= order.length) return;
+          if (token !== albumFillToken) return;
+          if (!activeMix || activeMix.name !== mixName) return;
+          if (!artistState || !artistState.album || artistState.album.id !== album.id) return;
+          var i = order[n];
+          findAlbumTrackVideo(songs[i].trackName, album.artist || artistState.name).then(function(r){
+            if (token !== albumFillToken) return;
+            if (!activeMix || activeMix.name !== mixName) return;
+            if (r){
+              var t = makeYtTrack({ videoId: r.id, title: r.title || songs[i].trackName, artist: (r.channel && r.channel !== "YouTube") ? r.channel : (album.artist || artistState.name || "YouTube"), duration: r.duration || 0, artUrl: r.thumbnail });
+              t.searchQuery = album.artist || artistState.name || "";
+              var ex = -1;
+              for (var j = 0; j < tracks.length; j++){ if (tracks[j].videoId === t.videoId && originOf(tracks[j]) === "yt"){ ex = j; break; } }
+              var idx = ex >= 0 ? ex : (tracks.push(t), tracks.length - 1);
+              slots[i] = idx;
+              activeMix.indices = slots.filter(function(x){ return x != null; });
+              renderPlaylist();
+              saveState();
+            }
+            next(n + 1);
+          }).catch(function(){ next(n + 1); });
+        })(0);
       }
       /* Ir a la página del artista desde una canción (NUEVO24): el
          buscador solo trae el canal ("YouTube" cuando no lo trae, por
@@ -3820,7 +3976,7 @@
       function openArtist(artistName){
         artistName = (artistName || "").trim();
         if (!artistName) return;
-        artistState = { name: artistName, top: [], albums: [] };
+        artistState = { name: artistName, top: [], albums: [], album: null };
         closeArtistAlbum();
         showView("artist");
         $("artistName").textContent = artistName;
@@ -3982,15 +4138,41 @@
       function renderYtSearchResults(list, query){
         var box = $("ytSearchResults");
         box.innerHTML = "";
+        /* NUEVO25: "Ver artista" es UNA sola tarjeta arriba de los
+           resultados (con la portada del primer resultado), no un botón
+           en cada canción. */
+        if (list.length){
+          var card = document.createElement("button");
+          card.type = "button";
+          card.className = "yt-artist-card";
+          var av = document.createElement("img");
+          av.className = "yac-av";
+          av.src = list[0].thumbnail || ("https://i.ytimg.com/vi/" + list[0].id + "/hqdefault.jpg");
+          av.alt = "";
+          av.onerror = function(){ this.onerror = null; this.src = "logo.png"; };
+          var tx = document.createElement("span");
+          tx.className = "yac-tx";
+          var nm = document.createElement("span");
+          nm.className = "yac-n";
+          nm.textContent = "Ver artista";
+          var sb = document.createElement("span");
+          sb.className = "yac-s";
+          sb.textContent = query || "";
+          tx.appendChild(nm);
+          tx.appendChild(sb);
+          card.appendChild(av);
+          card.appendChild(tx);
+          var go = document.createElement("span");
+          go.className = "yac-go";
+          go.textContent = "›";
+          card.appendChild(go);
+          card.addEventListener("click", function(){ openArtistForResult(list[0], query); });
+          box.appendChild(card);
+        }
         list.forEach(function(r){
-          var row = document.createElement("div");
+          var row = document.createElement("button");
+          row.type = "button";
           row.className = "yt-result";
-          /* La fila tiene dos toques: la zona principal abre la
-             ventana de elegir (Escuchar/Descargar) y el botón "Ver
-             artista" abre la página del artista directo. */
-          var main = document.createElement("button");
-          main.type = "button";
-          main.className = "yr-main";
           var img = document.createElement("img");
           img.src = r.thumbnail || ("https://i.ytimg.com/vi/" + r.id + "/hqdefault.jpg");
           img.alt = "";
@@ -4005,17 +4187,13 @@
           c.textContent = (r.channel || "YouTube") + (r.duration ? " · " + fmt(r.duration) : "");
           meta.appendChild(t);
           meta.appendChild(c);
-          main.appendChild(img);
-          main.appendChild(meta);
-          main.addEventListener("click", function(){ openYtResult(r, query); });
-          var artistBtn = document.createElement("button");
-          artistBtn.type = "button";
-          artistBtn.className = "yr-artist";
-          artistBtn.textContent = "Ver artista";
-          artistBtn.setAttribute("aria-label", "Ver artista de " + cleanTitle(r.title || "esta canción"));
-          artistBtn.addEventListener("click", function(ev){ ev.stopPropagation(); openArtistForResult(r, query); });
-          row.appendChild(main);
-          row.appendChild(artistBtn);
+          var chev = document.createElement("span");
+          chev.className = "yr-go";
+          chev.textContent = "›";
+          row.appendChild(img);
+          row.appendChild(meta);
+          row.appendChild(chev);
+          row.addEventListener("click", function(){ openYtResult(r, query); });
           box.appendChild(row);
         });
       }
@@ -4560,9 +4738,10 @@
         var t = tracks[i];
         /* El origen de la cola es el de la canción que empieza a sonar. */
         if (t) queueOrigin = originOf(t);
-        /* Canción online recién puesta: queda en las búsquedas recientes
-           de YouTube (tarjetas con portada). */
-        if (t && (t.type === "youtube" || t.type === "ytaudio") && t.videoId) recordYtRecent(t);
+        /* Canción online recién puesta DESDE LA LISTA DE BÚSQUEDA: queda
+           en las búsquedas recientes de YouTube (tarjetas con portada).
+           La cola, la radio y el artista no se mezclan ahí. */
+        if (t && t.fromYtSearch && (t.type === "youtube" || t.type === "ytaudio") && t.videoId){ recordYtRecent(t); t.fromYtSearch = false; }
         ytLoadSeq++;
         /* Al reabrir la app, vuelve a la posición donde quedó (solo local). */
         var rs = restoreSeekSec; restoreSeekSec = null;
@@ -4916,27 +5095,29 @@
       $("miniPlayer").addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); showView("player"); } });
       $("miniPlayBtn").addEventListener("click", function(ev){ ev.stopPropagation(); togglePlay(); });
       $("lyricsClose").addEventListener("click", function(){ closeLyrics(); });
-      /* Compartir la letra (NUEVO23): se comparte el texto con la hoja
-         de compartir de Android; si no está disponible, se copia. */
-      $("lyricsShareBtn").addEventListener("click", function(){
-        var t = tracks[current];
-        var title = t ? ("Letra de «" + cleanTitle(t.title) + "»" + (t.artist ? " – " + t.artist : "")) : "Letra";
-        var text = lyricsPlainText || "";
-        if (!text){ showToast({ title: "Sin letra", msg: "No hay letra para compartir de esta canción." }); return; }
-        if (navigator.share){
-          navigator.share({ title: title, text: text }).catch(function(){});
-        } else if (navigator.clipboard && navigator.clipboard.writeText){
-          navigator.clipboard.writeText(text).then(function(){ showToast({ title: "Letra copiada", msg: "La letra se copió al portapapeles." }); }).catch(function(){ showToast({ title: "No se pudo compartir", msg: "Tu teléfono no permite compartir desde aquí." }); });
-        } else {
-          showToast({ title: "No se pudo compartir", msg: "Tu teléfono no permite compartir desde aquí." });
-        }
-      });
       /* Hoja de la letra: bajarla con el dedo (NUEVO24). Se arrastra
          desde el reproductor minimizado o desde el encabezado "Letra":
          la hoja sigue al dedo y al soltar, si bajó más de 90 px, se
          cierra; si no, vuelve sola. Un toque en el reproductor
          minimizado vuelve al reproductor (la hoja se cierra). */
       $("lyricsMiniPlay").addEventListener("click", function(ev){ ev.stopPropagation(); togglePlay(); });
+      /* Tocar una línea de la letra adelanta o atrasa la música hasta
+         ese momento (NUEVO25): con tiempos, el de la línea; sin
+         tiempos, el momento estimado por el avance. */
+      $("lyricsBody").addEventListener("click", function(ev){
+        var line = ev.target && ev.target.closest ? ev.target.closest(".lyrics-line") : null;
+        if (!line) return;
+        var els = $("lyricsBody").querySelectorAll(".lyrics-line");
+        var idx = -1;
+        for (var i = 0; i < els.length; i++){ if (els[i] === line){ idx = i; break; } }
+        if (idx < 0) return;
+        var t = lyricsLineTime(idx);
+        if (t == null) return;
+        var d = 0;
+        try { d = currentDuration() || 0; } catch(e){}
+        if (!d){ var tr = tracks[current]; d = (tr && tr.duration) || 0; }
+        if (d > 0) seekToFraction(t / d);
+      });
       (function(){
         var box = $("lyricsBox");
         if (!box) return;
@@ -5176,7 +5357,7 @@
       document.addEventListener("keydown", function(ev){
         var tag = (ev.target && ev.target.tagName) || "";
         if (tag === "INPUT" || tag === "TEXTAREA") return;
-        if (ev.key === "Escape"){ var eo = $("editOverlay"); if (eo && eo.classList.contains("show")){ closeEdit(); return; } var lo = $("lyricsOverlay"); if (lo && lo.classList.contains("show")){ closeLyrics(); return; } if (view === "library" && libDrill){ closeDrill(); return; } if (view === "artist"){ if (artistAlbumOpen()){ closeArtistAlbum(); return; } showView("youtube"); return; } if (view !== "library") showView("library"); return; }
+        if (ev.key === "Escape"){ var eo = $("editOverlay"); if (eo && eo.classList.contains("show")){ closeEdit(); return; } var lo = $("lyricsOverlay"); if (lo && lo.classList.contains("show")){ closeLyrics(); return; } if (view === "library" && libDrill){ closeDrill(); return; } if (view === "artist"){ if (artistAlbumOpen()){ closeArtistAlbum(); return; } showView("youtube"); return; } if (view === "player" && playerReturnTo){ var rt = playerReturnTo; playerReturnTo = null; showView(rt); return; } if (view !== "library") showView("library"); return; }
         if (ev.code === "Space"){ ev.preventDefault(); togglePlay(); }
         else if (ev.key === "ArrowRight"){ seekBySeconds(5); }
         else if (ev.key === "ArrowLeft"){ seekBySeconds(-5); }
