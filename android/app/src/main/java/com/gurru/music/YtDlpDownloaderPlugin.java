@@ -327,16 +327,17 @@ public class YtDlpDownloaderPlugin extends Plugin {
 
     /**
      * Busca canciones en YouTube Music con yt-dlp DENTRO del APK.
-     * Parámetros JS: { query, limit } (limit por defecto 10, máx 20).
+     * Parámetros JS: { query, limit } (limit por defecto 10, máx 30).
      * Resuelve: { results: [{ id, title, channel, duration, thumbnail }] }.
      * Sin API key y sin servidores de terceros: la búsqueda la hace yt-dlp,
      * igual que las descargas (mismo cliente Android para pasar el bloqueo
-     * de YouTube). Se busca en YouTube Music (music.youtube.com) para que
-     * salgan las canciones (audio oficial, mejor calidad) y no videoclips;
-     * si esa búsqueda falla o no trae nada, se busca en YouTube normal
-     * (ytsearch). Solo se devuelven videos (ids de 11 caracteres); la
-     * miniatura es la oficial de YouTube (i.ytimg.com), como ya se usa en
-     * el resto de la app.
+     * de YouTube). SOLO YouTube Music (music.youtube.com): las búsquedas
+     * y las recomendaciones son exclusivamente música (canciones), no
+     * videos — por eso ya NO hay respaldo a YouTube normal (ytsearch);
+     * si la búsqueda de YouTube Music no trae nada, se devuelve vacío.
+     * Solo se devuelven videos (ids de 11 caracteres); la miniatura es
+     * la oficial de YouTube (i.ytimg.com), como ya se usa en el resto
+     * de la app.
      */
     @PluginMethod
     public void searchYouTube(final PluginCall call) {
@@ -346,7 +347,7 @@ public class YtDlpDownloaderPlugin extends Plugin {
             call.reject("Escribe el nombre de una canción o artista para buscar.");
             return;
         }
-        final int n = Math.max(1, Math.min(20, limit));
+        final int n = Math.max(1, Math.min(30, limit));
         final String q = query.trim();
         executor.execute(new Runnable() {
             @Override
@@ -365,11 +366,6 @@ public class YtDlpDownloaderPlugin extends Plugin {
                         catch (Exception ue) { encQ = q.replace(" ", "%20"); }
                         results = runYtSearch("https://music.youtube.com/search?q=" + encQ, n);
                     } catch (Exception e) { lastErr = e; }
-                    if (results == null || results.length() == 0) {
-                        try {
-                            results = runYtSearch("ytsearch" + n + ":" + q, n);
-                        } catch (Exception e) { lastErr = e; }
-                    }
                     if (results == null) {
                         throw lastErr != null ? lastErr
                                 : new Exception("yt-dlp no devolvió resultados");
@@ -395,7 +391,7 @@ public class YtDlpDownloaderPlugin extends Plugin {
         });
     }
 
-    /** Una búsqueda (URL de YouTube Music o ytsearch) con yt-dlp; devuelve los videos. */
+    /** Una búsqueda en YouTube Music con yt-dlp; devuelve las canciones. */
     private JSONArray runYtSearch(String searchQuery, int maxResults) throws Exception {
         YoutubeDLRequest request = new YoutubeDLRequest(searchQuery);
         request.addOption("--flat-playlist");
