@@ -103,11 +103,9 @@
          falta espacio y su lista rueda por dentro. La barra inferior
          (Biblioteca) va en su propia capa, siempre visible. */
       .queue{ flex:0 1 auto; min-height:0; display:flex; flex-direction:column; margin-top:2px; border-top:1px solid rgba(125,211,252,.28); padding-top:5px; overflow:hidden; transition:max-height .4s cubic-bezier(.32,.72,.24,1); }
-      /* NUEVO23: la cola es una hoja inferior: una barrita con tirador
-         arriba; con el gesto hacia arriba se abre y hacia abajo se
-         cierra (como en YouTube Music). */
-      .q-handle{ display:flex; justify-content:center; padding:8px 0 2px; cursor:grab; touch-action:none; flex:0 0 auto; }
-      .q-grip{ width:42px; height:4px; border-radius:2px; background:rgba(255,255,255,.35); }
+      /* NUEVO24: la barrita con tirador de la cola se quitó (Jonathan
+         pidió quitarla): la hoja se abre y se cierra con el botón
+         Mostrar/Ocultar o tocando el encabezado. */
       .queue-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 2px 4px; flex-wrap:wrap; }
       .queue-head .q-title{ font-size:12.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); text-shadow:0 0 6px var(--glow); flex-shrink:0; }
       .queue-head .q-right{ display:flex; align-items:center; gap:8px; min-width:0; flex:1 1 auto; justify-content:flex-end; }
@@ -135,14 +133,16 @@
       .yt-wrap.show{ display:block; }
       .yt-wrap iframe, .yt-wrap #ytPlayer{ width:4px; height:4px; border:0; display:block; }
       /* YouTube en Biblioteca */
-      .yt-box{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; margin-top:12px; border:1.5px solid rgba(255,80,80,.55); background:rgba(127,29,29,.22); border-radius:12px; padding:12px; }
+      /* NUEVO24: la pestaña de YouTube ya no va enmarcada: ocupa toda
+         la pantalla, con el contenido directo sobre el fondo (como la
+         Biblioteca). */
       .scan-box{ flex:0 0 auto; display:flex; flex-direction:column; align-items:stretch; gap:8px; margin-top:12px; border:1.5px solid rgba(125,249,255,.4); background:rgba(8,47,73,.5); border-radius:12px; padding:12px; }
       .scan-box[hidden], .pick-grid[hidden], .lib-note[hidden]{ display:none; }
       .scan-status{ font-size:13px; color:var(--soft); line-height:1.4; }
       .scan-btns{ display:flex; gap:8px; }
-      .yt-box .yt-h{ display:flex; align-items:center; gap:8px; font-weight:900; font-size:15px; }
-      .yt-box .yt-h .yt-badge{ background:#ff0033; color:#fff; font-size:11px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:.04em; }
-      .yt-box p{ margin:6px 0 10px; font-size:13px; color:var(--soft); line-height:1.45; }
+      .yt-h{ display:flex; align-items:center; gap:8px; font-weight:900; font-size:15px; }
+      .yt-h .yt-badge{ background:#ff0033; color:#fff; font-size:11px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:.04em; }
+      #viewYouTube p{ margin:6px 0 10px; font-size:13px; color:var(--soft); line-height:1.45; }
       .yt-row{ display:flex; gap:8px; }
       .yt-row input{ flex:1; min-width:0; padding:10px 11px; border-radius:9px; border:1px solid rgba(255,255,255,.28); background:rgba(255,255,255,.09); color:#fff; font:inherit; font-size:13.5px; }
       .yt-row input::placeholder{ color:rgba(186,230,253,.6); }
@@ -300,13 +300,16 @@
       #miniTitle{ display:block; font-size:14px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       #miniArtist{ display:block; font-size:12px; color:var(--soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       #miniPlayBtn{ flex:0 0 auto; width:44px; height:44px; border-radius:50%; border:1.5px solid rgba(125,211,252,.55); background:rgba(34,211,238,.18); color:#fff; font-size:18px; display:grid; place-items:center; }
-      .yt-result{ display:flex; gap:10px; align-items:center; width:100%; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:8px; cursor:pointer; color:inherit; font:inherit; text-align:left; }
+      .yt-result{ display:flex; gap:8px; align-items:center; width:100%; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:8px; color:inherit; font:inherit; text-align:left; }
       .yt-result:active{ background:rgba(34,211,238,.14); }
+      .yr-main{ flex:1; min-width:0; display:flex; gap:10px; align-items:center; background:none; border:0; padding:0; cursor:pointer; color:inherit; font:inherit; text-align:left; }
       .yt-result img{ width:96px; height:54px; object-fit:cover; border-radius:6px; flex:0 0 96px; background:#000; }
       .yt-result .yr-meta{ flex:1; min-width:0; display:flex; flex-direction:column; }
       .yt-result .yr-t{ font-weight:700; font-size:13.5px; line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
       .yt-result .yr-c{ font-size:12.5px; color:var(--soft); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-      .yt-result .yr-go{ margin-left:auto; font-size:22px; line-height:1; color:var(--accent); flex:0 0 auto; }
+      /* NUEVO24: botón "Ver artista" en cada resultado, sin tener que
+         tocar la canción: abre la página del artista directo. */
+      .yr-artist{ flex:0 0 auto; border:1.5px solid var(--accent); color:var(--accent); background:transparent; border-radius:999px; padding:6px 9px; font-size:11.5px; font-weight:800; white-space:nowrap; cursor:pointer; }
       .src-badge{ font-size:11px; font-weight:900; letter-spacing:.06em; padding:2px 6px; border-radius:999px; background:#ff0033; color:#fff; vertical-align:2px; margin-left:6px; }
 
       /* ===== Biblioteca ===== */
@@ -423,21 +426,27 @@
 
       /* ===== Al tocar un resultado de la búsqueda: Escuchar o Descargar ===== */
       .choice-overlay{ position:absolute; inset:0; z-index:30; display:none; place-items:center; background:rgba(1,8,28,.78); padding:20px; }
-      /* NUEVO23: la letra es a pantalla completa, estilo YouTube Music
-         con la esencia neón de Gurru: letra grande itálica serif, la
-         línea que suena en blanco brillante y las demás apagadas. */
-      .lyrics-overlay{ position:fixed; inset:0; z-index:32; display:none; place-items:center; background:rgba(1,8,28,.82); padding:0; }
-      .lyrics-overlay.show{ display:grid; }
-      .lyrics-box{ width:100%; height:100%; max-height:100dvh; display:flex; flex-direction:column; background:linear-gradient(180deg,#0a2a5e,#04163c); border:0; border-radius:0; overflow:hidden; }
-      .lyrics-head{ display:flex; align-items:center; gap:12px; padding:16px 16px 10px; }
-      .lyrics-cover{ width:56px; height:56px; border-radius:10px; object-fit:cover; flex:0 0 56px; background:rgba(255,255,255,.08); }
-      .lyrics-titles{ flex:1; min-width:0; }
-      .lyrics-title{ font-size:17px; font-weight:800; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-      .lyrics-artist{ font-size:13px; color:#7dd3fc; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-      .lyrics-body{ overflow-y:auto; overflow-x:hidden; padding:18px 22px; font-family:Georgia,"Times New Roman",serif; font-style:italic; font-size:26px; line-height:1.5; color:#dbeafe; text-align:left; position:relative; flex:1 1 auto; min-height:0; scroll-behavior:smooth; -webkit-mask-image:linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent); mask-image:linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent); }
-      .lyrics-foot{ display:flex; align-items:center; gap:10px; padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px)); border-top:1px solid rgba(125,249,255,.18); }
-      .lyrics-share{ flex:0 0 auto; border:1.5px solid var(--accent); color:var(--accent); background:transparent; border-radius:999px; padding:9px 16px; font-weight:800; font-size:14px; cursor:pointer; }
-      .lyrics-src{ flex:1; min-width:0; font-size:11px; color:var(--soft); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      /* NUEVO24: la letra es una hoja inferior que sube y baja SUAVE,
+         estilo YouTube Music con la esencia neón de Gurru: arriba queda
+         el reproductor minimizado (portada + título/artista + pausa),
+         luego el encabezado "Letra", la letra grande itálica serif con
+         la línea que suena en blanco brillante y las demás apagadas, y
+         el botón Compartir flotando abajo. */
+      .lyrics-overlay{ position:fixed; inset:0; z-index:32; display:none; background:rgba(1,8,28,.82); padding:0; }
+      .lyrics-overlay.show{ display:block; }
+      .lyrics-box{ position:absolute; left:0; right:0; bottom:0; height:92dvh; max-height:92dvh; display:flex; flex-direction:column; background:linear-gradient(180deg,#0a2a5e,#04163c); border:0; border-radius:20px 20px 0 0; overflow:hidden; transform:translateY(103%); transition:transform .45s cubic-bezier(.32,.72,.24,1); }
+      .lyrics-overlay.open .lyrics-box{ transform:translateY(0); }
+      .lyrics-mini{ display:flex; align-items:center; gap:10px; padding:12px 16px 6px; cursor:pointer; touch-action:none; flex:0 0 auto; }
+      .lyrics-mini-cover{ width:44px; height:44px; border-radius:8px; object-fit:cover; flex:0 0 44px; background:rgba(255,255,255,.08); }
+      .lyrics-mini-titles{ flex:1; min-width:0; }
+      .lyrics-mini-title{ font-size:15px; font-weight:800; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .lyrics-mini-artist{ font-size:12.5px; color:#7dd3fc; margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .lyrics-mini-play{ flex:0 0 auto; width:42px; height:42px; border-radius:50%; border:1.5px solid var(--accent); color:#fff; background:rgba(255,255,255,.08); font-size:15px; cursor:pointer; }
+      .lyrics-head{ display:flex; align-items:center; gap:10px; padding:8px 16px 6px; touch-action:none; flex:0 0 auto; }
+      .lyrics-head-t{ font-size:16px; font-weight:900; color:#fff; }
+      .lyrics-body{ overflow-y:auto; overflow-x:hidden; padding:14px 22px 84px; font-family:Georgia,"Times New Roman",serif; font-style:italic; font-size:26px; line-height:1.5; color:#dbeafe; text-align:left; position:relative; flex:1 1 auto; min-height:0; scroll-behavior:smooth; -webkit-mask-image:linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent); mask-image:linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent); }
+      .lyrics-share{ position:absolute; left:50%; bottom:calc(16px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); border:1.5px solid var(--accent); color:var(--accent); background:rgba(4,22,60,.92); border-radius:999px; padding:10px 18px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,.45); z-index:2; }
+      .lyrics-src{ margin-left:auto; font-size:11px; color:var(--soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .lyrics-line{ padding:7px 0; opacity:.45; transition:opacity .35s ease, color .35s ease, transform .35s ease, text-shadow .35s ease; text-align:left; font-family:Georgia,"Times New Roman",serif; font-style:italic; font-size:26px; line-height:1.5; transform-origin:left center; }
       .lyrics-line.active{ opacity:1; color:#fff; font-weight:700; transform:scale(1.03); text-shadow:0 0 16px rgba(125,249,255,.8); }
       .lyrics-loading,.lyrics-empty{ text-align:center; color:#93c5fd; padding:26px 10px; }
@@ -717,7 +726,6 @@
             </div>
 
             <div class="queue collapsed" id="queuePanel" aria-label="Cola de reproducción">
-              <div class="q-handle" id="queueHandle" role="button" aria-label="Abrir o cerrar la cola"><span class="q-grip"></span></div>
               <div class="queue-head">
                 <span class="q-title">A continuación</span>
                 <span class="q-right"><span class="q-count" id="queueCount"></span><button class="q-toggle" id="queueToggleBtn" aria-expanded="true">Ocultar ▴</button></span>
@@ -854,7 +862,6 @@
         <!-- ============ YOUTUBE ============ -->
         <section class="view" id="viewYouTube" aria-label="YouTube" hidden>
           <div class="lib">
-            <div class="yt-box">
               <div class="yt-h"><span class="yt-badge">YouTube Music</span><span>Buscar música</span></div>
               <p>Escribe el nombre de una canción o un artista y toca <b>Buscar</b>.</p>
               <div class="yt-row">
@@ -877,7 +884,6 @@
                 </div>
               </div>
               <div class="yt-results" id="ytSearchResults" aria-label="Resultados de YouTube"></div>
-            </div>
           </div>
         </section>
 
@@ -1029,21 +1035,23 @@
            clave): se abre con el botón "Letra" del reproductor; si la
            letra trae tiempos, la línea actual se resalta y se desplaza
            sola con la música. -->
-      <div class="lyrics-overlay" id="lyricsOverlay" role="dialog" aria-modal="true" aria-labelledby="lyricsTitle">
-        <div class="lyrics-box">
-          <div class="lyrics-head">
-            <img class="lyrics-cover" id="lyricsCover" src="logo.png" alt="" />
-            <div class="lyrics-titles">
-              <div class="lyrics-title" id="lyricsTitle"></div>
-              <div class="lyrics-artist" id="lyricsArtist"></div>
+      <div class="lyrics-overlay" id="lyricsOverlay" role="dialog" aria-modal="true" aria-labelledby="lyricsMiniTitle">
+        <div class="lyrics-box" id="lyricsBox">
+          <div class="lyrics-mini" id="lyricsMini" role="button" aria-label="Volver al reproductor">
+            <img class="lyrics-mini-cover" id="lyricsMiniCover" src="logo.png" alt="" />
+            <div class="lyrics-mini-titles">
+              <div class="lyrics-mini-title" id="lyricsMiniTitle"></div>
+              <div class="lyrics-mini-artist" id="lyricsMiniArtist"></div>
             </div>
+            <button class="lyrics-mini-play" id="lyricsMiniPlay" type="button" aria-label="Pausar o reproducir">❚❚</button>
+          </div>
+          <div class="lyrics-head" id="lyricsHead">
+            <span class="lyrics-head-t">Letra</span>
+            <span class="lyrics-src" id="lyricsSrc"></span>
             <button class="icon-btn" id="lyricsClose" title="Cerrar letra" aria-label="Cerrar letra">✕</button>
           </div>
           <div class="lyrics-body" id="lyricsBody"></div>
-          <div class="lyrics-foot">
-            <button class="lyrics-share" id="lyricsShareBtn" type="button">↗ Compartir</button>
-            <div class="lyrics-src" id="lyricsSrc"></div>
-          </div>
+          <button class="lyrics-share" id="lyricsShareBtn" type="button">↗ Compartir</button>
         </div>
       </div>
       <!-- Editar los datos de una canción (título, artista, álbum) y
@@ -1424,10 +1432,11 @@
         /* La primera vez se pone la clase sin animar (al abrir la app). */
         if (!qSheetInit){ qSheetInit = true; qp.classList.toggle("collapsed", queueCollapsed); return; }
         if (qAnimTimer){ clearTimeout(qAnimTimer); qAnimTimer = null; }
-        /* Altura de la barrita colapsada (tirador + encabezado), medida. */
-        var handle = $("queueHandle"), head = qp.querySelector(".queue-head");
+        /* Altura colapsada (solo el encabezado, medida; la barrita se
+           quitó en NUEVO24). */
+        var head = qp.querySelector(".queue-head");
         var collapsedH = 56;
-        try { collapsedH = (handle ? handle.offsetHeight : 0) + (head ? head.offsetHeight : 0) + 8; } catch(e){}
+        try { collapsedH = (head ? head.offsetHeight : 0) + 8; } catch(e){}
         if (queueCollapsed){
           qp.style.maxHeight = qp.scrollHeight + "px";
           void qp.offsetHeight;
@@ -1442,23 +1451,10 @@
         }
       }
       $("queueToggleBtn").addEventListener("click", function(){ setQueueCollapsed(!queueCollapsed); });
-      /* Gesto en la barrita de la cola: hacia arriba se abre, hacia
-         abajo se cierra; un toque la alterna. Tocar el encabezado de la
-         cola (fuera del botón Mostrar/Ocultar) también la alterna. */
+      /* NUEVO24: la barrita de la cola se quitó; tocar el encabezado
+         de la cola (fuera del botón Mostrar/Ocultar) también la
+         alterna. */
       (function(){
-        var handle = $("queueHandle");
-        if (!handle) return;
-        var startY = null;
-        handle.addEventListener("pointerdown", function(ev){ startY = ev.clientY; });
-        handle.addEventListener("pointerup", function(ev){
-          if (startY == null) return;
-          var dy = ev.clientY - startY;
-          startY = null;
-          if (dy < -40) setQueueCollapsed(false);
-          else if (dy > 40) setQueueCollapsed(true);
-          else setQueueCollapsed(!queueCollapsed);
-        });
-        handle.addEventListener("pointercancel", function(){ startY = null; });
         var head = $("queuePanel").querySelector(".queue-head");
         if (head) head.addEventListener("click", function(ev){
           if (ev.target && ev.target.closest && ev.target.closest("#queueToggleBtn")) return;
@@ -3474,18 +3470,20 @@
           lbody.scrollTo({ top: target, behavior: "smooth" });
         }
       }
+      var lyricsCloseTimer = null;
       function openLyrics(){
         var t = tracks[current];
         if (!t) return;
-        $("lyricsTitle").textContent = t.title || "";
-        $("lyricsArtist").textContent = t.artist || "";
-        var cov = $("lyricsCover");
-        if (cov) cov.src = t.artUrl || "logo.png";
+        syncLyricsMini();
         lyricsPlainText = "";
         $("lyricsBody").innerHTML = '<div class="lyrics-loading">Buscando la letra…</div>';
         $("lyricsSrc").textContent = "";
         lyricsLines = []; lyricsActiveIdx = -1;
-        $("lyricsOverlay").classList.add("show");
+        var ov = $("lyricsOverlay");
+        if (lyricsCloseTimer){ clearTimeout(lyricsCloseTimer); lyricsCloseTimer = null; }
+        ov.classList.add("show");
+        void ov.offsetHeight;
+        ov.classList.add("open");
         fetchLyrics(t).then(function(res){
           var ov = $("lyricsOverlay");
           if (!ov || !ov.classList.contains("show")) return;
@@ -3508,7 +3506,26 @@
           }
         });
       }
-      function closeLyrics(){ $("lyricsOverlay").classList.remove("show"); lyricsLines = []; lyricsActiveIdx = -1; }
+      function closeLyrics(){
+        var ov = $("lyricsOverlay");
+        if (!ov || !ov.classList.contains("show")) return;
+        ov.classList.remove("open");
+        if (lyricsCloseTimer) clearTimeout(lyricsCloseTimer);
+        lyricsCloseTimer = setTimeout(function(){ ov.classList.remove("show"); lyricsCloseTimer = null; }, 460);
+        lyricsLines = []; lyricsActiveIdx = -1;
+      }
+      /* El reproductor minimizado de la hoja de la letra (NUEVO24):
+         portada + título/artista + pausa, siempre al día. */
+      function syncLyricsMini(){
+        var t = (current >= 0) ? tracks[current] : null;
+        if (!t) return;
+        var cov = $("lyricsMiniCover");
+        if (cov) cov.src = t.artUrl || "logo.png";
+        $("lyricsMiniTitle").textContent = cleanTitle(t.title);
+        $("lyricsMiniArtist").textContent = t.artist || "";
+        var btn = $("lyricsMiniPlay");
+        if (btn) btn.textContent = activeIsPlaying() ? "❚❚" : "▶";
+      }
       function refreshLyricsForCurrent(){ var ov = $("lyricsOverlay"); if (ov && ov.classList.contains("show")) openLyrics(); }
       /* ---------- Editar datos de una canción y buscar su carátula ----------
          Corrige el nombre, el artista o el álbum de una canción (por
@@ -3605,9 +3622,8 @@
       $("choiceArtistBtn").addEventListener("click", function(){
         if (!choiceCtx) return;
         var first = tracks[choiceCtx.indices[0]];
-        var name = first ? first.artist : "";
         closeChoice();
-        if (name && name !== "YouTube") openArtist(name);
+        openArtistForTrack(first);
       });
       /* ---------- Búsquedas recientes e historial de YouTube (NUEVO23) ----------
          Se guardan en el teléfono: los términos buscados (máx. 10) y las
@@ -3698,6 +3714,15 @@
         renderPlaylist();
         openChoice({ indices: [idx], groupTitle: null, canDownload: true });
       }
+      /* "Ver artista" desde un resultado de la búsqueda (NUEVO24): no
+         hace falta tocar la canción; la página se abre directo con el
+         artista real de ese video. */
+      function openArtistForResult(r, query){
+        if (!r || !r.id) return;
+        var t = makeYtTrack({ videoId: r.id, title: r.title || "Canción de YouTube", artist: r.channel || "YouTube", duration: r.duration || 0, artUrl: r.thumbnail });
+        t.searchQuery = query || "";
+        openArtistForTrack(t);
+      }
       /* ---------- Página del artista (NUEVO23) ----------
          Tras una búsqueda en YouTube se puede ir a la página del
          artista: las 10 canciones más populares (búsqueda de YouTube
@@ -3769,6 +3794,27 @@
           showView("player");
         }).catch(function(){
           showToast({ kind: "err", title: "No se pudo buscar", msg: "La búsqueda en YouTube falló." });
+        });
+      }
+      /* Ir a la página del artista desde una canción (NUEVO24): el
+         buscador solo trae el canal ("YouTube" cuando no lo trae, por
+         eso al tocar "Ver artista" no salía nada), así que el artista
+         REAL se lee de la metadata con resolveArtist; si no se puede,
+         se usa lo que el usuario buscó. */
+      function openArtistForTrack(t){
+        if (!t || !t.videoId) return;
+        showToast({ title: "Buscando el artista…", msg: "Voy a ver de quién es esta canción." });
+        resolveArtist(t).then(function(name){
+          var a = (name || "").trim();
+          var title = (t.title || "").trim();
+          var isTitle = !!a && (a === title || cleanTitle(a) === cleanTitle(title));
+          var generic = !a || a === "YouTube" || a === "Artista desconocido";
+          if ((generic || isTitle) && t.searchQuery) a = String(t.searchQuery).trim();
+          if (!a || a === "YouTube" || a === "Artista desconocido"){
+            showToast({ title: "Sin artista", msg: "No pude saber el artista de esta canción." });
+            return;
+          }
+          openArtist(a);
         });
       }
       function openArtist(artistName){
@@ -3937,9 +3983,14 @@
         var box = $("ytSearchResults");
         box.innerHTML = "";
         list.forEach(function(r){
-          var row = document.createElement("button");
-          row.type = "button";
+          var row = document.createElement("div");
           row.className = "yt-result";
+          /* La fila tiene dos toques: la zona principal abre la
+             ventana de elegir (Escuchar/Descargar) y el botón "Ver
+             artista" abre la página del artista directo. */
+          var main = document.createElement("button");
+          main.type = "button";
+          main.className = "yr-main";
           var img = document.createElement("img");
           img.src = r.thumbnail || ("https://i.ytimg.com/vi/" + r.id + "/hqdefault.jpg");
           img.alt = "";
@@ -3954,13 +4005,17 @@
           c.textContent = (r.channel || "YouTube") + (r.duration ? " · " + fmt(r.duration) : "");
           meta.appendChild(t);
           meta.appendChild(c);
-          var go = document.createElement("span");
-          go.className = "yr-go";
-          go.textContent = "›";
-          row.appendChild(img);
-          row.appendChild(meta);
-          row.appendChild(go);
-          row.addEventListener("click", function(){ openYtResult(r, query); });
+          main.appendChild(img);
+          main.appendChild(meta);
+          main.addEventListener("click", function(){ openYtResult(r, query); });
+          var artistBtn = document.createElement("button");
+          artistBtn.type = "button";
+          artistBtn.className = "yr-artist";
+          artistBtn.textContent = "Ver artista";
+          artistBtn.setAttribute("aria-label", "Ver artista de " + cleanTitle(r.title || "esta canción"));
+          artistBtn.addEventListener("click", function(ev){ ev.stopPropagation(); openArtistForResult(r, query); });
+          row.appendChild(main);
+          row.appendChild(artistBtn);
           box.appendChild(row);
         });
       }
@@ -4775,8 +4830,7 @@
       $("btnLyrics").addEventListener("click", function(){ openLyrics(); });
       /* Tocar el artista en el reproductor abre su página (NUEVO23). */
       $("mArtist").addEventListener("click", function(){
-        var t = tracks[current];
-        if (t && t.artist && t.artist !== "Artista desconocido" && t.artist !== "YouTube") openArtist(t.artist);
+        openArtistForTrack(tracks[current]);
       });
 
       /* ---------- Botón Descargar en el reproductor (NUEVO13) ----------
@@ -4842,6 +4896,7 @@
          YouTube, Mezclas, Ajustes) muestra la canción que suena con
          su portada y play/pausa; tocarlo vuelve al reproductor. */
       function syncMiniPlayer(){
+        syncLyricsMini();
         var mp = $("miniPlayer");
         if (!mp) return;
         var t = (current >= 0) ? tracks[current] : null;
@@ -4876,6 +4931,47 @@
           showToast({ title: "No se pudo compartir", msg: "Tu teléfono no permite compartir desde aquí." });
         }
       });
+      /* Hoja de la letra: bajarla con el dedo (NUEVO24). Se arrastra
+         desde el reproductor minimizado o desde el encabezado "Letra":
+         la hoja sigue al dedo y al soltar, si bajó más de 90 px, se
+         cierra; si no, vuelve sola. Un toque en el reproductor
+         minimizado vuelve al reproductor (la hoja se cierra). */
+      $("lyricsMiniPlay").addEventListener("click", function(ev){ ev.stopPropagation(); togglePlay(); });
+      (function(){
+        var box = $("lyricsBox");
+        if (!box) return;
+        function zone(el, tapCloses){
+          if (!el) return;
+          var startY = null, dragging = false;
+          el.addEventListener("pointerdown", function(ev){
+            if (ev.target && ev.target.closest && ev.target.closest("#lyricsMiniPlay")) return;
+            startY = ev.clientY; dragging = false;
+            box.style.transition = "none";
+          });
+          el.addEventListener("pointermove", function(ev){
+            if (startY == null) return;
+            var dy = ev.clientY - startY;
+            if (dy > 0){ dragging = true; box.style.transform = "translateY(" + dy + "px)"; }
+          });
+          function end(ev){
+            if (startY == null) return;
+            var dy = ev.clientY - startY;
+            startY = null;
+            if (dy > 90 || (tapCloses && !dragging && Math.abs(dy) < 10)){
+              box.style.transition = "";
+              closeLyrics();
+              box.style.transform = "";
+              return;
+            }
+            box.style.transition = "";
+            box.style.transform = "";
+          }
+          el.addEventListener("pointerup", end);
+          el.addEventListener("pointercancel", function(){ startY = null; box.style.transition = ""; box.style.transform = ""; });
+        }
+        zone($("lyricsMini"), true);
+        zone($("lyricsHead"), false);
+      })();
       syncModes();
 
       /* ---------- Visualizador ---------- */
