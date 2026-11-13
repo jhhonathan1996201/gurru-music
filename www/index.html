@@ -3134,6 +3134,40 @@
       }
       /* NUEVO13: también prepara las de Facebook que ya están guardadas
          (su URL ya viene en la canción); el caché es el mismo. */
+      /* Precarga la siguiente canción online de la cola mientras suena
+         la actual (NUEVO27): así la siguiente abre al instante, sin
+         esperar la descarga invisible. Solo una por vez, y nunca
+         mientras se está preparando la actual. */
+      var prefetchBusy = false;
+      function nextOnlineUncached(){
+        if (current < 0 || !tracks[current]) return null;
+        var idxs = queueIndices();
+        var pos = idxs.indexOf(current);
+        var start = pos >= 0 ? pos + 1 : 0;
+        for (var k = start; k < idxs.length; k++){
+          var t = tracks[idxs[k]];
+          if (t && isOnlineType(t) && !t.cacheUrl && t.videoId) return t;
+        }
+        return null;
+      }
+      function prefetchNext(){
+        var p = getNativeDl();
+        if (!p || !p.cacheAudio) return;
+        if (prefetchBusy || cacheBusy) return;
+        var next = nextOnlineUncached();
+        if (!next) return;
+        prefetchBusy = true;
+        var watch = "https://www.youtube.com/watch?v=" + encodeURIComponent(next.videoId);
+        p.cacheAudio({ url: watch, videoId: next.videoId }).then(function(res){
+          prefetchBusy = false;
+          var path = res && res.path;
+          if (!path) return;
+          next.cachePath = path;
+          next.cacheUrl = toCacheSrc(path);
+          next._cacheRetry = false;
+          registerCache(next);
+        }).catch(function(){ prefetchBusy = false; });
+      }
       function playYouTubeOnline(track, autoplay, seekSec){
         stopYouTube();
         if (!autoplay){
@@ -3925,7 +3959,32 @@
         var p = getNativeDl();
         if (!p || !p.searchYouTube) return Promise.resolve({});
         return p.searchYouTube({ query: (album.name || "") + " " + (album.artist || (artistState && artistState.name) || ""), limit: 30 }).then(function(res){
-          return matchAlbumResults(album.tracks || [], (res && res.results) || []);
+          var matched = matchAlbumResults(album.tracks || [], (res && res.results) || []);
+          var ids = Object.keys(matched);
+          if (!ids.length || !p.getVideoInfo) return matched;
+          /* NUEVO27: del emparejado por título se quedan solo los videos
+             subidos por el perfil oficial del artista (los demás se
+             buscan una por una con pickOriginalTrack, que ya prefiere el
+             perfil). */
+          var want = normTitle(album.artist || (artistState && artistState.name) || "").replace(/ /g, "");
+          return Promise.all(ids.map(function(i){
+            return getArtistVideoInfo(matched[i].id).then(function(info){ return { i: i, info: info }; });
+          })).then(function(items){
+            var official = null;
+            items.forEach(function(x){
+              var a = normTitle(x.info && x.info.artist ? x.info.artist : "").replace(/ /g, "");
+              if (!official && a && (a === want || a.indexOf(want) >= 0 || want.indexOf(a) >= 0)){
+                official = (x.info.uploader || "").toLowerCase();
+              }
+            });
+            if (!official) return matched;
+            var out = {};
+            items.forEach(function(x){
+              var up = (x.info && x.info.uploader || "").toLowerCase();
+              if (up === official) out[x.i] = matched[x.i];
+            });
+            return out;
+          }).catch(function(){ return matched; });
         }).catch(function(){ return {}; });
       }
       function playAlbumTrack(trackName, artistName){
@@ -3933,37 +3992,59 @@
         if (!p || !p.searchYouTube){ showToast({ title: "Solo en el APK", msg: "La búsqueda solo funciona dentro del APK instalado." }); return; }
         showToast({ title: "Buscando", msg: "«" + cleanTitle(trackName) + "» en YouTube…" });
         var album = artistState.album;
-        function startWith(r, matched){
-          if (!r){ showToast({ kind: "err", title: "No se encontró", msg: "No encontré «" + cleanTitle(trackName) + "» en YouTube." }); return; }
+        var pos = 0;
+        if (album && album.tracks){
+          for (var i = 0; i < album.tracks.length; i++){ if (album.tracks[i].trackName === trackName){ pos = i; break; } }
+        }
+        var mixName = "Álbum: " + (album ? (album.name || "") : "");
+        var started = false, albumMatched = null, albumSearchDone = false;
+        /* La cola se rellena cuando YA empezó la canción y YA llegó la
+           búsqueda del álbum (lo que llegue primero no bloquea lo otro). */
+        function maybeFill(){
+          if (!started || !albumSearchDone) return;
+          if (!album || !album.tracks || album.tracks.length < 2) return;
+          if (!activeMix || activeMix.name !== mixName) return;
+          fillAlbumQueue(album, pos, albumMatched || {});
+        }
+        function startWith(r){
+          if (started || !r) return;
+          started = true;
           var t = makeYtTrack({ videoId: r.id, title: r.title || trackName, artist: (r.channel && r.channel !== "YouTube") ? r.channel : (artistName || "YouTube"), duration: r.duration || 0, artUrl: r.thumbnail });
           t.searchQuery = artistName || "";
-          /* La cola es el álbum completo: la que se tocó suena y las
-             demás se agregan en orden con la búsqueda del álbum. */
-          if (album && album.tracks && album.tracks.length > 1){
-            var pos = 0;
-            for (var i = 0; i < album.tracks.length; i++){ if (album.tracks[i].trackName === trackName){ pos = i; break; } }
-            playArtistQueue([t], 0, "Álbum: " + (album.name || ""));
-            fillAlbumQueue(album, pos, matched || {});
-          } else {
-            playArtistQueue([t], 0, "Álbum: " + (album ? (album.name || "") : ""));
-          }
+          playArtistQueue([t], 0, mixName);
+          maybeFill();
         }
+        var albumSearchPromise = null;
         if (album && album.tracks && album.tracks.length > 1){
-          /* Primero UNA búsqueda del álbum: la que se tocó suele salir
-             ahí, y las demás ya quedan emparejadas para la cola. */
-          resolveAlbumVideos(album).then(function(matched){
-            var pos = 0;
-            for (var i = 0; i < album.tracks.length; i++){ if (album.tracks[i].trackName === trackName){ pos = i; break; } }
-            if (matched[pos]) startWith(matched[pos], matched);
-            else findAlbumTrackVideo(trackName, artistName).then(function(r){ startWith(r, matched); }).catch(function(){ startWith(null, matched); });
+          /* La búsqueda del álbum corre en paralelo con la de la canción:
+             antes la canción esperaba el álbum completo y tardaba mucho
+             en abrir (NUEVO27). */
+          albumSearchPromise = resolveAlbumVideos(album);
+          albumSearchPromise.then(function(matched){
+            albumMatched = matched || {};
+            albumSearchDone = true;
+            maybeFill();
           }).catch(function(){
-            findAlbumTrackVideo(trackName, artistName).then(function(r){ startWith(r, {}); }).catch(function(){ startWith(null, {}); });
+            albumMatched = {};
+            albumSearchDone = true;
+            maybeFill();
           });
         } else {
-          findAlbumTrackVideo(trackName, artistName).then(function(r){ startWith(r, {}); }).catch(function(){
-            showToast({ kind: "err", title: "No se pudo buscar", msg: "La búsqueda en YouTube falló." });
-          });
+          albumSearchDone = true;
         }
+        findAlbumTrackVideo(trackName, artistName).then(function(r){
+          if (r) startWith(r);
+          else if (albumSearchPromise){
+            albumSearchPromise.then(function(matched){
+              if (matched[pos]) startWith(matched[pos]);
+              else showToast({ kind: "err", title: "No se encontró", msg: "No encontré «" + cleanTitle(trackName) + "» en YouTube." });
+            });
+          } else {
+            showToast({ kind: "err", title: "No se encontró", msg: "No encontré «" + cleanTitle(trackName) + "» en YouTube." });
+          }
+        }).catch(function(){
+          showToast({ kind: "err", title: "No se pudo buscar", msg: "La búsqueda en YouTube falló." });
+        });
       }
       /* Rellena la cola del álbum en segundo plano, en el orden del
          álbum, mientras suena la primera (NUEVO26): las que salieron
@@ -3984,7 +4065,9 @@
         function insertAt(i, r){
           if (token !== albumFillToken) return;
           if (!activeMix || activeMix.name !== mixName) return;
-          if (!artistState || !artistState.album || artistState.album.id !== album.id) return;
+          /* Solo se detiene si hay OTRO álbum abierto (no si el panel se
+             cerró: la mezcla y el token ya cuidan lo viejo). */
+          if (artistState && artistState.album && artistState.album.id !== album.id) return;
           if (!r) return;
           var t = makeYtTrack({ videoId: r.id, title: r.title || songs[i].trackName, artist: (r.channel && r.channel !== "YouTube") ? r.channel : (album.artist || artistState.name || "YouTube"), duration: r.duration || 0, artUrl: r.thumbnail });
           t.searchQuery = album.artist || artistState.name || "";
@@ -4041,7 +4124,11 @@
           $("artistTopMsg").textContent = "No encontré canciones de «" + artistName + "» en YouTube.";
         } else {
           $("artistTopMsg").textContent = "";
-          if (img && top[0].thumbnail) img.src = top[0].thumbnail;
+          /* La carátula del artista es la de la primera canción OFICIAL
+             (NUEVO27): antes se ponía la del primer resultado y salía la
+             miniatura de la canción "BELANOVA" de Peso Pluma. Mientras no
+             está verificado, queda el logo. */
+          if (img && artistState.topVerified && top[0].thumbnail) img.src = top[0].thumbnail;
           top.forEach(function(r, i){
             var li = document.createElement("li");
             var num = document.createElement("span");
@@ -4084,37 +4171,78 @@
          primeros resultados, se toma su canal como oficial y las
          canciones de ese canal suben arriba. Si no se puede verificar,
          el orden queda como lo dio la búsqueda. */
-      function verifyArtistTop(artistName, allResults){
-        if (!allResults || !allResults.length) return;
+      /* Títulos que NO son canciones de estudio del artista (NUEVO27):
+         en vivo, episodios de podcast, entrevistas, videos de noticias
+         ("¿BELANOVA REGRESA?"), covers, karaokes, remixes, letras,
+         recopilaciones ("Mix 2026", "mejores canciones"). */
+      var SONG_BAD = /(en vivo|\blive\b|episodio|podcast|entrevista|regresa|documental|detrás|behind|reacci[oó]n|cover|karaoke|remix|instrumental|\bletra\b|lyrics?|mix 20|recopilaci[oó]n|mejores canciones)/i;
+      /* El top 10 solo con música del perfil oficial del artista
+         (NUEVO27): de la búsqueda se quedan solo los videos subidos por
+         el canal oficial y con título de canción; si quedan menos de 10,
+         se completa con una segunda búsqueda ("<artista> canciones").
+         Corre en segundo plano: el top se pinta primero con la búsqueda
+         y se corrige al terminar. */
+      function buildArtistTop(artistName, firstResults){
+        var p = getNativeDl();
         var want = normTitle(artistName).replace(/ /g, "");
-        var cands = allResults.slice(0, 12);
-        Promise.all(cands.map(function(r){
-          return getArtistVideoInfo(r.id).then(function(info){ return { r: r, info: info }; });
-        })).then(function(items){
-          if (artistState.name !== artistName) return;
-          var official = null;
-          for (var i = 0; i < items.length; i++){
-            var a = normTitle(items[i].info && items[i].info.artist ? items[i].info.artist : "").replace(/ /g, "");
-            if (a && (a === want || a.indexOf(want) >= 0 || want.indexOf(a) >= 0)){
-              official = (items[i].info.uploader || "").toLowerCase();
-              break;
+        function verifyList(list){
+          var vids = (list || []).filter(function(r){ return r && r.id && r.title; }).slice(0, 15);
+          if (!vids.length || !p || !p.getVideoInfo) return Promise.resolve({ official: null, kept: [] });
+          return Promise.all(vids.map(function(r){
+            return getArtistVideoInfo(r.id).then(function(info){ return { r: r, info: info }; });
+          })).then(function(items){
+            var official = null;
+            for (var i = 0; i < items.length; i++){
+              var a = normTitle(items[i].info && items[i].info.artist ? items[i].info.artist : "").replace(/ /g, "");
+              if (a && (a === want || a.indexOf(want) >= 0 || want.indexOf(a) >= 0)){
+                official = (items[i].info.uploader || "").toLowerCase();
+                break;
+              }
             }
-          }
-          if (!official) return;
-          var matched = [], rest = [];
-          items.forEach(function(x){
-            var up = (x.info && x.info.uploader || "").toLowerCase();
-            (up === official ? matched : rest).push(x.r);
+            var kept = [];
+            if (official){
+              items.forEach(function(x){
+                var up = (x.info && x.info.uploader || "").toLowerCase();
+                if (up !== official) return;
+                if (SONG_BAD.test(x.r.title || "")) return;
+                kept.push(x.r);
+              });
+            }
+            return { official: official, kept: kept };
           });
-          if (!matched.length) return;
-          artistState.top = matched.concat(rest).slice(0, 10);
+        }
+        verifyList(firstResults).then(function(res1){
+          if (artistState.name !== artistName) return;
+          var top = res1.kept.slice();
+          var seen = {};
+          top.forEach(function(r){ seen[r.id] = true; });
+          function finish(){
+            if (artistState.name !== artistName) return;
+            artistState.top = top.slice(0, 10);
+            artistState.topVerified = true;
+            renderArtistTop();
+          }
+          if (top.length >= 10 || !res1.official || !p || !p.searchYouTube){ finish(); return; }
+          p.searchYouTube({ query: artistName + " canciones", limit: 30 }).then(function(res2){
+            if (artistState.name !== artistName) return;
+            var more = ((res2 && res2.results) || []).filter(function(r){ return r && r.id && !seen[r.id]; });
+            if (!more.length){ finish(); return; }
+            verifyList(more).then(function(res2v){
+              if (artistState.name !== artistName) return;
+              res2v.kept.forEach(function(r){ if (!seen[r.id]){ seen[r.id] = true; top.push(r); } });
+              finish();
+            }).catch(function(){ finish(); });
+          }).catch(function(){ finish(); });
+        }).catch(function(){
+          if (artistState.name !== artistName) return;
+          artistState.top = (firstResults || []).slice(0, 10);
           renderArtistTop();
-        }).catch(function(){});
+        });
       }
       function openArtist(artistName){
         artistName = (artistName || "").trim();
         if (!artistName) return;
-        artistState = { name: artistName, top: [], albums: [], album: null };
+        artistState = { name: artistName, top: [], albums: [], album: null, topVerified: false };
         closeArtistAlbum();
         showView("artist");
         $("artistName").textContent = artistName;
@@ -4131,10 +4259,12 @@
             if (artistState.name !== artistName) return;
             var all = (res && res.results) || [];
             artistState.top = all.slice(0, 10);
+            artistState.topVerified = false;
             renderArtistTop();
-            /* NUEVO26: en segundo plano se verifica cuáles son del
-               perfil oficial del artista y se suben arriba. */
-            verifyArtistTop(artistName, all);
+            /* NUEVO27: en segundo plano se arma el top 10 solo con
+               música del perfil oficial (y se completa con otra búsqueda
+               si faltan). */
+            buildArtistTop(artistName, all);
           }).catch(function(){
             if (artistState.name !== artistName) return;
             $("artistTopMsg").textContent = "No se pudieron buscar las canciones. Revisa tu internet y vuelve a abrir el artista.";
@@ -4889,6 +5019,8 @@
         renderPlaylist();
         saveState();
         if (autoplay) startPlayback(); else setPlayIcons(false);
+        /* Ya suena: precargar la siguiente para que abra al instante. */
+        if (autoplay) prefetchNext();
         /* En caché la canción es online aunque suene por el <audio>
            local: las sugerencias del artista también se siembran aquí. */
         if (t.type === "youtube" || t.type === "ytaudio"){ ensureYtSuggestions(t); resolveArtist(t); }
